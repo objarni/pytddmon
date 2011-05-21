@@ -283,7 +283,6 @@ class pyTDDmonFrame(Frame):
         print("|_______________________________________|")
         print("|                                       |")
         print("| Left click pyTDDmon: show test output |")
-        print('| Right click  - " - : quit             |')
         print('|_______________________________________|')
 
     def update_gui(self):
