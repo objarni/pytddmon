@@ -32,7 +32,7 @@ from time import gmtime, strftime
 run_tests_script_file = 'pyTDDmon_tmp.py'
 
 def build_run_script(files):
-    header = 	'''\
+    header =    '''\
 import unittest
 
 suite = unittest.TestSuite()
@@ -62,7 +62,7 @@ class ColorPicker:
         based on the number of green tests, and the total number of
         tests. Also, there is a "pulse" (light color, dark color),
         to increase the feeling of continous testing.'''
-    
+
     def __init__(self):
         self.color = 'green'
         self.reset_pulse()
@@ -72,10 +72,10 @@ class ColorPicker:
 
     def pulse(self):
         self.light = not self.light
-    
+
     def reset_pulse(self):
         self.light = True
-        
+
     def set_result(self, (green, total)):
         old_color = self.color
         self.color = 'green'
@@ -85,11 +85,11 @@ class ColorPicker:
             self.color = 'gray'
         if self.color != old_color:
             self.reset_pulse()
-                        
+
 def win_text(total_tests, passing_tests=0, prev_total_tests=0):
     if prev_total_tests > total_tests:
         return "%d of %d tests green\n"% (passing_tests, total_tests) +\
-                     "Warning: number of tests decreased!" 
+                     "Warning: number of tests decreased!"
     if total_tests == 0:
         return "No tests found!"
     if passing_tests == total_tests:
@@ -108,13 +108,13 @@ class ScriptWriter:
         self.finder = finder
         self.file_writer = file_writer
         self.script_builder = script_builder
-        
+
     def write_script(self):
         result = self.script_builder.build_script_from_modules(self.finder.find_modules())
         self.file_writer.write_file(run_tests_script_file, result)
 
 class TestScriptRunner:
-    ''' TestScriptRunner - 
+    ''' TestScriptRunner -
       Collaborators:
        CmdRunner, runs a specified command line, returns stderr as string
        Analyzer, analyses unittest-output into green,total number of tests
@@ -122,11 +122,11 @@ class TestScriptRunner:
     def __init__(self, cmdrunner, analyzer):
         self.cmdrunner = cmdrunner
         self.analyzer = analyzer
-        
+
     def run(self, test_script):
         output = self.cmdrunner.run_cmdline('python '+test_script)
         return self.analyzer.analyze(output)
-        
+
 class Analyzer:
     '''
     Analyzer
@@ -135,7 +135,7 @@ class Analyzer:
     '''
     def __init__(self, logger):
         self.logger = logger
-        
+
     def analyze(self, txt):
         if len(txt.strip()) == 0:
             return (0, 0)
@@ -148,19 +148,19 @@ class Analyzer:
 
 class Logger:
     ''' Logger, remembers log messages.'''
-    
+
     def __init__(self):
         self.clear()
-        
+
     def log(self, message):
         self.complete_log = self.complete_log + message
-        
+
     def get_log(self):
         return self.complete_log
-        
+
     def clear(self):
         self.complete_log = ""
-        
+
 ## Rows above this are unit-tested.
 ## Rows below this are not unit-tested.
 
@@ -173,14 +173,14 @@ class RealFileInfo:
 class Finder:
     def find_modules(self):
         return glob.glob("test_*.py")
-    
+
 class FinderWithFixedFileSet:
     def __init__(self, files):
         self.files = files
-    
+
     def find_modules(self):
         return self.files
-        
+
 def safe_remove(path):
     try: os.unlink(path)
     except: pass
@@ -195,13 +195,13 @@ class CmdRunner:
             f.close()
         safe_remove('tmp2.txt')
         return output
-        
+
 class FileWriter:
     def write_file(self, filename, content):
         f = open(filename, 'w')
         f.write(content)
         f.close()
-        
+
 class ScriptBuilder:
     def build_script_from_modules(self, modules):
         return build_run_script(modules)
@@ -219,8 +219,8 @@ def message_window(message):
 
 class pyTDDmonFrame(Frame):
 
-    def __init__(self, files=None):
-        Frame.__init__(self, None)
+    def __init__(self, root=None, files=None):
+        Frame.__init__(self, root)
         self.grid()
         self.create_button()
         self.failures = 0
@@ -244,7 +244,7 @@ class pyTDDmonFrame(Frame):
             (False, 'gray'): '555'
         }
         self.run()
-                
+
     def compute_checksum(self):
         files = glob.glob('*.py')
         try: files.remove(run_tests_script_file)
@@ -289,14 +289,14 @@ class pyTDDmonFrame(Frame):
         (green, total, prev_total) = (self.num_tests-self.failures, self.num_tests, self.num_tests_prev)
         self.update_gui_color(green, total)
         self.update_gui_text(green, total, prev_total)
-    
+
     def update_gui_color(self, green, total):
         self.color_picker.set_result( (green, total) )
         (light, color) = self.color_picker.pick()
- 		self.color_picker.pulse()
+        self.color_picker.pulse()
         rgb = '#' + self.color_table[(light, color)]
         self.button.configure(bg=rgb, activebackground=rgb)
-        
+
     def update_gui_text(self, green, total, prev_total):
         txt = "pyTDDmon\n" + win_text(passing_tests = green, total_tests = total, prev_total_tests = prev_total)
         self.button.configure(text=txt)
@@ -327,14 +327,16 @@ def filter_existing_files(files):
 
 if __name__ == '__main__':
     filtered = filter_existing_files(sys.argv[1:])
+    root = Tk()
     if len(filtered)>0:
-        app = pyTDDmonFrame(filtered)
+        app = pyTDDmonFrame(root, filtered)
     else:
         app = pyTDDmonFrame()
     app.master.title(" ")
     app.master.resizable(0,0)
     app.look_for_changes()
+    root.wm_attributes("-topmost", 1)
     try:
-        app.mainloop() 
-    except:
-        pass
+        root.mainloop()
+    except Exception as e:
+        print(e)
