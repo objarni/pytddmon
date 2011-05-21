@@ -20,6 +20,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+'''
+
+''' CONTRIBUTIONS
+KrunoSaho: added always-on-top to the pyTDDmon window
 '''
 
 from Tkinter import *
@@ -214,8 +219,6 @@ def message_window(message):
     white = '#ffffff'
     label=Label(win, text=message, bg=white, activebackground=white)
     label.pack()
-    label.bind("<Button-2>", destroy)
-    label.bind("<Button-3>", destroy)
 
 class pyTDDmonFrame(Frame):
 
@@ -264,8 +267,6 @@ class pyTDDmonFrame(Frame):
     def create_button(self):
         self.button = Label(self, text = 'pyTDDmon')
         self.button.bind("<Button-1>", self.button_clicked)
-        self.button.bind("<Button-2>", self.end_program)
-        self.button.bind("<Button-3>", self.end_program)
         self.button.grid()
 
     def button_clicked(self, widget):
