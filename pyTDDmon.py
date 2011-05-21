@@ -284,6 +284,7 @@ class pyTDDmonFrame(Frame):
         print("|                                       |")
         print("| Left click pyTDDmon: show test output |")
         print('|_______________________________________|')
+        print(' Monitoring path: ' +  os.getcwd())
 
     def update_gui(self):
         (green, total, prev_total) = (self.num_tests-self.failures, self.num_tests, self.num_tests_prev)
@@ -333,7 +334,7 @@ if __name__ == '__main__':
     else:
         app = pyTDDmonFrame()
     app.master.title(" ")
-    app.master.resizable(0,0)
+    #app.master.resizable(0,0)
     app.look_for_changes()
     root.wm_attributes("-topmost", 1)
     try:
