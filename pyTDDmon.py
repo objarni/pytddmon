@@ -299,7 +299,12 @@ class pyTDDmonFrame(Frame):
         self.button.configure(bg=rgb, activebackground=rgb)
 
     def update_gui_text(self, green, total, prev_total):
-        txt = "pyTDDmon\n" + win_text(passing_tests = green, total_tests = total, prev_total_tests = prev_total)
+        lines = [
+           win_text(passing_tests = green, total_tests = total, prev_total_tests = prev_total),
+           "",
+           "   Monitoring: " + os.path.join(os.getcwd(), '*.py   '),
+        ]
+        txt = '\n'.join(lines)
         self.button.configure(text=txt)
 
     def look_for_changes(self):
@@ -333,8 +338,8 @@ if __name__ == '__main__':
         app = pyTDDmonFrame(root, filtered)
     else:
         app = pyTDDmonFrame()
-    app.master.title(" ")
-    #app.master.resizable(0,0)
+    app.master.title("pyTDDmon")
+    app.master.resizable(0,0)
     app.look_for_changes()
     root.wm_attributes("-topmost", 1)
     try:
