@@ -169,6 +169,12 @@ class Logger:
 ## Rows above this are unit-tested.
 ## Rows below this are not unit-tested.
 
+def remove_tmp_files():
+    safe_remove(run_tests_script_file)
+
+from atexit import register
+register(remove_tmp_files)
+
 class RealFileInfo:
     def get_size(self, f):
         return os.stat(f).st_size
@@ -214,8 +220,6 @@ class ScriptBuilder:
 def message_window(message):
     win = Toplevel()
     win.title('Log')
-    def destroy(something):
-        win.destroy()
     white = '#ffffff'
     label=Label(win, text=message, bg=white, activebackground=white)
     label.pack()
@@ -271,10 +275,6 @@ class pyTDDmonFrame(Frame):
 
     def button_clicked(self, widget):
         message_window(self.logger.get_log())
-
-    def end_program(self, widget):
-        safe_remove(run_tests_script_file)
-        self.quit()
 
     def run(self):
         print("")
