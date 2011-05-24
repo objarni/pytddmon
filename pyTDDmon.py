@@ -343,8 +343,10 @@ if __name__ == '__main__':
     app.master.resizable(0,0)
     app.look_for_changes()
     root.wm_attributes("-topmost", 1)
-    try:
+    icon_file = "pyTDDmon.ico"
+    if os.path.exists(icon_file):
         root.wm_iconbitmap('pyTDDmon.ico')
+    try:
         root.mainloop()
     except Exception as e:
         print(e)
