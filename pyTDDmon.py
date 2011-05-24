@@ -59,7 +59,7 @@ if __name__ == '__main__':
 def calculate_checksum(filelist, fileinfo):
     val = 0
     for f in filelist:
-        val += fileinfo.get_modified_time(f) + fileinfo.get_size(f)
+        val += fileinfo.get_modified_time(f) + fileinfo.get_size(f) + fileinfo.get_name_hash(f)
     return val
 
 class ColorPicker:
@@ -180,6 +180,11 @@ class RealFileInfo:
         return os.stat(f).st_size
     def get_modified_time(self, f):
         return os.stat(f).st_mtime
+    def get_name_hash(self, path):
+        hash = 0
+        for ch in path:
+            hash += ord(ch)
+        return hash
 
 class Finder:
     def find_modules(self):
