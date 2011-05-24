@@ -203,14 +203,10 @@ def safe_remove(path):
 
 class CmdRunner:
     def run_cmdline(self, cmdline):
-        os.system(cmdline + " 2>tmp2.txt")
-        try:
-            f = open('tmp2.txt', "r")
-            output = f.read()
-        finally:
-            f.close()
-        safe_remove('tmp2.txt')
-        return output
+        from subprocess import Popen, PIPE, STDOUT
+        list = cmdline.split()
+        p = Popen(list, stdout=PIPE, stderr=STDOUT)
+        return p.communicate()[0]
 
 class FileWriter:
     def write_file(self, filename, content):
