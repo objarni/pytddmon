@@ -344,6 +344,7 @@ if __name__ == '__main__':
     app.look_for_changes()
     root.wm_attributes("-topmost", 1)
     try:
+        root.wm_iconbitmap('pyTDDmon.ico')
         root.mainloop()
     except Exception as e:
         print(e)
