@@ -35,6 +35,7 @@ import glob
 from time import gmtime, strftime
 
 run_tests_script_file = 'pyTDDmon_tmp.py'
+icon_file = "pyTDDmon_tmp.ico"
 
 def build_run_script(files):
     header =    '''\
@@ -171,6 +172,7 @@ class Logger:
 
 def remove_tmp_files():
     safe_remove(run_tests_script_file)
+    safe_remove(icon_file)
 
 from atexit import register
 register(remove_tmp_files)
@@ -329,6 +331,45 @@ def file_exists(f):
     print(f + " exists")
     return True
 
+def try_set_window_icon(root):
+    # This feature is only available on Windows for now
+    import platform
+    if platform.system() != "Windows":
+        return
+
+    def create_ico_file():
+        data = """  AAABAAEAEBAAAAAAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAAAAAAAAAAAAAAAAA
+                    AAAAAAD///8B////Af///wH///8B////AQAAkjEAAIATFWQUmw9qD4kUZhJxF14XRf///wH///8B
+                    ////Af///wH///8B////Af///wH///8BAACPEQAAqJsAAMXzAAC0zRdNRFsIfQjdAIAA/wJ8Av0M
+                    bwzBFWUVMf///wH///8B////Af///wH///8BFhaoUwYGu9kAANT/AADU/wAA1P8AALjRFk1HXQh/
+                    COEAggD/AIAA/whzCN0WZhJH////Af///wH///8BQkKqGxsbxt8FBdX/AADU/wAA1P8AANT/AADU
+                    /wAAuNMiZi9xAYwB/wCFAP8AgAD/B3cG5xVkEUv///8B////AUhIwqsnJ93/GBja/w0N1/8CAtX/
+                    AADU/wAA1P8AANT/CQ2Vcw6NDusAkQD/AIgA/wCAAP8Nbguz////AXR0wE1cXOX7PT3j/yws3/8h
+                    Idz/Fhba/wsL1/8AANT/AADU/wMDq5UdkhzNAJ0A/wCUAP8AiwD/BXsE8xdjFy1/f86DdXXu/2Ji
+                    6v9AQOT/NTXh/yoq3/8eHtz/ExPZ/w4Oy+86dGB3CK8I+wCpAP8AoAD/AJcA/wCOAP8Qbg6PjY3b
+                    pYqK8v+Hh/H/Y2Pr/0hI5v89PeP/MjLh/ycn3v8tL7qZM7MzwwC/AP8AtgD/AKwA/wCjAP8AmgD/
+                    EHgOo6Oj4qGbm/f/lZX1/42N8v9sbO3/UVHo/0ZG5v9FRdPjYa5uewbSBv8AywD/AMIA/wC4AP8A
+                    rwD/AKYA/xeGFqe0tOSPpqb6/6Sk+P+cnPb/lJT0/3R07/9aWur/b2/FiTrZOtUA4AD/ANcA/wDO
+                    AP8AxQD/ALsA/wCyAP8kjSSJwsLbVbS0+/2zs/z/qqr6/6Ki+P+amvX/kpLk2WnRa4UB9gH/AOwA
+                    /wDjAP8A2gD/ANEA/wDIAP8Huwf/QopCR////wG9vezJv7///7m5/v+xsfv/qan5/7u76rl85ny7
+                    CP8I/wD5AP8A7wD/AOYA/wDdAP8A1AD/NLM0vf///wH///8Bv7/dTbm5+e+/v///v7///7i4/f/K
+                    yvGxiOmIwzz/PP8X/xf/APwA/wDyAP8A6QD/IdMh62SsZC////8B////Af///wG9vd9hu7v587+/
+                    //+/v///ysry3dLn0m1g82DvQP9A/yP/I/8A/wD/L+Uv4W3HbVP///8B////Af///wH///8B////
+                    AcTE3TW8vOu3urr7/b29///Q0O7Hq+Srl0P5Q/s+8T7vUN1Qs4LKgiv///8B////Af///wH///8B
+                    ////Af///wH///8B////AcfH10G/v+Bzvb3kl8TE2UuHxodJk7qTG////wH///8B////Af///wH/
+                    //8BAAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA
+                    //8AAP//AAD//w==
+               """
+        import base64
+        ico = base64.b64decode(data)
+        f = open(icon_file, "wb")
+        f.write(ico)
+        f.close()
+
+    if not os.path.exists(icon_file):
+        create_ico_file()
+    root.wm_iconbitmap(icon_file)
+
 def filter_existing_files(files):
     return [f for f in files if file_exists(f)]
 
@@ -343,9 +384,7 @@ if __name__ == '__main__':
     app.master.resizable(0,0)
     app.look_for_changes()
     root.wm_attributes("-topmost", 1)
-    icon_file = "pyTDDmon.ico"
-    if os.path.exists(icon_file):
-        root.wm_iconbitmap('pyTDDmon.ico')
+    try_set_window_icon(root)
     try:
         root.mainloop()
     except Exception as e:
