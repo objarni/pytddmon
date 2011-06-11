@@ -93,6 +93,7 @@ class ColorPicker:
             self.reset_pulse()
 
 def win_text(total_tests, passing_tests=0, prev_total_tests=0):
+    return "%d/%d" % (passing_tests, total_tests)
     if prev_total_tests > total_tests:
         return "%d of %d tests green\n"% (passing_tests, total_tests) +\
                      "Warning: number of tests decreased!"
@@ -222,17 +223,21 @@ class ScriptBuilder:
 
 def message_window(message):
     win = Toplevel()
-    win.title('Log')
+    win.wm_attributes("-topmost", 1)
+    win.attributes("-toolwindow", 1)
+    win.title('Details')
     white = '#ffffff'
-    label=Label(win, text=message, bg=white, activebackground=white)
-    label.pack()
+    message = message.replace('\r\n', '\n')
+    label=Label(win, text=message, justify='left', bg=white, activebackground=white)
+    label.pack(expand=1,fill='both')
 
 class pyTDDmonFrame(Frame):
 
     def __init__(self, root=None, files=None):
         Frame.__init__(self, root)
-        self.grid()
+        #self.configure(bg='black')
         self.create_button()
+        self.grid()
         self.failures = 0
         self.last_checksum = 0
         self.num_tests = 0
@@ -272,9 +277,10 @@ class pyTDDmonFrame(Frame):
         return strftime("%H:%M:%S", gmtime())
 
     def create_button(self):
-        self.button = Label(self, text = 'pyTDDmon')
+        self.button = Label(self, text = 'pyTDDmon', width=8, relief='raised', font=("Helvetica", 16), justify=CENTER, anchor='n')
         self.button.bind("<Button-1>", self.button_clicked)
-        self.button.grid()
+#        self.button.grid()
+        self.button.pack(expand=1,fill='both')
 
     def button_clicked(self, widget):
         message_window(self.logger.get_log())
@@ -300,12 +306,13 @@ class pyTDDmonFrame(Frame):
         self.color_picker.pulse()
         rgb = '#' + self.color_table[(light, color)]
         self.button.configure(bg=rgb, activebackground=rgb)
+        self.configure(background=rgb)
 
     def update_gui_text(self, green, total, prev_total):
         lines = [
            win_text(passing_tests = green, total_tests = total, prev_total_tests = prev_total),
-           "",
-           "   Monitoring: " + os.path.join(os.getcwd(), '*.py   '),
+  #         "",
+#           "   Monitoring: " + os.path.join(os.getcwd(), '*.py   '),
         ]
         txt = '\n'.join(lines)
         self.button.configure(text=txt)
@@ -376,10 +383,13 @@ def filter_existing_files(files):
 if __name__ == '__main__':
     filtered = filter_existing_files(sys.argv[1:])
     root = Tk()
+    #root.configure(toolwindow=1)
+    root.attributes("-toolwindow", 1)
+    #root.overrideredirect(1)
     if len(filtered)>0:
         app = pyTDDmonFrame(root, filtered)
     else:
-        app = pyTDDmonFrame()
+        app = pyTDDmonFrame(root)
     app.master.title("pyTDDmon")
     app.master.resizable(0,0)
     app.look_for_changes()
