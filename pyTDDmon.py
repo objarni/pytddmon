@@ -282,9 +282,18 @@ class pyTDDmonFrame(Frame):
         return strftime("%H:%M:%S", gmtime())
 
     def create_button(self):
-        self.button = Label(self, text = 'pyTDDmon', width=8, relief='raised', font=("Helvetica", 16), justify=CENTER, anchor='n')
+        button_width = 8
+        if not on_windows():
+            # Hack: Window title cut if button too small!
+            button_width = 10
+        self.button = Label(self,
+            text='pyTDDmon',
+            width=button_width,
+            relief='raised',
+            font=("Helvetica", 16),
+            justify=CENTER,
+            anchor=CENTER)
         self.button.bind("<Button-1>", self.button_clicked)
-#        self.button.grid()
         self.button.pack(expand=1,fill='both')
 
     def button_clicked(self, widget):
