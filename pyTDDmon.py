@@ -171,6 +171,10 @@ class Logger:
 ## Rows above this are unit-tested.
 ## Rows below this are not unit-tested.
 
+def on_windows():
+    import platform
+    return platform.system() == "Windows"
+
 def remove_tmp_files():
     safe_remove(run_tests_script_file)
     safe_remove(icon_file)
@@ -224,7 +228,8 @@ class ScriptBuilder:
 def message_window(message):
     win = Toplevel()
     win.wm_attributes("-topmost", 1)
-    win.attributes("-toolwindow", 1)
+    if on_windows():
+        win.attributes("-toolwindow", 1)
     win.title('Details')
     white = '#ffffff'
     message = message.replace('\r\n', '\n')
@@ -340,8 +345,7 @@ def file_exists(f):
 
 def try_set_window_icon(root):
     # This feature is only available on Windows for now
-    import platform
-    if platform.system() != "Windows":
+    if not on_windows():
         return
 
     def create_ico_file():
@@ -383,9 +387,8 @@ def filter_existing_files(files):
 if __name__ == '__main__':
     filtered = filter_existing_files(sys.argv[1:])
     root = Tk()
-    #root.configure(toolwindow=1)
-    root.attributes("-toolwindow", 1)
-    #root.overrideredirect(1)
+    if on_windows():
+        root.attributes("-toolwindow", 1)
     if len(filtered)>0:
         app = pyTDDmonFrame(root, filtered)
     else:
