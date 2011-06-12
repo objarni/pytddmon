@@ -212,7 +212,7 @@ class CmdRunner:
     def run_cmdline(self, cmdline):
         from subprocess import Popen, PIPE, STDOUT
         list = cmdline.split()
-        p = Popen(list, stdout=PIPE, stderr=STDOUT)
+        p = Popen(list, stdout=PIPE, stderr=STDOUT, shell=True)
         return p.communicate()[0]
 
 class FileWriter:
