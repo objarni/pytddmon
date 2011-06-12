@@ -14,10 +14,13 @@
    height="200"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="0.48.1 "
+   inkscape:version="0.48.0 r9654"
    version="1.0"
    sodipodi:docname="pyTDDmon.svg"
-   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   inkscape:export-filename="C:\prj\py\pytddmon\pyTDDmon.png"
+   inkscape:export-xdpi="21.6"
+   inkscape:export-ydpi="21.6">
   <defs
      id="defs4">
     <linearGradient
@@ -119,22 +122,6 @@
        y2="390.59988"
        gradientUnits="userSpaceOnUse"
        gradientTransform="translate(3.0304576,5.0101525)" />
-    <filter
-       inkscape:collect="always"
-       id="filter3292">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="3.8882161"
-         id="feGaussianBlur3294" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       id="filter3326">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="3.6548766"
-         id="feGaussianBlur3328" />
-    </filter>
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3338"
@@ -251,6 +238,78 @@
        y1="460.53082"
        x2="279.39786"
        y2="416.08411" />
+    <filter
+       inkscape:collect="always"
+       id="filter3810">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.49449"
+         id="feGaussianBlur3812" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3832">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.6150575"
+         id="feGaussianBlur3834" />
+    </filter>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3338"
+       id="linearGradient3855"
+       gradientUnits="userSpaceOnUse"
+       x1="208.02345"
+       y1="522.42053"
+       x2="299.79645"
+       y2="394.28171" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3346"
+       id="linearGradient3857"
+       gradientUnits="userSpaceOnUse"
+       x1="178.83714"
+       y1="486.41888"
+       x2="260.62125"
+       y2="371.02631" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3170"
+       id="linearGradient3859"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(0,4)"
+       x1="263.23544"
+       y1="454.2395"
+       x2="228.89024"
+       y2="393.63034" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3382"
+       id="linearGradient3861"
+       gradientUnits="userSpaceOnUse"
+       x1="253.13391"
+       y1="478.71356"
+       x2="215.75826"
+       y2="416.08411" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3178"
+       id="linearGradient3863"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(3.0304576,5.0101525)"
+       x1="328.89536"
+       y1="452.21921"
+       x2="282.42831"
+       y2="390.59988" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3374"
+       id="linearGradient3865"
+       gradientUnits="userSpaceOnUse"
+       x1="316.77353"
+       y1="460.53082"
+       x2="279.39786"
+       y2="416.08411" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -262,14 +321,14 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="342.57537"
-     inkscape:cy="85.535222"
+     inkscape:zoom="1"
+     inkscape:cx="163.20858"
+     inkscape:cy="75.195075"
      inkscape:document-units="px"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1138"
+     inkscape:window-width="1680"
+     inkscape:window-height="988"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1" />
@@ -304,39 +363,12 @@
   <g
      inkscape:groupmode="layer"
      id="layer2"
-     inkscape:label="shades">
-    <path
-       transform="matrix(0.8240419,-0.5665288,0.5665288,0.8240419,-350.20862,-91.431928)"
-       d="M 342.85715,429.50504 A 74.285713,74.285713 0 1 1 194.28573,429.50504 A 74.285713,74.285713 0 1 1 342.85715,429.50504 z"
-       sodipodi:ry="74.285713"
-       sodipodi:rx="74.285713"
-       sodipodi:cy="429.50504"
-       sodipodi:cx="268.57144"
-       id="path3296"
-       style="opacity:1;fill:url(#linearGradient3344);fill-opacity:1;fill-rule:evenodd;stroke:url(#linearGradient3352);stroke-width:10;stroke-linecap:round;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible;filter:url(#filter3326);enable-background:accumulate"
-       sodipodi:type="arc" />
-    <text
-       transform="translate(-75.740845,-156.91588)"
-       id="text3186"
-       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;filter:url(#filter3292);font-family:Bitstream Vera Sans"
-       xml:space="preserve"><textPath
-         id="textPath3188"
-         xlink:href="#path2395"><tspan
-   id="tspan3190">pyTDDmon</tspan></textPath></text>
-  </g>
+     inkscape:label="shades" />
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(-156.15926,-324.17043)">
-    <path
-       style="opacity:1;fill:url(#linearGradient3176);fill-opacity:1;fill-rule:evenodd;stroke:url(#linearGradient3388);stroke-width:4.50000000000000000;stroke-linecap:round;stroke-linejoin:round;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
-       d="M 245.6921,498.44568 C 226.51271,491.4724 211.37171,476.69983 204.29387,458.05485 C 193.88968,430.64744 202.31313,398.62999 224.6682,380.61197 C 237.83599,369.99881 251.84509,364.95526 268.78252,364.72995 C 275.36335,364.64239 275.54977,365.25739 270.10999,369.10891 C 266.12294,371.93186 260.05471,378.97894 257.81515,383.38697 C 254.24069,390.42241 254.15513,400.22582 257.58918,409.27334 C 260.51454,416.98063 266.41904,427.54029 274.62664,439.74329 C 282.53961,451.50821 283.25199,452.78257 283.90246,456.33656 C 286.02442,467.93022 278.49472,479.14217 257.88096,495.08337 L 251.02556,500.38481 L 245.6921,498.44568 z"
-       id="path2387" />
-    <path
-       style="opacity:1;fill:url(#linearGradient3184);fill-opacity:1;fill-rule:evenodd;stroke:url(#linearGradient3380);stroke-width:4.50000000000000000;stroke-linecap:round;stroke-linejoin:round;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
-       d="M 305.26571,494.44689 C 302.32275,496.15618 297.4459,498.4241 294.42824,499.48671 C 287.20165,502.03142 274.59935,503.75165 267.1983,503.20364 L 261.26187,502.76408 L 268.69575,496.55607 C 278.00879,488.77881 282.48241,484.15305 286.82797,477.80719 C 291.38612,471.15086 293.26131,463.5511 292.032,456.71612 C 291.17348,451.94281 290.96585,451.54841 281.87311,437.42153 C 266.22305,413.1069 262.58479,404.1756 263.89269,393.28295 C 264.67578,386.76112 268.50647,381.06576 276.80849,374.08006 C 278.92266,372.3011 281.14822,369.93912 281.75419,368.83124 C 282.81929,366.88387 282.9844,366.83912 286.72077,367.48515 C 291.08999,368.2406 300.35904,371.63753 305.07587,374.21198 C 317.17964,380.81823 328.70539,393.3588 334.25449,405.95975 C 340.27174,419.62382 341.70921,431.35506 339.19678,446.29429 C 335.74323,466.82953 323.91515,483.61508 305.26569,494.44689 L 305.26571,494.44689 z"
-       id="path2389" />
     <path
        sodipodi:type="arc"
        style="opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#666666;stroke-width:10;stroke-linecap:round;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
@@ -347,14 +379,6 @@
        sodipodi:ry="74.285713"
        d="m 342.85715,429.50504 c 0,41.02686 -33.25884,74.28571 -74.28571,74.28571 -41.02686,0 -74.28571,-33.25885 -74.28571,-74.28571 0,-41.02687 33.25885,-74.28572 74.28571,-74.28572 41.02687,0 74.28571,33.25885 74.28571,74.28572 z"
        transform="matrix(0.8240419,-0.5665288,0.5665288,0.8240419,-422.36414,287.28674)" />
-    <text
-       xml:space="preserve"
-       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-       id="text2391"
-       transform="translate(81.428572,168.26469)"><textPath
-         xlink:href="#path2395"
-         id="textPath2397"><tspan
-   id="tspan2393">pyTDDmon</tspan></textPath></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 105.50328,293.28742 C 98.13435,213.87697 163.34821,166.20262 223.93612,196.68961 C 234.11008,201.80901 239.21678,208.20765 249.03042,218.15436"
@@ -362,12 +386,61 @@
        sodipodi:nodetypes="css"
        inkscape:transform-center-y="-62.708549"
        inkscape:transform-center-x="5.6108416" />
-    <path
-       transform="translate(144.03743,302.95723)"
-       style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dashoffset:0;stroke-opacity:1;marker:none;marker-start:none;marker-mid:none;marker-end:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;opacity:0.25"
-       d="M 75.417509,173.10837 C 64.986749,162.06902 61.619305,143.13879 61.619305,126.76394 C 61.619305,92.750083 89.224753,65.144634 123.23861,65.144634 C 135.17276,65.144634 146.31801,68.542968 155.75881,74.424085 C 172.32524,71.979636 41.134387,139.25521 75.417509,173.10837 z"
-       id="path3335"
-       sodipodi:nodetypes="csscc" />
+    <g
+       id="g3840"
+       transform="translate(2.0875024,4.5547021)">
+      <path
+         sodipodi:type="arc"
+         style="opacity:0.90265491;fill:url(#linearGradient3855);fill-opacity:1;fill-rule:evenodd;stroke:url(#linearGradient3857);stroke-width:10.38545609;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3832);enable-background:accumulate"
+         id="path3296"
+         sodipodi:cx="268.57144"
+         sodipodi:cy="429.50504"
+         sodipodi:rx="74.285713"
+         sodipodi:ry="74.285713"
+         d="m 342.85715,429.50504 c 0,41.02686 -33.25884,74.28571 -74.28571,74.28571 -41.02686,0 -74.28571,-33.25885 -74.28571,-74.28571 0,-41.02687 33.25885,-74.28572 74.28571,-74.28572 41.02687,0 74.28571,33.25885 74.28571,74.28572 z"
+         transform="matrix(0.79345758,-0.54550208,0.54550208,0.79345758,-177.8042,237.22744)" />
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;opacity:0.6460177;fill:#2f769d;fill-opacity:1;stroke:none;filter:url(#filter3810);font-family:Bitstream Vera Sans"
+         id="text3186"
+         transform="translate(82.418415,168.25455)"><textPath
+           xlink:href="#path2395"
+           id="textPath3188"><tspan
+   style="fill:#2f769d;fill-opacity:1"
+   id="tspan3190">pyTDDmon</tspan></textPath></text>
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;opacity:0.38053098;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+         id="text3814"
+         transform="translate(83.428572,170.26469)"><textPath
+           xlink:href="#path2395"
+           id="textPath3816"><tspan
+   id="tspan3818">pyTDDmon</tspan></textPath></text>
+      <path
+         id="path2387"
+         d="m 245.6921,498.44568 c -19.17939,-6.97328 -34.32039,-21.74585 -41.39823,-40.39083 -10.40419,-27.40741 -1.98074,-59.42486 20.37433,-77.44288 13.16779,-10.61316 27.17689,-15.65671 44.11432,-15.88202 6.58083,-0.0876 6.76725,0.52744 1.32747,4.37896 -3.98705,2.82295 -10.05528,9.87003 -12.29484,14.27806 -3.57446,7.03544 -3.66002,16.83885 -0.22597,25.88637 2.92536,7.70729 8.82986,18.26695 17.03746,30.46995 7.91297,11.76492 8.62535,13.03928 9.27582,16.59327 2.12196,11.59366 -5.40774,22.80561 -26.0215,38.74681 l -6.8554,5.30144 -5.33346,-1.93913 z"
+         style="fill:url(#linearGradient3859);fill-opacity:1;fill-rule:evenodd;stroke:url(#linearGradient3861);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         inkscape:connector-curvature="0" />
+      <path
+         id="path2389"
+         d="m 305.26571,494.44689 c -2.94296,1.70929 -7.81981,3.97721 -10.83747,5.03982 -7.22659,2.54471 -19.82889,4.26494 -27.22994,3.71693 l -5.93643,-0.43956 7.43388,-6.20801 c 9.31304,-7.77726 13.78666,-12.40302 18.13222,-18.74888 4.55815,-6.65633 6.43334,-14.25609 5.20403,-21.09107 -0.85852,-4.77331 -1.06615,-5.16771 -10.15889,-19.29459 -15.65006,-24.31463 -19.28832,-33.24593 -17.98042,-44.13858 0.78309,-6.52183 4.61378,-12.21719 12.9158,-19.20289 2.11417,-1.77896 4.33973,-4.14094 4.9457,-5.24882 1.0651,-1.94737 1.23021,-1.99212 4.96658,-1.34609 4.36922,0.75545 13.63827,4.15238 18.3551,6.72683 12.10377,6.60625 23.62952,19.14682 29.17862,31.74777 6.01725,13.66407 7.45472,25.39531 4.94229,40.33454 -3.45355,20.53524 -15.28163,37.32079 -33.93109,48.1526 l 2e-5,0 z"
+         style="fill:url(#linearGradient3863);fill-opacity:1;fill-rule:evenodd;stroke:url(#linearGradient3865);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         inkscape:connector-curvature="0" />
+      <text
+         transform="translate(81.428572,168.26469)"
+         id="text2391"
+         style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><textPath
+           id="textPath2397"
+           xlink:href="#path2395"><tspan
+   id="tspan2393">pyTDDmon</tspan></textPath></text>
+      <path
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="csscc"
+         id="path3335"
+         d="m 220.97017,477.56052 c -10.43076,-11.03935 -15.31344,-29.4645 -15.31344,-45.83935 0,-34.01386 27.60545,-61.61931 61.61931,-61.61931 11.93415,0 23.0794,3.39834 32.5202,9.27945 16.56643,-2.44444 -113.10919,64.32605 -78.82607,98.17921 z"
+         style="opacity:0.25;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:10;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    </g>
     <g
        id="g3808"
        transform="matrix(1.7275645,0,0,1.7275645,-95.479553,-468.34267)">
