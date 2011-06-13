@@ -27,8 +27,14 @@ THE SOFTWARE.
 KrunoSaho: added always-on-top to the pyTDDmon window
 '''
 
-from Tkinter import *
 import sys
+def on_python3():
+    return sys.version_info.major==3
+
+if not on_python3():
+    from Tkinter import *
+else:
+    from tkinter import *
 import os
 import glob
 
@@ -82,7 +88,7 @@ class ColorPicker:
     def reset_pulse(self):
         self.light = True
 
-    def set_result(self, (green, total)):
+    def set_result(self, green, total):
         old_color = self.color
         self.color = 'green'
         if green == total-1:
@@ -213,7 +219,11 @@ class CmdRunner:
         from subprocess import Popen, PIPE, STDOUT
         list = cmdline.split()
         p = Popen(list, stdout=PIPE, stderr=STDOUT, shell=True)
-        return p.communicate()[0]
+        bytes = p.communicate()[0]
+        if on_python3():
+            return str(bytes, 'utf-8')
+        else:
+            return bytes
 
 class FileWriter:
     def write_file(self, filename, content):
@@ -315,7 +325,7 @@ class pyTDDmonFrame(Frame):
         self.update_gui_text(green, total, prev_total)
 
     def update_gui_color(self, green, total):
-        self.color_picker.set_result( (green, total) )
+        self.color_picker.set_result( green, total )
         (light, color) = self.color_picker.pick()
         self.color_picker.pulse()
         rgb = '#' + self.color_table[(light, color)]
@@ -352,12 +362,13 @@ def file_exists(f):
     print(f + " exists")
     return True
 
+'''
 def try_set_window_icon(root):
     # This feature is only available on Windows for now
     if not on_windows():
         return
 
-    def create_ico_file():
+    def _file():
         data = """  AAABAAEAEBAAAAAAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAAAAAAAAAAAAAAAAA
                     AAAAAAD///8B////Af///wH///8B////AQAAkjEAAIATFWQUmw9qD4kUZhJxF14XRf///wH///8B
                     ////Af///wH///8B////Af///wH///8BAACPEQAAqJsAAMXzAAC0zRdNRFsIfQjdAIAA/wJ8Av0M
@@ -389,6 +400,7 @@ def try_set_window_icon(root):
     if not os.path.exists(icon_file):
         create_ico_file()
     root.wm_iconbitmap(icon_file)
+'''
 
 def filter_existing_files(files):
     return [f for f in files if file_exists(f)]
@@ -406,7 +418,7 @@ if __name__ == '__main__':
     app.master.resizable(0,0)
     app.look_for_changes()
     root.wm_attributes("-topmost", 1)
-    try_set_window_icon(root)
+    #try_set_window_icon(root)
     try:
         root.mainloop()
     except Exception as e:
