@@ -27,18 +27,18 @@ THE SOFTWARE.
 KrunoSaho: added always-on-top to the pyTDDmon window
 '''
 
+import os
+import glob
 import sys
-def on_python3():
-    return sys.version_info[0]==3
+from time import gmtime, strftime
+
+on_python3 = lambda : sys.version_info[0]==3
 
 if not on_python3():
     from Tkinter import *
 else:
     from tkinter import *
-import os
-import glob
 
-from time import gmtime, strftime
 
 run_tests_script_file = 'pyTDDmon_tmp.py'
 icon_file = "pyTDDmon_tmp.ico"
