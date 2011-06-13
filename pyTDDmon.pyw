@@ -29,7 +29,7 @@ KrunoSaho: added always-on-top to the pyTDDmon window
 
 import sys
 def on_python3():
-    return sys.version_info.major==3
+    return sys.version_info[0]==3
 
 if not on_python3():
     from Tkinter import *
@@ -218,7 +218,8 @@ class CmdRunner:
     def run_cmdline(self, cmdline):
         from subprocess import Popen, PIPE, STDOUT
         list = cmdline.split()
-        p = Popen(list, stdout=PIPE, stderr=STDOUT, shell=True)
+        use_shell = True if on_windows() else False
+        p = Popen(list, stdout=PIPE, stderr=STDOUT, shell=use_shell)
         bytes = p.communicate()[0]
         if on_python3():
             return str(bytes, 'utf-8')
@@ -408,8 +409,6 @@ def filter_existing_files(files):
 if __name__ == '__main__':
     filtered = filter_existing_files(sys.argv[1:])
     root = Tk()
-    if on_windows():
-        root.attributes("-toolwindow", 1)
     if len(filtered)>0:
         app = pyTDDmonFrame(root, filtered)
     else:
@@ -418,6 +417,8 @@ if __name__ == '__main__':
     app.master.resizable(0,0)
     app.look_for_changes()
     root.wm_attributes("-topmost", 1)
+    if on_windows():
+        root.attributes("-toolwindow", 1)
     #try_set_window_icon(root)
     try:
         root.mainloop()
