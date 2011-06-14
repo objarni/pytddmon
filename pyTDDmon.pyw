@@ -61,31 +61,41 @@ def file_name_to_module(file_name):
     return ".".join(file_name.split(".")[:-1])
 
 def build_run_script(files):
-    header =    '''\
-import unittest
-import doctest
+    """
+    >>> print(build_run_script(["pyTDDmon.py"]))
+    import unittest
+    import doctest
+    ...
+    import pyTDDmon
+    suite.addTests(load_module_tests(pyTDDmon))
+    try:
+        suite.addTests(doctest.DocTestSuite(pyTDDmon, optionflags=doctest.ELLIPSIS))
+    except:pass
+    ...
+    """
 
-suite = unittest.TestSuite()
-load_module_tests = unittest.defaultTestLoader.loadTestsFromModule
+    content = []
+    content.append("import unittest")
+    content.append("import doctest")
+    content.append("")
+    content.append("suite = unittest.TestSuite()")
+    content.append("load_module_tests = unittest.defaultTestLoader.loadTestsFromModule")
+    content.append("")
 
-'''
-    middle = []
     for filename in files:
         module = file_name_to_module(filename)
-        middle.append('import ' + module)
-        middle.append('suite.addTests(load_module_tests(' + module + '))')
-        middle.append('try:')
-        middle.append('    suite.addTests(doctest.DocTestSuite(' + module + '))')
-        middle.append('except:pass')
-        middle.append('')
-    footer = '''\
-if __name__ == '__main__':
-    out = file(%r, "w")
-    unittest.TextTestRunner(stream=out).run(suite)
-''' % TEMP_OUT_FILE_NAME
+        content.append('import ' + module)
+        content.append('suite.addTests(load_module_tests(' + module + '))')
+        content.append('try:')
+        content.append('    suite.addTests(doctest.DocTestSuite(' + module + ', optionflags=doctest.ELLIPSIS))')
+        content.append('except:pass')
+        content.append('')
+    
+    content.append("if __name__ == '__main__':")
+    content.append("    out = file(%r, 'w')" % TEMP_OUT_FILE_NAME)
+    content.append("    unittest.TextTestRunner(stream=out).run(suite)")
 
-    content = header + "\n".join(middle) + footer
-    return content
+    return "\n".join(content)
 
 def calculate_checksum(filelist, fileinfo):
     val = 0
