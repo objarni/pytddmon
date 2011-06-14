@@ -24,6 +24,7 @@ THE SOFTWARE.
 '''
 
 ''' CONTRIBUTIONS
+Fredrik Wendt: help with Tkinter implementation (replacing the pygame dependency)
 KrunoSaho: added always-on-top to the pyTDDmon window
 Neppord: print(".") will not screw up test-counting (it did before)
 '''
