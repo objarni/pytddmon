@@ -365,18 +365,8 @@ class pyTDDmonFrame(Frame):
         self.update_gui()
         self.after(750, self.look_for_changes)
 
-def file_exists(f):
-    try:
-        o = open(f, "r")
-        o.close()
-    except:
-        print(f + " does not exist")
-        return False
-    print(f + " exists")
-    return True
-
 def filter_existing_files(files):
-    return [f for f in files if file_exists(f)]
+    return [f for f in files if os.path.exists(f)]
 
 def run():
     filtered = filter_existing_files(sys.argv[1:])
