@@ -263,7 +263,6 @@ class pyTDDmonFrame(Frame):
 
     def __init__(self, root=None, files=None):
         Frame.__init__(self, root)
-        #self.configure(bg='black')
         self.create_button()
         self.grid()
         self.failures = 0
@@ -286,7 +285,6 @@ class pyTDDmonFrame(Frame):
             (True, 'gray'): '999',
             (False, 'gray'): '555'
         }
-        self.run()
 
     def compute_checksum(self):
         files = glob.glob('*.py')
@@ -320,17 +318,8 @@ class pyTDDmonFrame(Frame):
         self.button.pack(expand=1,fill='both')
 
     def button_clicked(self, widget):
-        message_window(self.logger.get_log())
-
-    def run(self):
-        print("")
-        print(" _______________________________________")
-        print("|       pyTDDmon window opened          |")
-        print("|_______________________________________|")
-        print("|                                       |")
-        print("| Left click pyTDDmon: show test output |")
-        print('|_______________________________________|')
-        print(' Monitoring path: ' +  os.getcwd())
+        msg = "Monitoring: %s\n%s" % (os.getcwd(), self.logger.get_log())
+        message_window(msg)
 
     def update_gui(self):
         (green, total, prev_total) = (self.num_tests-self.failures, self.num_tests, self.num_tests_prev)
@@ -346,12 +335,7 @@ class pyTDDmonFrame(Frame):
         self.configure(background=rgb)
 
     def update_gui_text(self, green, total, prev_total):
-        lines = [
-           win_text(passing_tests = green, total_tests = total, prev_total_tests = prev_total),
-  #         "",
-#           "   Monitoring: " + os.path.join(os.getcwd(), '*.py   '),
-        ]
-        txt = '\n'.join(lines)
+        txt = win_text(passing_tests = green, total_tests = total, prev_total_tests = prev_total)
         self.button.configure(text=txt)
 
     def look_for_changes(self):
@@ -391,7 +375,6 @@ def run():
     root.wm_attributes("-topmost", 1)
     if on_windows():
         root.attributes("-toolwindow", 1)
-    #try_set_window_icon(root)
     try:
         root.mainloop()
     except Exception as e:
