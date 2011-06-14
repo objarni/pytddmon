@@ -51,9 +51,19 @@ TEMP_OUT_FILE_NAME = os.path.join(TEMP_FILE_DIR_NAME, "out")
 
 # End of Constants
 
+def file_name_to_module(file_name):
+    """
+    >>> print(file_name_to_module("pyTDDmon.pyw"))
+    pyTDDmon
+    >>> print(file_name_to_module("pyTDDmon.py"))
+    pyTDDmon
+    """
+    return ".".join(file_name.split(".")[:-1])
+
 def build_run_script(files):
     header =    '''\
 import unittest
+import doctest
 
 suite = unittest.TestSuite()
 load_module_tests = unittest.defaultTestLoader.loadTestsFromModule
@@ -61,16 +71,21 @@ load_module_tests = unittest.defaultTestLoader.loadTestsFromModule
 '''
     middle = []
     for filename in files:
-        module = filename[:-3]
-        middle.append( 'import ' + module)
-        middle.append('suite.addTests(load_module_tests(' + module + '))\n')
+        module = file_name_to_module(filename)
+        middle.append('import ' + module)
+        middle.append('suite.addTests(load_module_tests(' + module + '))')
+        middle.append('try:')
+        middle.append('    suite.addTests(doctest.DocTestSuite(' + module + '))')
+        middle.append('except:pass')
+        middle.append('')
     footer = '''\
 if __name__ == '__main__':
     out = file(%r, "w")
     unittest.TextTestRunner(stream=out).run(suite)
 ''' % TEMP_OUT_FILE_NAME
 
-    return header + "\n".join(middle) + footer
+    content = header + "\n".join(middle) + footer
+    return content
 
 def calculate_checksum(filelist, fileinfo):
     val = 0
