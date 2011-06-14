@@ -30,6 +30,7 @@ KrunoSaho: added always-on-top to the pyTDDmon window
 import os
 import glob
 import sys
+import tempfile
 from time import gmtime, strftime
 
 on_python3 = lambda : sys.version_info[0]==3
@@ -43,6 +44,8 @@ else:
 
 RUN_TESTS_SCRIPT_FILE = 'pyTDDmon_tmp.py'
 ICON_FILE_NAME = "pyTDDmon_tmp.ico"
+TEMP_FILE_DIR_NAME = tempfile.mkdtemp()
+TEMP_OUT_FILE_NAME = os.path.join(TEMP_FILE_DIR_NAME, "out")
 
 # End of Constants
 
@@ -54,17 +57,18 @@ suite = unittest.TestSuite()
 load_module_tests = unittest.defaultTestLoader.loadTestsFromModule
 
 '''
-    middle = ""
+    middle = []
     for filename in files:
         module = filename[:-3]
-        middle += 'import ' + module + '\n'
-        middle += 'suite.addTests(load_module_tests(' + module + '))\n\n'
+        middle.append( 'import ' + module)
+        middle.append('suite.addTests(load_module_tests(' + module + '))\n')
     footer = '''\
 if __name__ == '__main__':
-    unittest.TextTestRunner().run(suite)
-'''
+    out = file(%r, "w")
+    unittest.TextTestRunner(stream=out).run(suite)
+''' % TEMP_OUT_FILE_NAME
 
-    return header + middle + footer
+    return header + "\n".join(middle) + footer
 
 def calculate_checksum(filelist, fileinfo):
     val = 0
@@ -126,7 +130,8 @@ class ScriptWriter:
         self.script_builder = script_builder
 
     def write_script(self):
-        result = self.script_builder.build_script_from_modules(self.finder.find_modules())
+        modules = self.finder.find_modules()
+        result = self.script_builder.build_script_from_modules(modules)
         self.file_writer.write_file(RUN_TESTS_SCRIPT_FILE, result)
 
 class TestScriptRunner:
@@ -224,6 +229,9 @@ class CmdRunner:
         use_shell = True if on_windows() else False
         p = Popen(list, stdout=PIPE, stderr=STDOUT, shell=use_shell)
         bytes = p.communicate()[0]
+        if os.path.exists(TEMP_OUT_FILE_NAME):
+            bytes = file(TEMP_OUT_FILE_NAME).read()
+            os.remove(TEMP_OUT_FILE_NAME)
         if on_python3():
             return str(bytes, 'utf-8')
         else:
