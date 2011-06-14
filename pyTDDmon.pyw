@@ -395,3 +395,6 @@ if __name__ == '__main__':
         root.mainloop()
     except Exception as e:
         print(e)
+    finally:
+        if os.path.exists(TEMP_FILE_DIR_NAME):
+            os.removedirs(TEMP_FILE_DIR_NAME)
