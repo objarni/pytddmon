@@ -33,6 +33,7 @@ import os
 import glob
 import sys
 import tempfile
+import atexit
 from time import gmtime, strftime
 
 on_python3 = lambda : sys.version_info[0]==3
@@ -220,8 +221,7 @@ def remove_tmp_files():
     safe_remove(RUN_TESTS_SCRIPT_FILE)
     safe_remove(ICON_FILE_NAME)
 
-from atexit import register
-register(remove_tmp_files)
+atexit.register(remove_tmp_files)
 
 class RealFileInfo:
     def get_size(self, f):
