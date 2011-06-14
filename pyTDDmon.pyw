@@ -25,6 +25,7 @@ THE SOFTWARE.
 
 ''' CONTRIBUTIONS
 KrunoSaho: added always-on-top to the pyTDDmon window
+Neppord: print(".") will not screw up test-counting (it did before)
 '''
 
 import sys
