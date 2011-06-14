@@ -378,7 +378,7 @@ def file_exists(f):
 def filter_existing_files(files):
     return [f for f in files if file_exists(f)]
 
-if __name__ == '__main__':
+def run():
     filtered = filter_existing_files(sys.argv[1:])
     root = Tk()
     if len(filtered)>0:
@@ -399,3 +399,7 @@ if __name__ == '__main__':
     finally:
         if os.path.exists(TEMP_FILE_DIR_NAME):
             os.removedirs(TEMP_FILE_DIR_NAME)
+
+if __name__ == '__main__':
+    run()
+
