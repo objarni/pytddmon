@@ -50,6 +50,14 @@ else:
 TEMP_FILE_DIR_NAME = tempfile.mkdtemp()
 RUN_TESTS_SCRIPT_FILE = os.path.join(TEMP_FILE_DIR_NAME, 'pyTDDmon_tmp.py')
 TEMP_OUT_FILE_NAME = os.path.join(TEMP_FILE_DIR_NAME, "out")
+# If pyTDDmon is run in test mode, it will:
+# 1. display the GUI for a very short time
+# 2. write a log file, containing the information displayed (most notably green/total)
+# 3. exit
+TEST_MODE = False
+TEST_MODE_FLAG = '--log-and-exit'
+TEST_MODE_LOG_FILE = 'pyTDDmon.log'
+
 
 # End of Constants
 
@@ -295,6 +303,8 @@ class pyTDDmonFrame(Frame):
 
     def __init__(self, root=None, files=None):
         Frame.__init__(self, root)
+        self.master.title("pyTDDmon")
+        self.master.resizable(0,0)
         self.create_button()
         self.grid()
         self.failures = 0
@@ -317,6 +327,7 @@ class pyTDDmonFrame(Frame):
             (True, 'gray'): '999',
             (False, 'gray'): '555'
         }
+        self.look_for_changes()
 
     def compute_checksum(self):
         files = glob.glob('*.py')
@@ -352,9 +363,13 @@ class pyTDDmonFrame(Frame):
     def button_clicked(self, widget):
         msg = "Monitoring: %s\n%s" % (os.getcwd(), self.logger.get_log())
         message_window(msg)
+        
+    def get_green_and_total(self):
+        return (self.num_tests-self.failures, self.num_tests)
 
     def update_gui(self):
-        (green, total, prev_total) = (self.num_tests-self.failures, self.num_tests, self.num_tests_prev)
+        (green, total) = self.get_green_and_total()
+        prev_total = self.num_tests_prev
         self.update_gui_color(green, total)
         self.update_gui_text(green, total, prev_total)
 
@@ -379,24 +394,41 @@ class pyTDDmonFrame(Frame):
             self.failures = self.get_number_of_failures()
             self.logger.log('[%s] Number of failures: %d\n' % (self.clock_string(), self.failures))
         self.update_gui()
-        self.after(750, self.look_for_changes)
+        if TEST_MODE:
+            f = open(TEST_MODE_LOG_FILE, "w")
+            (green, total) = self.get_green_and_total()
+            lines = [ 'green='+str(green), 'total='+str(total) ]
+            f.write('\n'.join(lines))
+            f.close()
+            self.master.destroy()
+        else:
+            self.after(750, self.look_for_changes)
 
 def filter_existing_files(files):
     return [f for f in files if os.path.exists(f)]
 
 def run():
-    filtered = filter_existing_files(sys.argv[1:])
+    # Command line argument handling
+    args = list(sys.argv[1:])
+    if TEST_MODE_FLAG in args:
+        global TEST_MODE
+        TEST_MODE = True
+        args.remove(TEST_MODE_FLAG)
+    filtered = filter_existing_files(args)
+    
+    # Basic tkinter initialization
     root = Tk()
-    if len(filtered)>0:
-        app = pyTDDmonFrame(root, filtered)
-    else:
-        app = pyTDDmonFrame(root)
-    app.master.title("pyTDDmon")
-    app.master.resizable(0,0)
-    app.look_for_changes()
     root.wm_attributes("-topmost", 1)
     if on_windows():
         root.attributes("-toolwindow", 1)
+       
+    # Create main window
+    if len(filtered)>0:
+        win = pyTDDmonFrame(root, filtered)
+    else:
+        win = pyTDDmonFrame(root)
+
+    # Main loop
     try:
         root.mainloop()
     except Exception as e:
