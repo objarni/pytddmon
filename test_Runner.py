@@ -32,8 +32,8 @@ class test_TestScriptRunner(unittest.TestCase):
 		self.runner = TestScriptRunner(self.fake_cmdrunner, self.fake_analyzer)
 
 	def test_sends_correct_commandline_to_cmdrunner(self):
-		self.assertSentCommandLine('test_module.py', 'python test_module.py')
-		self.assertSentCommandLine('test_module2.py', 'python test_module2.py')
+		self.assertSentCommandLine('test_module.py', 'python "test_module.py"')
+		self.assertSentCommandLine('test_module2.py', 'python "test_module2.py"')
 
 	def assertSentCommandLine(self, module, expected_cmdline):
 		self.runner.run(module)

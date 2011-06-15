@@ -34,6 +34,8 @@ import glob
 import sys
 import tempfile
 import atexit
+import shlex
+
 from time import gmtime, strftime
 
 on_python3 = lambda : sys.version_info[0]==3
@@ -45,9 +47,9 @@ else:
 
 # Constants
 
-RUN_TESTS_SCRIPT_FILE = 'pyTDDmon_tmp.py'
-ICON_FILE_NAME = "pyTDDmon_tmp.ico"
 TEMP_FILE_DIR_NAME = tempfile.mkdtemp()
+RUN_TESTS_SCRIPT_FILE = os.path.join(TEMP_FILE_DIR_NAME, 'pyTDDmon_tmp.py')
+ICON_FILE_NAME = "pyTDDmon_tmp.ico"
 TEMP_OUT_FILE_NAME = os.path.join(TEMP_FILE_DIR_NAME, "out")
 
 # End of Constants
@@ -64,6 +66,7 @@ def file_name_to_module(file_name):
 def build_run_script(files):
     """
     >>> print(build_run_script(["pyTDDmon.py"]))
+    import sys
     import unittest
     import doctest
     ...
@@ -76,9 +79,11 @@ def build_run_script(files):
     """
 
     content = []
+    content.append("import sys")
     content.append("import unittest")
     content.append("import doctest")
     content.append("")
+    content.append("sys.path.append(%r)" % os.getcwd())
     content.append("suite = unittest.TestSuite()")
     content.append("load_module_tests = unittest.defaultTestLoader.loadTestsFromModule")
     content.append("")
@@ -173,7 +178,7 @@ class TestScriptRunner:
         self.analyzer = analyzer
 
     def run(self, test_script):
-        output = self.cmdrunner.run_cmdline('python '+test_script)
+        output = self.cmdrunner.run_cmdline('python "%s"' % test_script)
         return self.analyzer.analyze(output)
 
 class Analyzer:
@@ -220,6 +225,9 @@ def on_windows():
 def remove_tmp_files():
     safe_remove(RUN_TESTS_SCRIPT_FILE)
     safe_remove(ICON_FILE_NAME)
+    if os.path.exists(TEMP_FILE_DIR_NAME):
+        os.removedirs(TEMP_FILE_DIR_NAME)
+
 
 atexit.register(remove_tmp_files)
 
@@ -252,7 +260,7 @@ def safe_remove(path):
 class CmdRunner:
     def run_cmdline(self, cmdline):
         from subprocess import Popen, PIPE, STDOUT
-        list = cmdline.split()
+        list = shlex.split(cmdline) if on_windows() else cmdline
         use_shell = True if on_windows() else False
         p = Popen(list, stdout=PIPE, stderr=STDOUT, shell=use_shell)
         bytes = p.communicate()[0]
@@ -395,9 +403,6 @@ def run():
         root.mainloop()
     except Exception as e:
         print(e)
-    finally:
-        if os.path.exists(TEMP_FILE_DIR_NAME):
-            os.removedirs(TEMP_FILE_DIR_NAME)
 
 if __name__ == '__main__':
     run()
