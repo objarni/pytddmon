@@ -49,7 +49,6 @@ else:
 
 TEMP_FILE_DIR_NAME = tempfile.mkdtemp()
 RUN_TESTS_SCRIPT_FILE = os.path.join(TEMP_FILE_DIR_NAME, 'pyTDDmon_tmp.py')
-ICON_FILE_NAME = "pyTDDmon_tmp.ico"
 TEMP_OUT_FILE_NAME = os.path.join(TEMP_FILE_DIR_NAME, "out")
 
 # End of Constants
@@ -224,7 +223,6 @@ def on_windows():
 
 def remove_tmp_files():
     safe_remove(RUN_TESTS_SCRIPT_FILE)
-    safe_remove(ICON_FILE_NAME)
     if os.path.exists(TEMP_FILE_DIR_NAME):
         os.removedirs(TEMP_FILE_DIR_NAME)
 
