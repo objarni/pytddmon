@@ -34,21 +34,20 @@ def compare_logs(testdir, got, exp):
     compare(testdir, 'total', got, exp)
 
 def compare_logs_in_dir(testdir):
-    #print("Comparing logs in " + testdir)
     gotinfo = get_log(testdir, "pyTDDmon.log")
     expinfo = get_log(testdir, "expected.log")
     compare_logs(testdir, gotinfo, expinfo)
 
 def run_all():
-    systestdir = os.getcwd()
-    names = os.listdir(".")
+    rootdir = os.getcwd()
+    pytddmon_path = os.path.join(rootdir, "pyTDDmon.pyw")
+    names = os.listdir("systest")
     for name in names:
-        if os.path.isdir(name):
-            testdir = os.path.join(systestdir, name)
-            os.chdir(testdir)
-            subprocess.call(['python', "../../pyTDDmon.pyw", "--log-and-exit"])
-            compare_logs_in_dir(testdir)
-            os.chdir(systestdir)
+        path = os.path.join(rootdir, "systest", name)
+        if os.path.isdir(path):
+            os.chdir(path)
+            subprocess.call(['python', pytddmon_path, "--log-and-exit"])
+            compare_logs_in_dir(path)
 
 
 if __name__ == "__main__":

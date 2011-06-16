@@ -10,15 +10,15 @@ A: To clearly separate unit-level tests from system-level tests.
 
 Q: How are the system level tests run?
 A: The tests in this directory are not meant to be run by pyTDDmon. Run them with the
-run_all.py script:
+systest.py script:
 
-$ python run_all.py
+$ python systest.py
 
 It will output which tests worked and which failed.
 
 Q: How is this organized?
-A: The run_all.py script runs pyTDDmon.pyw in "test mode" (flag --log-and-exit) in all
+A: The systest.py script runs pyTDDmon.pyw in "test mode" (flag --log-and-exit) inside all
 subdirectories of systest. In each directory, there is an "expected.log" file. That file
-contains the correct output for pyTDDmon, for the directory in question. run_all.py
-checks each and every expected.log, and compares with the newly created pytddmon.pyw.
-For each broken exception, an informative message is printed to stdout.
+contains the correct output for pyTDDmon, for the directory in question. systest.py
+checks each and every expected.log, and compares it with the newly created pytddmon.log.
+For each broken expectation, an informative message is printed to stdout.
