@@ -21,4 +21,6 @@ A: The systest.py script runs pyTDDmon.pyw in "test mode" (flag --log-and-exit) 
 subdirectories of systest. In each directory, there is an "expected.log" file. That file
 contains the correct output for pyTDDmon, for the directory in question. systest.py
 checks each and every expected.log, and compares it with the newly created pytddmon.log.
-For each broken expectation, an informative message is printed to stdout.
+For each broken expectation, an informative message is printed to stdout. Besides any
+test and/or code-files in the folder being tested, an optional "args.txt" may specify
+any arguments to pytddmon.
