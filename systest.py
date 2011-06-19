@@ -37,6 +37,16 @@ def compare_logs_in_dir(testdir):
     gotinfo = get_log(testdir, "pyTDDmon.log")
     expinfo = get_log(testdir, "expected.log")
     compare_logs(testdir, gotinfo, expinfo)
+    
+    
+def get_args(path):
+    argspath = os.path.join(path, "args.txt")
+    if not os.path.exists(argspath):
+        return []
+    f = open(argspath, "r")
+    content = f.read().strip()
+    f.close()
+    return [content.split()[0][3:]]
 
 def run_all():
     rootdir = os.getcwd()
@@ -46,7 +56,11 @@ def run_all():
         path = os.path.join(rootdir, "systest", name)
         if os.path.isdir(path):
             os.chdir(path)
-            subprocess.call(['python', pytddmon_path, "--log-and-exit"])
+            cmdline = ['python', pytddmon_path, "--log-and-exit"]
+            args = get_args(path)
+            cmdline.extend(args)
+            print(cmdline)
+            subprocess.call(cmdline)
             compare_logs_in_dir(path)
 
 
