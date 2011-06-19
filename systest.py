@@ -38,7 +38,6 @@ def compare_logs_in_dir(testdir):
     expinfo = get_log(testdir, "expected.log")
     compare_logs(testdir, gotinfo, expinfo)
     
-    
 def get_args(path):
     argspath = os.path.join(path, "args.txt")
     if not os.path.exists(argspath):
@@ -59,7 +58,6 @@ def run_all():
             cmdline = ['python', pytddmon_path, "--log-and-exit"]
             args = get_args(path)
             cmdline.extend(args)
-            print(cmdline)
             subprocess.call(cmdline)
             compare_logs_in_dir(path)
 
