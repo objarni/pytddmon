@@ -45,7 +45,7 @@ def get_args(path):
     f = open(argspath, "r")
     content = f.read().strip()
     f.close()
-    return [content.split()[0][3:]]
+    return content.split()
 
 def run_all():
     rootdir = os.getcwd()
