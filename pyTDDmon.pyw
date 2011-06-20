@@ -266,7 +266,7 @@ def safe_remove(path):
 class CmdRunner:
     def run_cmdline(self, cmdline):
         from subprocess import Popen, PIPE, STDOUT
-        list = shlex.split(cmdline) if on_windows() else cmdline
+        list = shlex.split(cmdline)
         use_shell = True if on_windows() else False
         p = Popen(list, stdout=PIPE, stderr=STDOUT, shell=use_shell)
         bytes = p.communicate()[0]
