@@ -58,7 +58,10 @@ def run_all():
             cmdline = ['python', pytddmon_path, "--log-and-exit"]
             args = get_args(path)
             cmdline.extend(args)
-            subprocess.call(cmdline)
+            try:
+                subprocess.check_call(cmdline, stdout=None, stderr=None)
+            except:
+                print(" .. in test: " + path + "\n")
             compare_logs_in_dir(path)
 
 
