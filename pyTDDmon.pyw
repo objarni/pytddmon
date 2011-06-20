@@ -316,7 +316,9 @@ class pyTDDmonFrame(Frame):
         self.color_picker = ColorPicker()
         self.runner = TestScriptRunner(CmdRunner(), Analyzer(self.logger))
         finder = Finder()
+        self.monitoring = os.getcwd()
         if files != None:
+            self.monitoring = ' '.join(files)
             finder = FinderWithFixedFileSet(files)
         self.script_writer = ScriptWriter(finder, FileWriter(), ScriptBuilder())
         self.color_table = {
@@ -361,7 +363,7 @@ class pyTDDmonFrame(Frame):
         self.button.pack(expand=1,fill='both')
 
     def button_clicked(self, widget):
-        msg = "Monitoring: %s\n%s" % (os.getcwd(), self.logger.get_log())
+        msg = "Monitoring: %s\n%s" % (self.monitoring, self.logger.get_log())
         message_window(msg)
         
     def get_green_and_total(self):
