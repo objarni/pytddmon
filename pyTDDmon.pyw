@@ -296,11 +296,10 @@ def message_window(message):
     win.title('Details')
     white = '#ffffff'
     message = message.replace('\r\n', '\n')
-    label = Text(win)
-    label.insert(INSERT, message)
-    label['state'] = DISABLED
-    #Label(win, text=message, justify='left', bg=white, activebackground=white)
-    label.pack(expand=1,fill='both')
+    text = Text(win)
+    text.insert(INSERT, message)
+    text['state'] = DISABLED
+    text.pack(expand=1,fill='both')
 
 class pyTDDmonFrame(Frame):
 
