@@ -42,10 +42,10 @@ on_python3 = lambda : sys.version_info[0]==3
 
 if not on_python3():
     import Tkinter as tk
-    from Tkinter import Tk, Frame, Toplevel, Label, CENTER, DISABLED, Text
+    from Tkinter import Tk, Frame, Toplevel, Label, CENTER, DISABLED
 else:
     import tkinter as tk
-    from tkinter import Tk, Frame, Toplevel, Label, CENTER, DISABLED, Text
+    from tkinter import Tk, Frame, Toplevel, Label, CENTER, DISABLED
 
 # Constants
 
@@ -298,7 +298,7 @@ def message_window(message):
     win.title('Details')
     white = '#ffffff'
     message = message.replace('\r\n', '\n')
-    text = Text(win)
+    text = tk.Text(win)
     text.insert(tk.INSERT, message)
     text['state'] = DISABLED
     text.pack(expand=1,fill='both')
