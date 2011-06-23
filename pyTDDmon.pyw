@@ -41,9 +41,9 @@ from time import gmtime, strftime
 on_python3 = lambda : sys.version_info[0]==3
 
 if not on_python3():
-    from Tkinter import Tk, Frame, Toplevel, Label, CENTER
+    from Tkinter import Tk, Frame, Toplevel, Label, CENTER, DISABLED, Text, INSERT
 else:
-    from tkinter import Tk, Frame, Toplevel, Label, CENTER
+    from tkinter import Tk, Frame, Toplevel, Label, CENTER, DISABLED, Text, INSERT
 
 # Constants
 
@@ -296,7 +296,10 @@ def message_window(message):
     win.title('Details')
     white = '#ffffff'
     message = message.replace('\r\n', '\n')
-    label = Label(win, text=message, justify='left', bg=white, activebackground=white)
+    label = Text(win)
+    label.insert(INSERT, message)
+    label['state'] = DISABLED
+    #Label(win, text=message, justify='left', bg=white, activebackground=white)
     label.pack(expand=1,fill='both')
 
 class pyTDDmonFrame(Frame):
