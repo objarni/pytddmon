@@ -41,9 +41,11 @@ from time import gmtime, strftime
 on_python3 = lambda : sys.version_info[0]==3
 
 if not on_python3():
-    from Tkinter import Tk, Frame, Toplevel, Label, CENTER, DISABLED, Text, INSERT
+    import Tkinter as tk
+    from Tkinter import Tk, Frame, Toplevel, Label, CENTER, DISABLED, Text
 else:
-    from tkinter import Tk, Frame, Toplevel, Label, CENTER, DISABLED, Text, INSERT
+    import tkinter as tk
+    from tkinter import Tk, Frame, Toplevel, Label, CENTER, DISABLED, Text
 
 # Constants
 
@@ -297,7 +299,7 @@ def message_window(message):
     white = '#ffffff'
     message = message.replace('\r\n', '\n')
     text = Text(win)
-    text.insert(INSERT, message)
+    text.insert(tk.INSERT, message)
     text['state'] = DISABLED
     text.pack(expand=1,fill='both')
 
