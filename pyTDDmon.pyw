@@ -42,10 +42,10 @@ on_python3 = lambda : sys.version_info[0]==3
 
 if not on_python3():
     import Tkinter as tk
-    from Tkinter import Tk, Frame, Toplevel, Label, CENTER, DISABLED
+    from Tkinter import Tk, Frame, Toplevel, Label, CENTER
 else:
     import tkinter as tk
-    from tkinter import Tk, Frame, Toplevel, Label, CENTER, DISABLED
+    from tkinter import Tk, Frame, Toplevel, Label, CENTER
 
 # Constants
 
@@ -300,7 +300,7 @@ def message_window(message):
     message = message.replace('\r\n', '\n')
     text = tk.Text(win)
     text.insert(tk.INSERT, message)
-    text['state'] = DISABLED
+    text['state'] = tk.DISABLED
     text.pack(expand=1,fill='both')
 
 class pyTDDmonFrame(Frame):
