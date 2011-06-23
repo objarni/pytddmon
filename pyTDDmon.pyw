@@ -42,10 +42,10 @@ on_python3 = lambda : sys.version_info[0]==3
 
 if not on_python3():
     import Tkinter as tk
-    from Tkinter import Tk, Frame, Toplevel, Label, CENTER
+    from Tkinter import Tk, Frame, Toplevel, Label
 else:
     import tkinter as tk
-    from tkinter import Tk, Frame, Toplevel, Label, CENTER
+    from tkinter import Tk, Frame, Toplevel, Label
 
 # Constants
 
@@ -361,8 +361,8 @@ class pyTDDmonFrame(Frame):
             width=button_width,
             relief='raised',
             font=("Helvetica", 16),
-            justify=CENTER,
-            anchor=CENTER)
+            justify=tk.CENTER,
+            anchor=tk.CENTER)
         self.button.bind("<Button-1>", self.button_clicked)
         self.button.pack(expand=1,fill='both')
 
