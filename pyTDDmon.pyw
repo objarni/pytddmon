@@ -42,10 +42,8 @@ on_python3 = lambda : sys.version_info[0]==3
 
 if not on_python3():
     import Tkinter as tk
-    from Tkinter import Tk, Frame, Toplevel, Label
 else:
     import tkinter as tk
-    from tkinter import Tk, Frame, Toplevel, Label
 
 # Constants
 
@@ -291,7 +289,7 @@ class ScriptBuilder:
         return build_run_script(modules)
 
 def message_window(message):
-    win = Toplevel()
+    win = tk.Toplevel()
     win.wm_attributes("-topmost", 1)
     if on_windows():
         win.attributes("-toolwindow", 1)
@@ -303,10 +301,10 @@ def message_window(message):
     text['state'] = tk.DISABLED
     text.pack(expand=1,fill='both')
 
-class pyTDDmonFrame(Frame):
+class pyTDDmonFrame(tk.Frame):
 
     def __init__(self, root=None, files=None):
-        Frame.__init__(self, root)
+        tk.Frame.__init__(self, root)
         self.master.title("pyTDDmon")
         self.master.resizable(0,0)
         self.create_button()
@@ -356,7 +354,7 @@ class pyTDDmonFrame(Frame):
         if not on_windows():
             # Hack: Window title cut if button too small!
             button_width = 10
-        self.button = Label(self,
+        self.button = tk.Label(self,
             text='pyTDDmon',
             width=button_width,
             relief='raised',
@@ -423,7 +421,7 @@ def run():
     filtered = filter_existing_files(args)
     
     # Basic tkinter initialization
-    root = Tk()
+    root = tk.Tk()
     root.wm_attributes("-topmost", 1)
     if on_windows():
         root.attributes("-toolwindow", 1)
