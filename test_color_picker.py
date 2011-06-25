@@ -1,5 +1,5 @@
 import unittest
-from pyTDDmon import ColorPicker
+from pytddmon import ColorPicker
 
 class test_pulse(unittest.TestCase):
 

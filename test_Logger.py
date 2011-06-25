@@ -1,6 +1,6 @@
 # coding: utf-8
 import unittest
-from pyTDDmon import Logger
+from pytddmon import Logger
 
 class test_Logger(unittest.TestCase):
 	def test_concatenates_log_messages(self):

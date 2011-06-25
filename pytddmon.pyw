@@ -25,7 +25,7 @@ THE SOFTWARE.
 
 ''' CONTRIBUTIONS
 Fredrik Wendt: help with Tkinter implementation (replacing the pygame dependency)
-KrunoSaho: added always-on-top to the pyTDDmon window
+KrunoSaho: added always-on-top to the pytddmon window
 Neppord: print(".") will not screw up test-counting (it did before)
 '''
 
@@ -48,39 +48,39 @@ else:
 # Constants
 
 TEMP_FILE_DIR_NAME = tempfile.mkdtemp()
-RUN_TESTS_SCRIPT_FILE = os.path.join(TEMP_FILE_DIR_NAME, 'pyTDDmon_tmp.py')
+RUN_TESTS_SCRIPT_FILE = os.path.join(TEMP_FILE_DIR_NAME, 'pytddmon_tmp.py')
 TEMP_OUT_FILE_NAME = os.path.join(TEMP_FILE_DIR_NAME, "out")
-# If pyTDDmon is run in test mode, it will:
+# If pytddmon is run in test mode, it will:
 # 1. display the GUI for a very short time
 # 2. write a log file, containing the information displayed (most notably green/total)
 # 3. exit
 TEST_MODE = False
 TEST_MODE_FLAG = '--log-and-exit'
-TEST_MODE_LOG_FILE = 'pyTDDmon.log'
+TEST_MODE_LOG_FILE = 'pytddmon.log'
 
 
 # End of Constants
 
 def file_name_to_module(file_name):
     """
-    >>> print(file_name_to_module("pyTDDmon.pyw"))
-    pyTDDmon
-    >>> print(file_name_to_module("pyTDDmon.py"))
-    pyTDDmon
+    >>> print(file_name_to_module("pytddmon.pyw"))
+    pytddmon
+    >>> print(file_name_to_module("pytddmon.py"))
+    pytddmon
     """
     return ".".join(file_name.split(".")[:-1])
 
 def build_run_script(files):
     """
-    >>> print(build_run_script(["pyTDDmon.py"]))
+    >>> print(build_run_script(["pytddmon.py"]))
     import sys
     import unittest
     import doctest
     ...
-    import pyTDDmon
-    suite.addTests(load_module_tests(pyTDDmon))
+    import pytddmon
+    suite.addTests(load_module_tests(pytddmon))
     try:
-        suite.addTests(doctest.DocTestSuite(pyTDDmon, optionflags=doctest.ELLIPSIS))
+        suite.addTests(doctest.DocTestSuite(pytddmon, optionflags=doctest.ELLIPSIS))
     except:pass
     ...
     """
@@ -117,7 +117,7 @@ def calculate_checksum(filelist, fileinfo):
     return val
 
 class ColorPicker:
-    ''' ColorPicker decides the background color the pyTDDmon window,
+    ''' ColorPicker decides the background color the pytddmon window,
         based on the number of green tests, and the total number of
         tests. Also, there is a "pulse" (light color, dark color),
         to increase the feeling of continous testing.'''
@@ -291,11 +291,11 @@ def message_window(message):
     text.pack(expand=1,fill='both')
     text.focus_set()
 
-class pyTDDmonFrame(tk.Frame):
+class PytddmonFrame(tk.Frame):
 
     def __init__(self, root=None, files=None):
         tk.Frame.__init__(self, root)
-        self.master.title("pyTDDmon")
+        self.master.title("pytddmon")
         self.master.resizable(0,0)
         self.create_button()
         self.grid()
@@ -345,7 +345,7 @@ class pyTDDmonFrame(tk.Frame):
             # Hack: Window title cut if button too small!
             button_width = 10
         self.button = tk.Label(self,
-            text='pyTDDmon',
+            text='pytddmon',
             width=button_width,
             relief='raised',
             font=("Helvetica", 16),
@@ -418,9 +418,9 @@ def run():
        
     # Create main window
     if len(filtered)>0:
-        win = pyTDDmonFrame(root, filtered)
+        win = PytddmonFrame(root, filtered)
     else:
-        win = pyTDDmonFrame(root)
+        win = PytddmonFrame(root)
 
     # Main loop
     try:

@@ -1,6 +1,6 @@
 # coding: utf-8
 import unittest
-from pyTDDmon import ScriptWriter
+from pytddmon import ScriptWriter
 
 class test_ScriptWriter(unittest.TestCase):
 	class FakeFinder:
