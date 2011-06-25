@@ -300,6 +300,7 @@ def message_window(message):
     text.insert(tk.INSERT, message)
     text['state'] = tk.DISABLED
     text.pack(expand=1,fill='both')
+    text.focus_set()
 
 class pyTDDmonFrame(tk.Frame):
 
