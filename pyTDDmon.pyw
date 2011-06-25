@@ -147,17 +147,6 @@ class ColorPicker:
 
 def win_text(total_tests, passing_tests=0, prev_total_tests=0):
     return "%d/%d" % (passing_tests, total_tests)
-    if prev_total_tests > total_tests:
-        return "%d of %d tests green\n"% (passing_tests, total_tests) +\
-                     "Warning: number of tests decreased!"
-    if total_tests == 0:
-        return "No tests found!"
-    if passing_tests == total_tests:
-        return "All %d tests green" % total_tests
-    txt = "%d of %d tests green"
-    if passing_tests+1 < total_tests:
-        txt = "Warning: only " + txt + "!"
-    return txt % (passing_tests, total_tests)
 
 class ScriptWriter:
     '''
