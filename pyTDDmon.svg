@@ -16,9 +16,9 @@
    sodipodi:version="0.32"
    inkscape:version="0.48.0 r9654"
    version="1.0"
-   sodipodi:docname="pyTDDmon.svg"
+   sodipodi:docname="pytddmon.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
-   inkscape:export-filename="C:\prj\py\pytddmon\pyTDDmon.png"
+   inkscape:export-filename="C:\prj\py\pytddmon\pytddmon.png"
    inkscape:export-xdpi="21.6"
    inkscape:export-ydpi="21.6">
   <defs
@@ -492,7 +492,7 @@
        height="256"
        x="570.73621"
        y="-170.72598"
-       inkscape:export-filename="C:\Users\Olof.Bjarnason\Desktop\pyTDDmon.png"
+       inkscape:export-filename="C:\Users\Olof.Bjarnason\Desktop\pytddmon.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <rect
@@ -562,7 +562,7 @@
            xlink:href="#path2395"
            id="textPath3188"><tspan
    style="fill:#2f769d;fill-opacity:1"
-   id="tspan3190">pyTDDmon</tspan></textPath></text>
+   id="tspan3190">pytddmon</tspan></textPath></text>
       <text
          xml:space="preserve"
          style="font-size:40px;font-style:normal;font-weight:normal;opacity:0.38053098;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
@@ -570,7 +570,7 @@
          transform="translate(83.428572,170.26469)"><textPath
            xlink:href="#path2395"
            id="textPath3816"><tspan
-   id="tspan3818">pyTDDmon</tspan></textPath></text>
+   id="tspan3818">pytddmon</tspan></textPath></text>
       <path
          id="path2387"
          d="m 245.6921,498.44568 c -19.17939,-6.97328 -34.32039,-21.74585 -41.39823,-40.39083 -10.40419,-27.40741 -1.98074,-59.42486 20.37433,-77.44288 13.16779,-10.61316 27.17689,-15.65671 44.11432,-15.88202 6.58083,-0.0876 6.76725,0.52744 1.32747,4.37896 -3.98705,2.82295 -10.05528,9.87003 -12.29484,14.27806 -3.57446,7.03544 -3.66002,16.83885 -0.22597,25.88637 2.92536,7.70729 8.82986,18.26695 17.03746,30.46995 7.91297,11.76492 8.62535,13.03928 9.27582,16.59327 2.12196,11.59366 -5.40774,22.80561 -26.0215,38.74681 l -6.8554,5.30144 -5.33346,-1.93913 z"
@@ -588,7 +588,7 @@
          xml:space="preserve"><textPath
            id="textPath2397"
            xlink:href="#path2395"><tspan
-   id="tspan2393">pyTDDmon</tspan></textPath></text>
+   id="tspan2393">pytddmon</tspan></textPath></text>
       <path
          inkscape:connector-curvature="0"
          sodipodi:nodetypes="csscc"
@@ -697,7 +697,7 @@
            id="textPath3930"
            xlink:href="#path2395"><tspan
    id="tspan3932"
-   style="fill:#2f769d;fill-opacity:1">pyTDDmon</tspan></textPath></text>
+   style="fill:#2f769d;fill-opacity:1">pytddmon</tspan></textPath></text>
       <text
          transform="translate(83.428572,170.26469)"
          id="text3934"
@@ -705,7 +705,7 @@
          xml:space="preserve"><textPath
            id="textPath3936"
            xlink:href="#path2395"><tspan
-   id="tspan3938">pyTDDmon</tspan></textPath></text>
+   id="tspan3938">pytddmon</tspan></textPath></text>
       <path
          inkscape:connector-curvature="0"
          style="fill:url(#linearGradient3956);fill-opacity:1;fill-rule:evenodd;stroke:url(#linearGradient3958);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
@@ -723,7 +723,7 @@
          transform="translate(81.428572,168.26469)"><textPath
            xlink:href="#path2395"
            id="textPath3946"><tspan
-   id="tspan3948">pyTDDmon</tspan></textPath></text>
+   id="tspan3948">pytddmon</tspan></textPath></text>
       <path
          style="opacity:0.25;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:10;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
          d="m 220.97017,477.56052 c -10.43076,-11.03935 -15.31344,-29.4645 -15.31344,-45.83935 0,-34.01386 27.60545,-61.61931 61.61931,-61.61931 11.93415,0 23.0794,3.39834 32.5202,9.27945 16.56643,-2.44444 -113.10919,64.32605 -78.82607,98.17921 z"
