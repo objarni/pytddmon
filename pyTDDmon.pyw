@@ -90,7 +90,7 @@ def build_run_script(files):
     content.append("import unittest")
     content.append("import doctest")
     content.append("")
-    content.append("sys.path.append(%r)" % os.getcwd())
+    content.append("sys.path[0] = %r" % os.getcwd())
     content.append("suite = unittest.TestSuite()")
     content.append("load_module_tests = unittest.defaultTestLoader.loadTestsFromModule")
     content.append("")
