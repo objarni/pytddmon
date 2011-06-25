@@ -34,7 +34,7 @@ def compare_logs(testdir, got, exp):
     compare(testdir, 'total', got, exp)
 
 def compare_logs_in_dir(testdir):
-    gotinfo = get_log(testdir, "pyTDDmon.log")
+    gotinfo = get_log(testdir, "pytddmon.log")
     expinfo = get_log(testdir, "expected.log")
     compare_logs(testdir, gotinfo, expinfo)
     
@@ -49,7 +49,7 @@ def get_args(path):
 
 def run_all():
     rootdir = os.getcwd()
-    pytddmon_path = os.path.join(rootdir, "pyTDDmon.pyw")
+    pytddmon_path = os.path.join(rootdir, "pytddmon.pyw")
     names = os.listdir("systest")
     for name in names:
         path = os.path.join(rootdir, "systest", name)

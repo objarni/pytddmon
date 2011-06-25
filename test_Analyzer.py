@@ -1,6 +1,6 @@
 # coding: utf-8
 import unittest
-from pyTDDmon import Analyzer
+from pytddmon import Analyzer
 
 class test_Analyzer(unittest.TestCase):
 	class FakeLog:

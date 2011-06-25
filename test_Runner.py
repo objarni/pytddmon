@@ -1,6 +1,6 @@
 # coding: utf-8
 import unittest
-from pyTDDmon import TestScriptRunner
+from pytddmon import TestScriptRunner
 
 class test_TestScriptRunner(unittest.TestCase):
 	class FakeAnalyzer:

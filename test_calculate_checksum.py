@@ -1,5 +1,5 @@
 import unittest
-from pyTDDmon import calculate_checksum
+from pytddmon import calculate_checksum
 
 class FakeFileInfo:
   def get_size(self, path):
