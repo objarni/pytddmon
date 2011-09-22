@@ -49,7 +49,7 @@ def get_args(path):
 
 def run_all():
     rootdir = os.getcwd()
-    pytddmon_path = os.path.join(rootdir, "pytddmon.pyw")
+    pytddmon_path = os.path.join(rootdir, "pytddmon.py")
     names = os.listdir("systest")
     for name in names:
         path = os.path.join(rootdir, "systest", name)
