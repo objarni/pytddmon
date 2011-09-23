@@ -307,11 +307,15 @@ class PytddmonFrame(tk.Frame):
         self.logger = Logger()
         self.color_picker = ColorPicker()
         self.runner = TestScriptRunner(CmdRunner(), Analyzer(self.logger))
-        finder = Finder()
         self.monitoring = os.getcwd()
+
+        finder = None
         if files != None:
             self.monitoring = ' '.join(files)
             finder = FinderWithFixedFileSet(files)
+		else:
+			finder = Finder()
+
         self.script_writer = ScriptWriter(finder, FileWriter(), ScriptBuilder())
         self.color_table = {
             (True, 'green'): '0f0',
