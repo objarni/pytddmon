@@ -259,7 +259,6 @@ class RecursiveFinder(object):
         dirs = [(dir, long, os.path.join(long, "__init__.py")) for dir, long in dirs]
         dirs = [dir for dir, long, init in dirs if os.path.isdir(long) and not os.path.isfile(init)]
         for dir in dirs:
-            print dir
             names.remove(dir)
     def find_modules(self):
         return self.files
