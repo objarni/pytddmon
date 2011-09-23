@@ -67,8 +67,14 @@ def file_name_to_module(file_name):
     pytddmon
     >>> print(file_name_to_module("pytddmon.py"))
     pytddmon
+    >>> print(file_name_to_module("tests/pytddmon.py"))
+    tests.pytddmon
+    >>> print(file_name_to_module("./tests/pytddmon.py"))
+    tests.pytddmon
     """
-    return ".".join(file_name.split(".")[:-1])
+    ret = ".".join(".".join(file_name.split(".")[:-1]).split("/"))
+    ret = ret.strip(".")
+    return ret
 
 def build_run_script(files):
     """
@@ -241,6 +247,23 @@ class Finder:
     def find_modules(self):
         return glob.glob("test_*.py")
 
+class RecursiveFinder(object):
+    def __init__(self):
+        self.files = []
+        os.path.walk(".", self.visit, None)
+        self.files = [file for file in self.files if os.path.isfile(file)]
+
+    def visit(self, arg, dirname, names):
+        self.files.extend([os.path.join(dirname, name) for name in names if "test" in name and name[-3:] == ".py"])
+        dirs = [(dir, os.path.join(dirname, dir)) for dir in names]
+        dirs = [(dir, long, os.path.join(long, "__init__.py")) for dir, long in dirs]
+        dirs = [dir for dir, long, init in dirs if os.path.isdir(long) and not os.path.isfile(init)]
+        for dir in dirs:
+            print dir
+            names.remove(dir)
+    def find_modules(self):
+        return self.files
+
 class FinderWithFixedFileSet:
     def __init__(self, files):
         self.files = files
@@ -313,8 +336,8 @@ class PytddmonFrame(tk.Frame):
         if files != None:
             self.monitoring = ' '.join(files)
             finder = FinderWithFixedFileSet(files)
-		else:
-			finder = Finder()
+        else:
+            finder = RecursiveFinder()
 
         self.script_writer = ScriptWriter(finder, FileWriter(), ScriptBuilder())
         self.color_table = {
