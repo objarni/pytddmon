@@ -71,8 +71,11 @@ def file_name_to_module(file_name):
     tests.pytddmon
     >>> print(file_name_to_module("./tests/pytddmon.py"))
     tests.pytddmon
+    >>> print(file_name_to_module(".\\tests\\pytddmon.py"))
+    tests.pytddmon
     """
     ret = ".".join(".".join(file_name.split(".")[:-1]).split("/"))
+    ret = ".".join(ret.split("\\"))
     ret = ret.strip(".")
     return ret
 
