@@ -306,12 +306,8 @@ class RealFileInfo:
     def get_name_hash(self, path):
         """
         returns a hash of the name of the path
-        this has is computed by sum(ord(char) for char in path)
         """
-        hash = 0
-        for char in path:
-            hash += ord(char)
-        return hash
+        return hash(path)
 
 class Finder:
     """
