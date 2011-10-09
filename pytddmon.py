@@ -325,7 +325,7 @@ class PytddmonFrame(tk.Frame):
         self.create_button()
         self.grid()
         self.failures = 0
-        self.last_checksum = 0
+        self.last_checksum = None # impoertent to be different from any number
         self.num_tests = 0
         self.num_tests_prev = 0
         self.num_tests_diff = 0
