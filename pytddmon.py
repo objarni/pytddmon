@@ -206,11 +206,11 @@ class ScriptWriter:
 
     def write_script(self):
         """
-        Findes the tests and Compiles the test runner script and writes it 
+        Finds the tests and Compiles the test runner script and writes it 
         to file. This is done with the help from the finder script builder and
         file writer.
         """
-        modules = self.finder.find_modules()
+        modules = self.finder()
         result = self.script_builder.build_script_from_modules(modules)
         self.file_writer.write_file(RUN_TESTS_SCRIPT_FILE, result)
 
@@ -309,15 +309,12 @@ class RealFileInfo:
         """
         return hash(path)
 
-class Finder:
-    """
-        Simple module finder.
-        this finder only look for files in the current directory that starts 
-        with test_ and ends with .py.
-    """
-    def find_modules(self):
-        "findes modules that we think contains tests"
-        return glob.glob("test_*.py")
+def find_modules():
+    """Simple module finder.
+    this finder only look for files in the current directory that starts 
+    with test_ and ends with .py."""
+    "findes modules that we think contains tests"
+    return glob.glob("test_*.py")
 
 class RecursiveFinder(object):
     """
@@ -347,7 +344,7 @@ class RecursiveFinder(object):
         dirs = [dir for dir, long, init in dirs if is_ok(long, init)]
         for dir in dirs:
             names.remove(dir)
-    def find_modules(self):
+    def __call__(self):
         "returns modules that we think contains tests"
         return self.files
 
@@ -359,7 +356,7 @@ class FinderWithFixedFileSet(object):
     def __init__(self, files):
         self.files = files
 
-    def find_modules(self):
+    def __call__(self):
         "returns modules that was submited to the constructor."
         return self.files
 

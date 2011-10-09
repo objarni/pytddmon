@@ -7,7 +7,7 @@ class test_ScriptWriter(unittest.TestCase):
 		def __init__(self):
 			self.find_modules_returns = []
 			
-		def find_modules(self):
+		def __call__(self):
 			return self.find_modules_returns
 			
 	class FakeScriptBuilder:
