@@ -21,12 +21,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-'''
-
-''' CONTRIBUTIONS
-Fredrik Wendt: help with Tkinter implementation (replacing the pygame dependency)
-KrunoSaho: added always-on-top to the pytddmon window
-Neppord: print(".") will not screw up test-counting (it did before)
+CONTRIBUTIONS
+Fredrik Wendt: 
+    help with Tkinter implementation (replacing the pygame dependency)
+KrunoSaho: 
+    added always-on-top to the pytddmon window
+Neppord: 
+    print(".") will not screw up test-counting (it did before)
+    docstring support
+    recursive discovery of tests.
 '''
 
 import os
@@ -35,12 +38,15 @@ import sys
 import tempfile
 import atexit
 import shlex
+import platform
 
 from time import gmtime, strftime
+from subprocess import Popen, PIPE, STDOUT
 
-on_python3 = lambda : sys.version_info[0]==3
+ON_PYTHON3 = sys.version_info[0] == 3
+ON_WINDOWS = platform.system() == "Windows"
 
-if not on_python3():
+if not ON_PYTHON3:
     import Tkinter as tk
 else:
     import tkinter as tk
@@ -52,7 +58,8 @@ RUN_TESTS_SCRIPT_FILE = os.path.join(TEMP_FILE_DIR_NAME, 'pytddmon_tmp.py')
 TEMP_OUT_FILE_NAME = os.path.join(TEMP_FILE_DIR_NAME, "out")
 # If pytddmon is run in test mode, it will:
 # 1. display the GUI for a very short time
-# 2. write a log file, containing the information displayed (most notably green/total)
+# 2. write a log file, containing the information displayed 
+#    (most notably green/total)
 # 3. exit
 TEST_MODE = False
 TEST_MODE_FLAG = '--log-and-exit'
@@ -63,6 +70,9 @@ TEST_MODE_LOG_FILE = 'pytddmon.log'
 
 def file_name_to_module(file_name):
     """
+    
+    Converts filenames of files in packages to import frendly dot seperated paths.
+
     >>> print(file_name_to_module("pytddmon.pyw"))
     pytddmon
     >>> print(file_name_to_module("pytddmon.py"))
@@ -81,6 +91,9 @@ def file_name_to_module(file_name):
 
 def build_run_script(files):
     """
+    
+    Compiles a script to run all tests in the files.
+
     >>> print(build_run_script(["pytddmon.py"]))
     import sys
     import unittest
@@ -101,7 +114,9 @@ def build_run_script(files):
     content.append("")
     content.append("sys.path[0] = %r" % os.getcwd())
     content.append("suite = unittest.TestSuite()")
-    content.append("load_module_tests = unittest.defaultTestLoader.loadTestsFromModule")
+    content.append(
+        "load_module_tests = unittest.defaultTestLoader.loadTestsFromModule"
+        )
     content.append("")
 
     for filename in files:
@@ -109,7 +124,11 @@ def build_run_script(files):
         content.append('import ' + module)
         content.append('suite.addTests(load_module_tests(' + module + '))')
         content.append('try:')
-        content.append('    suite.addTests(doctest.DocTestSuite(' + module + ', optionflags=doctest.ELLIPSIS))')
+        content.append(
+            '    suite.addTests(doctest.DocTestSuite(' + 
+            module + 
+            ', optionflags=doctest.ELLIPSIS))'
+            )
         content.append('except:pass')
         content.append('')
     
@@ -120,9 +139,18 @@ def build_run_script(files):
     return "\n".join(content)
 
 def calculate_checksum(filelist, fileinfo):
+    """
+
+    Generates a checksum for all the files in the file list.
+
+    """
     val = 0
-    for f in filelist:
-        val += fileinfo.get_modified_time(f) + fileinfo.get_size(f) + fileinfo.get_name_hash(f)
+    for filename in filelist:
+        val += (
+            fileinfo.get_modified_time(filename) +
+            fileinfo.get_size(filename) +
+            fileinfo.get_name_hash(filename)
+            )
     return val
 
 class ColorPicker:
@@ -133,18 +161,22 @@ class ColorPicker:
 
     def __init__(self):
         self.color = 'green'
-        self.reset_pulse()
+        self.light = True
 
     def pick(self):
+        "returns the tuple (light, color) with the types(bool ,str)"
         return (self.light, self.color)
 
     def pulse(self):
+        "updates the light state"
         self.light = not self.light
 
     def reset_pulse(self):
+        "resets the light state"
         self.light = True
 
     def set_result(self, green, total):
+        "calculates what colure should be used and may reset the lightnes"
         old_color = self.color
         self.color = 'green'
         if green == total-1:
@@ -155,6 +187,11 @@ class ColorPicker:
             self.reset_pulse()
 
 def win_text(total_tests, passing_tests=0, prev_total_tests=0):
+    """
+        Compiles the text to show in the message window.
+        This message is typicaly shown when clicking the main window.
+    """
+
     return "%d/%d" % (passing_tests, total_tests)
 
 class ScriptWriter:
@@ -168,6 +205,11 @@ class ScriptWriter:
         self.script_builder = script_builder
 
     def write_script(self):
+        """
+        Findes the tests and Compiles the test runner script and writes it 
+        to file. This is done with the help from the finder script builder and
+        file writer.
+        """
         modules = self.finder.find_modules()
         result = self.script_builder.build_script_from_modules(modules)
         self.file_writer.write_file(RUN_TESTS_SCRIPT_FILE, result)
@@ -183,6 +225,9 @@ class TestScriptRunner:
         self.analyzer = analyzer
 
     def run(self, test_script):
+        """
+        Runns the test runner script and returns the analysed output.
+        """
         output = self.cmdrunner.run_cmdline('python "%s"' % test_script)
         return self.analyzer.analyze(output)
 
@@ -196,12 +241,16 @@ class Analyzer:
         self.logger = logger
 
     def analyze(self, txt):
+        """
+        Analyses the out put from a unittest and returns a tupple of 
+        (passed/green, total)
+        """
         if len(txt.strip()) == 0:
             return (0, 0)
         toprow =  txt.splitlines()[0]
         green = toprow.count('.')
         total = len(toprow)
-        if green<total:
+        if green < total:
             self.logger.log(txt)
         return (green, total)
 
@@ -209,25 +258,34 @@ class Logger:
     ''' Logger, remembers log messages.'''
 
     def __init__(self):
-        self.clear()
+        self.complete_log = ""
 
     def log(self, message):
+        """
+        Adds message to the log
+        """
         self.complete_log = self.complete_log + message
 
     def get_log(self):
+        """
+        returns the log as a string
+        """
         return self.complete_log
 
     def clear(self):
+        """
+        clears all entries in the log
+        """
         self.complete_log = ""
 
 ## Rows above this are unit-tested.
 ## Rows below this are not unit-tested.
 
-def on_windows():
-    import platform
-    return platform.system() == "Windows"
 
 def remove_tmp_files():
+    """
+    Clean up all tempfiles after us.
+    """
     safe_remove(RUN_TESTS_SCRIPT_FILE)
     if os.path.exists(TEMP_FILE_DIR_NAME):
         os.removedirs(TEMP_FILE_DIR_NAME)
@@ -236,58 +294,94 @@ def remove_tmp_files():
 atexit.register(remove_tmp_files)
 
 class RealFileInfo:
-    def get_size(self, f):
-        return os.stat(f).st_size
-    def get_modified_time(self, f):
-        return os.stat(f).st_mtime
+    """
+    A adapter to easy finde info of a file.
+    """
+    def get_size(self, filename):
+        "returns the size of a file"
+        return os.stat(filename).st_size
+    def get_modified_time(self, filename):
+        "returns the time the file was last modified"
+        return os.stat(filename).st_mtime
     def get_name_hash(self, path):
+        """
+        returns a hash of the name of the path
+        this has is computed by sum(ord(char) for char in path)
+        """
         hash = 0
-        for ch in path:
-            hash += ord(ch)
+        for char in path:
+            hash += ord(char)
         return hash
 
 class Finder:
+    """
+        Simple module finder.
+        this finder only look for files in the current directory that starts 
+        with test_ and ends with .py.
+    """
     def find_modules(self):
+        "findes modules that we think contains tests"
         return glob.glob("test_*.py")
 
 class RecursiveFinder(object):
+    """
+       A test finder which look recursevly for files in current folder and in 
+       folders which are packages. The files needs to start with test_ and
+       end with .py.
+    """
     def __init__(self):
         self.files = []
         os.path.walk(".", self.visit, None)
-        self.files = [file for file in self.files if os.path.isfile(file)]
+        self.files = [
+            filename for filename in self.files if os.path.isfile(filename)
+            ]
 
     def visit(self, arg, dirname, names):
-        self.files.extend([os.path.join(dirname, name) for name in names if "test" in name and name[-3:] == ".py"])
+        "helper function that findes modules that we think contains tests"
+        is_ok = lambda name : "test" in name and name[-3:] == ".py"
+        self.files.extend(
+            [os.path.join(dirname, name) for name in names if is_ok(name)]
+            )
         dirs = [(dir, os.path.join(dirname, dir)) for dir in names]
-        dirs = [(dir, long, os.path.join(long, "__init__.py")) for dir, long in dirs]
-        dirs = [dir for dir, long, init in dirs if os.path.isdir(long) and not os.path.isfile(init)]
+        dirs = [
+            (dir, long, os.path.join(long, "__init__.py")) for dir, long in dirs
+            ]
+        def is_ok(long, init):
+            return os.path.isdir(long) and not os.path.isfile(init)
+        dirs = [dir for dir, long, init in dirs if is_ok(long, init)]
         for dir in dirs:
             names.remove(dir)
     def find_modules(self):
+        "returns modules that we think contains tests"
         return self.files
 
-class FinderWithFixedFileSet:
+class FinderWithFixedFileSet(object):
+    """
+        Module finder which always return the Static filelist submited to the 
+        constructor.
+    """
     def __init__(self, files):
         self.files = files
 
     def find_modules(self):
+        "returns modules that was submited to the constructor."
         return self.files
 
 def safe_remove(path):
+    "removes path and ignores all exceptions."
     try: os.unlink(path)
     except: pass
 
 class CmdRunner:
     def run_cmdline(self, cmdline):
-        from subprocess import Popen, PIPE, STDOUT
         list = shlex.split(cmdline)
-        use_shell = True if on_windows() else False
+        use_shell = True if ON_WINDOWS else False
         p = Popen(list, stdout=PIPE, stderr=STDOUT, shell=use_shell)
         bytes = p.communicate()[0]
         if os.path.exists(TEMP_OUT_FILE_NAME):
             bytes = file(TEMP_OUT_FILE_NAME).read()
             os.remove(TEMP_OUT_FILE_NAME)
-        if on_python3():
+        if ON_PYTHON3:
             return str(bytes, 'utf-8')
         else:
             return bytes
@@ -305,7 +399,7 @@ class ScriptBuilder:
 def message_window(message):
     win = tk.Toplevel()
     win.wm_attributes("-topmost", 1)
-    if on_windows():
+    if ON_WINDOWS:
         win.attributes("-toolwindow", 1)
     win.title('Details')
     white = '#ffffff'
@@ -370,7 +464,7 @@ class PytddmonFrame(tk.Frame):
 
     def create_button(self):
         button_width = 8
-        if not on_windows():
+        if not ON_WINDOWS:
             # Hack: Window title cut if button too small!
             button_width = 10
         self.button = tk.Label(self,
@@ -405,7 +499,11 @@ class PytddmonFrame(tk.Frame):
         self.configure(background=rgb)
 
     def update_gui_text(self, green, total, prev_total):
-        txt = win_text(passing_tests = green, total_tests = total, prev_total_tests = prev_total)
+        txt = win_text(
+            passing_tests=green,
+            total_tests=total,
+            prev_total_tests=prev_total
+            )
         self.button.configure(text=txt)
 
     def look_for_changes(self):
@@ -415,7 +513,12 @@ class PytddmonFrame(tk.Frame):
             self.logger.clear()
             self.logger.log('[%s] Running all tests...\n' % self.clock_string())
             self.failures = self.get_number_of_failures()
-            self.logger.log('[%s] Number of failures: %d\n' % (self.clock_string(), self.failures))
+            self.logger.log(
+                '[%s] Number of failures: %d\n' % (
+                    self.clock_string(),
+                    self.failures
+                    )
+                )
         self.update_gui()
         if TEST_MODE:
             f = open(TEST_MODE_LOG_FILE, "w")
@@ -442,7 +545,7 @@ def run():
     # Basic tkinter initialization
     root = tk.Tk()
     root.wm_attributes("-topmost", 1)
-    if on_windows():
+    if ON_WINDOWS:
         root.attributes("-toolwindow", 1)
        
     # Create main window
