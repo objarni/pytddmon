@@ -23,13 +23,13 @@ THE SOFTWARE.
 
 CONTRIBUTIONS
 Fredrik Wendt: 
-    help with Tkinter implementation (replacing the pygame dependency)
+    Help with Tkinter implementation (replacing the pygame dependency).
 KrunoSaho: 
-    added always-on-top to the pytddmon window
-Neppord: 
-    print(".") will not screw up test-counting (it did before)
-    docstring support
-    recursive discovery of tests.
+    Added always-on-top to the pytddmon window.
+Neppord(Samuel Ytterbrink): 
+    Print(".") will not screw up test-counting (it did before).
+    Docstring support.
+    Recursive discovery of tests.
 '''
 
 import os
