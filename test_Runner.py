@@ -19,7 +19,7 @@ class test_TestScriptRunner(unittest.TestCase):
 			self.received_cmdline = ''
 			self.stderr_output = ''
 		
-		def run_cmdline(self, cmdline):
+		def __call__(self, cmdline):
 			self.received_cmdline = cmdline
 			return self.stderr_output
 	

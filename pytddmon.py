@@ -217,7 +217,7 @@ class ScriptWriter:
 class TestScriptRunner:
     ''' TestScriptRunner -
       Collaborators:
-       CmdRunner, runs a specified command line, returns stderr as string
+       cmdrunner, runs a specified command line, returns stderr as string
        Analyzer, analyses unittest-output into green,total number of tests
     '''
     def __init__(self, cmdrunner, analyzer):
@@ -228,7 +228,7 @@ class TestScriptRunner:
         """
         Runns the test runner script and returns the analysed output.
         """
-        output = self.cmdrunner.run_cmdline('python "%s"' % test_script)
+        output = self.cmdrunner('python "%s"' % test_script)
         return self.analyzer.analyze(output)
 
 class Analyzer:
@@ -365,19 +365,18 @@ def safe_remove(path):
     try: os.unlink(path)
     except: pass
 
-class CmdRunner:
-    def run_cmdline(self, cmdline):
-        list = shlex.split(cmdline)
-        use_shell = True if ON_WINDOWS else False
-        p = Popen(list, stdout=PIPE, stderr=STDOUT, shell=use_shell)
-        bytes = p.communicate()[0]
-        if os.path.exists(TEMP_OUT_FILE_NAME):
-            bytes = file(TEMP_OUT_FILE_NAME).read()
-            os.remove(TEMP_OUT_FILE_NAME)
-        if ON_PYTHON3:
-            return str(bytes, 'utf-8')
-        else:
-            return bytes
+def run_cmdline(cmdline):
+    list = shlex.split(cmdline)
+    use_shell = True if ON_WINDOWS else False
+    p = Popen(list, stdout=PIPE, stderr=STDOUT, shell=use_shell)
+    bytes = p.communicate()[0]
+    if os.path.exists(TEMP_OUT_FILE_NAME):
+        bytes = file(TEMP_OUT_FILE_NAME).read()
+        os.remove(TEMP_OUT_FILE_NAME)
+    if ON_PYTHON3:
+        return str(bytes, 'utf-8')
+    else:
+        return bytes
 
 class FileWriter:
     def write_file(self, filename, content):
@@ -418,7 +417,7 @@ class PytddmonFrame(tk.Frame):
         self.num_tests_diff = 0
         self.logger = Logger()
         self.color_picker = ColorPicker()
-        self.runner = TestScriptRunner(CmdRunner(), Analyzer(self.logger))
+        self.runner = TestScriptRunner(run_cmdline, Analyzer(self.logger))
         self.monitoring = os.getcwd()
 
         finder = None
