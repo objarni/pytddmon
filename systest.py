@@ -51,6 +51,7 @@ def run_all():
     rootdir = os.getcwd()
     pytddmon_path = os.path.join(rootdir, "pytddmon.py")
     names = os.listdir("systest")
+
     for name in names:
         path = os.path.join(rootdir, "systest", name)
         if os.path.isdir(path):
@@ -63,6 +64,8 @@ def run_all():
             except:
                 print(" .. in test: " + path + "\n")
             compare_logs_in_dir(path)
+
+    os.chdir(rootdir)
 
 
 if __name__ == "__main__":
