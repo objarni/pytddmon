@@ -14,7 +14,7 @@ class test_ScriptWriter(unittest.TestCase):
 		def __init__(self):
 			self.build_script_from_modules_returns = ''
 			
-		def build_script_from_modules(self, modules):
+		def __call__(self, modules):
 			self.received_modules = modules
 			return self.build_script_from_modules_returns
 			

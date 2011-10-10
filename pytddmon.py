@@ -61,7 +61,6 @@ TEMP_OUT_FILE_NAME = os.path.join(TEMP_FILE_DIR_NAME, "out")
 # 2. write a log file, containing the information displayed 
 #    (most notably green/total)
 # 3. exit
-TEST_MODE = False
 TEST_MODE_FLAG = '--log-and-exit'
 TEST_MODE_LOG_FILE = 'pytddmon.log'
 
@@ -211,7 +210,7 @@ class ScriptWriter:
         file writer.
         """
         modules = self.finder()
-        result = self.script_builder.build_script_from_modules(modules)
+        result = self.script_builder(modules)
         self.file_writer.write_file(RUN_TESTS_SCRIPT_FILE, result)
 
 class TestScriptRunner:
@@ -384,11 +383,8 @@ class FileWriter:
         f.write(content)
         f.close()
 
-class ScriptBuilder:
-    def build_script_from_modules(self, modules):
-        return build_run_script(modules)
-
 def message_window(message):
+    """creates and shows a window with the message"""
     win = tk.Toplevel()
     win.wm_attributes("-topmost", 1)
     if ON_WINDOWS:
@@ -403,9 +399,12 @@ def message_window(message):
     text.focus_set()
 
 class PytddmonFrame(tk.Frame):
+    """The Main GUI of pytddmon"""
 
-    def __init__(self, root=None, files=None):
+    def __init__(self, root=None, files=None, test_mode=False):
         tk.Frame.__init__(self, root)
+        self.button = None
+        self.TEST_MODE = test_mode
         self.master.title("pytddmon")
         self.master.resizable(0,0)
         self.create_button()
@@ -427,7 +426,7 @@ class PytddmonFrame(tk.Frame):
         else:
             finder = RecursiveFinder()
 
-        self.script_writer = ScriptWriter(finder, FileWriter(), ScriptBuilder())
+        self.script_writer = ScriptWriter(finder, FileWriter(), build_run_script)
         self.color_table = {
             (True, 'green'): '0f0',
             (False, 'green'): '0c0',
@@ -439,12 +438,14 @@ class PytddmonFrame(tk.Frame):
         self.look_for_changes()
 
     def compute_checksum(self):
+        """returns the checksum for all the sourcefiles as a single integer."""
         files = glob.glob('*.py')
         try: files.remove(RUN_TESTS_SCRIPT_FILE)
         except: pass
         return calculate_checksum(files, RealFileInfo())
 
     def get_number_of_failures(self):
+        """Returns the number of faild tests"""
         self.script_writer.write_script()
         (green, total) = self.runner.run(RUN_TESTS_SCRIPT_FILE)
         self.num_tests_prev = self.num_tests
@@ -452,9 +453,11 @@ class PytddmonFrame(tk.Frame):
         return total - green
 
     def clock_string(self):
+        """Formating the time for better readability"""
         return strftime("%H:%M:%S", gmtime())
 
     def create_button(self):
+        """Initialize the Button lable."""
         button_width = 8
         if not ON_WINDOWS:
             # Hack: Window title cut if button too small!
@@ -467,22 +470,27 @@ class PytddmonFrame(tk.Frame):
             justify=tk.CENTER,
             anchor=tk.CENTER)
         self.button.bind("<Button-1>", self.button_clicked)
-        self.button.pack(expand=1,fill='both')
+        self.button.pack(expand=1, fill='both')
 
-    def button_clicked(self, widget):
+    def button_clicked(self, _widget):
+        """Event method triggerd if the button is clicked."""
         msg = "Monitoring: %s\n%s" % (self.monitoring, self.logger.get_log())
         message_window(msg)
         
     def get_green_and_total(self):
+        """calculate the green results and returns that together with the 
+        total of tests as a tuple."""
         return (self.num_tests-self.failures, self.num_tests)
 
     def update_gui(self):
+        """Calls all update methods related to the gui"""
         (green, total) = self.get_green_and_total()
         prev_total = self.num_tests_prev
         self.update_gui_color(green, total)
         self.update_gui_text(green, total, prev_total)
 
     def update_gui_color(self, green, total):
+        """Calculates the new backgroundcolure and tells the GUI to switch to it."""
         self.color_picker.set_result( green, total )
         (light, color) = self.color_picker.pick()
         self.color_picker.pulse()
@@ -491,6 +499,7 @@ class PytddmonFrame(tk.Frame):
         self.configure(background=rgb)
 
     def update_gui_text(self, green, total, prev_total):
+        """Updates the text of the Main GUI."""
         txt = win_text(
             passing_tests=green,
             total_tests=total,
@@ -499,6 +508,7 @@ class PytddmonFrame(tk.Frame):
         self.button.configure(text=txt)
 
     def look_for_changes(self):
+        """Looking for changes in source files and runns tests if needed."""
         newval = self.compute_checksum()
         if newval != self.last_checksum:
             self.last_checksum = newval
@@ -512,25 +522,28 @@ class PytddmonFrame(tk.Frame):
                     )
                 )
         self.update_gui()
-        if TEST_MODE:
-            f = open(TEST_MODE_LOG_FILE, "w")
+        if self.TEST_MODE:
+            file_h = open(TEST_MODE_LOG_FILE, "w")
             (green, total) = self.get_green_and_total()
             lines = [ 'green='+str(green), 'total='+str(total) ]
-            f.write('\n'.join(lines))
-            f.close()
+            file_h.write('\n'.join(lines))
+            file_h.close()
             self.master.destroy()
         else:
             self.after(750, self.look_for_changes)
 
 def filter_existing_files(files):
+    """simple filtering function checking for existence of files"""
     return [f for f in files if os.path.exists(f)]
 
 def run():
+    """The main function: dose the basic initialisation and starts the program
+    """
     # Command line argument handling
     args = list(sys.argv[1:])
+    test_mode = False
     if TEST_MODE_FLAG in args:
-        global TEST_MODE
-        TEST_MODE = True
+        test_mode = True
         args.remove(TEST_MODE_FLAG)
     filtered = filter_existing_files(args)
     
@@ -542,15 +555,15 @@ def run():
        
     # Create main window
     if len(filtered)>0:
-        win = PytddmonFrame(root, filtered)
+        PytddmonFrame(root, filtered, test_mode=test_mode)
     else:
-        win = PytddmonFrame(root)
+        PytddmonFrame(root, test_mode=test_mode)
 
     # Main loop
     try:
         root.mainloop()
-    except Exception as e:
-        print(e)
+    except Exception as exception:
+        print(exception)
 
 if __name__ == '__main__':
     run()
