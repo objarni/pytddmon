@@ -292,17 +292,20 @@ def remove_tmp_files():
 
 atexit.register(remove_tmp_files)
 
-class RealFileInfo:
+class RealFileInfo(object):
     """
     A adapter to easy finde info of a file.
     """
-    def get_size(self, filename):
+    @staticmethod
+    def get_size(filename):
         "returns the size of a file"
         return os.stat(filename).st_size
-    def get_modified_time(self, filename):
+    @staticmethod
+    def get_modified_time(filename):
         "returns the time the file was last modified"
         return os.stat(filename).st_mtime
-    def get_name_hash(self, path):
+    @staticmethod
+    def get_name_hash(path):
         """
         returns a hash of the name of the path
         """
@@ -312,7 +315,6 @@ def find_modules():
     """Simple module finder.
     this finder only look for files in the current directory that starts 
     with test_ and ends with .py."""
-    "findes modules that we think contains tests"
     return glob.glob("test_*.py")
 
 class RecursiveFinder(object):
@@ -328,21 +330,29 @@ class RecursiveFinder(object):
             filename for filename in self.files if os.path.isfile(filename)
             ]
 
-    def visit(self, arg, dirname, names):
+    def visit(self, _arg, dirname, names):
         "helper function that findes modules that we think contains tests"
-        is_ok = lambda name : "test" in name and name[-3:] == ".py"
-        self.files.extend(
-            [os.path.join(dirname, name) for name in names if is_ok(name)]
-            )
-        dirs = [(dir, os.path.join(dirname, dir)) for dir in names]
+        self.files.extend([
+            os.path.join(dirname, name)
+            for name in names
+            if "test" in name and name[-3:] == ".py"
+        ])
         dirs = [
-            (dir, long, os.path.join(long, "__init__.py")) for dir, long in dirs
-            ]
-        def is_ok(long, init):
-            return os.path.isdir(long) and not os.path.isfile(init)
-        dirs = [dir for dir, long, init in dirs if is_ok(long, init)]
-        for dir in dirs:
-            names.remove(dir)
+            (dir_path, os.path.join(dirname, dir_path))
+            for dir_path in names
+        ]
+        dirs = [
+            (dir_path, long_path, os.path.join(long_path, "__init__.py"))
+            for dir_path, long_path in dirs
+        ]
+        dirs = [
+            dir_path
+            for dir_path, long_path, init in dirs
+            if os.path.isdir(long_path) and not os.path.isfile(init)
+        ]
+        for dir_path in dirs:
+            names.remove(dir_path)
+
     def __call__(self):
         "returns modules that we think contains tests"
         return self.files
@@ -361,21 +371,24 @@ class FinderWithFixedFileSet(object):
 
 def safe_remove(path):
     "removes path and ignores all exceptions."
-    try: os.unlink(path)
-    except: pass
+    try: 
+        os.unlink(path)
+    except OSError: 
+        pass
 
 def run_cmdline(cmdline):
-    list = shlex.split(cmdline)
+    """runs a cmd and returns its output"""
+    lst = shlex.split(cmdline)
     use_shell = True if ON_WINDOWS else False
-    p = Popen(list, stdout=PIPE, stderr=STDOUT, shell=use_shell)
-    bytes = p.communicate()[0]
+    cmd = Popen(lst, stdout=PIPE, stderr=STDOUT, shell=use_shell)
+    output = cmd.communicate()[0]
     if os.path.exists(TEMP_OUT_FILE_NAME):
-        bytes = file(TEMP_OUT_FILE_NAME).read()
+        output = file(TEMP_OUT_FILE_NAME).read()
         os.remove(TEMP_OUT_FILE_NAME)
     if ON_PYTHON3:
-        return str(bytes, 'utf-8')
+        return str(output, 'utf-8')
     else:
-        return bytes
+        return output
 
 class FileWriter:
     def write_file(self, filename, content):
@@ -426,7 +439,11 @@ class PytddmonFrame(tk.Frame):
         else:
             finder = RecursiveFinder()
 
-        self.script_writer = ScriptWriter(finder, FileWriter(), build_run_script)
+        self.script_writer = ScriptWriter(
+            finder, 
+            FileWriter(), 
+            build_run_script
+        )
         self.color_table = {
             (True, 'green'): '0f0',
             (False, 'green'): '0c0',
@@ -490,7 +507,8 @@ class PytddmonFrame(tk.Frame):
         self.update_gui_text(green, total, prev_total)
 
     def update_gui_color(self, green, total):
-        """Calculates the new backgroundcolure and tells the GUI to switch to it."""
+        """Calculates the new backgroundcolure and tells the GUI to switch to 
+        it."""
         self.color_picker.set_result( green, total )
         (light, color) = self.color_picker.pick()
         self.color_picker.pulse()
