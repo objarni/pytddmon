@@ -390,11 +390,12 @@ def run_cmdline(cmdline):
     else:
         return output
 
-class FileWriter:
-    def write_file(self, filename, content):
-        f = open(filename, 'w')
-        f.write(content)
-        f.close()
+class FileWriter(object):
+    @staticmethod
+    def write_file(filename, content):
+        f_hand = open(filename, 'w')
+        f_hand.write(content)
+        f_hand.close()
 
 def message_window(message):
     """creates and shows a window with the message"""
@@ -403,12 +404,11 @@ def message_window(message):
     if ON_WINDOWS:
         win.attributes("-toolwindow", 1)
     win.title('Details')
-    white = '#ffffff'
     message = message.replace('\r\n', '\n')
     text = tk.Text(win)
     text.insert(tk.INSERT, message)
     text['state'] = tk.DISABLED
-    text.pack(expand=1,fill='both')
+    text.pack(expand=1, fill='both')
     text.focus_set()
 
 class PytddmonFrame(tk.Frame):
@@ -419,7 +419,7 @@ class PytddmonFrame(tk.Frame):
         self.button = None
         self.TEST_MODE = test_mode
         self.master.title("pytddmon")
-        self.master.resizable(0,0)
+        self.master.resizable(0, 0)
         self.create_button()
         self.grid()
         self.failures = 0
@@ -454,11 +454,14 @@ class PytddmonFrame(tk.Frame):
         }
         self.look_for_changes()
 
-    def compute_checksum(self):
+    @staticmethod
+    def compute_checksum():
         """returns the checksum for all the sourcefiles as a single integer."""
         files = glob.glob('*.py')
-        try: files.remove(RUN_TESTS_SCRIPT_FILE)
-        except: pass
+        try:
+            files.remove(RUN_TESTS_SCRIPT_FILE)
+        except ValueError:
+            pass
         return calculate_checksum(files, RealFileInfo())
 
     def get_number_of_failures(self):
@@ -469,7 +472,8 @@ class PytddmonFrame(tk.Frame):
         self.num_tests = total
         return total - green
 
-    def clock_string(self):
+    @staticmethod
+    def clock_string():
         """Formating the time for better readability"""
         return strftime("%H:%M:%S", gmtime())
 
