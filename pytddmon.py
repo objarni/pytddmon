@@ -346,7 +346,7 @@ class FindTestFilesRecursively(object):
             ]
 
     def visit(self, _arg, dirname, names):
-        "helper function that findes modules that we think contains tests"
+        "helper function that finds modules that we think contains tests"
         self.files.extend([
             os.path.join(dirname, name)
             for name in names
@@ -374,7 +374,7 @@ class FindTestFilesRecursively(object):
 
 class FinderWithFixedFileSet(object):
     """
-    Module finder which always return the Static filelist submited to the 
+    Module finder which always return the Static filelist submitted to the 
     constructor.
     """
     def __init__(self, files):
@@ -432,7 +432,7 @@ class PytddmonFrame(tk.Frame):
     def __init__(self, root=None, files=None, test_mode=False):
         tk.Frame.__init__(self, root)
         self.button = None
-        self.TEST_MODE = test_mode
+        self.test_mode = test_mode
         self.master.title("pytddmon")
         self.master.resizable(0, 0)
         self.create_button()
@@ -523,7 +523,6 @@ class PytddmonFrame(tk.Frame):
     def update_gui(self):
         "Calls all update methods related to the gui"
         (green, total) = self.get_green_and_total()
-        prev_total = self.num_tests_prev
         self.update_gui_color(green, total)
         self.update_gui_text(green, total)
 
@@ -562,7 +561,7 @@ class PytddmonFrame(tk.Frame):
                     )
                 )
         self.update_gui()
-        if self.TEST_MODE:
+        if self.test_mode:
             file_h = open(TEST_MODE_LOG_FILE, "w")
             (green, total) = self.get_green_and_total()
             lines = [ 'green='+str(green), 'total='+str(total) ]
