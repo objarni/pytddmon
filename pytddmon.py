@@ -34,7 +34,6 @@ Neppord(Samuel Ytterbrink):
 '''
 
 import os
-import glob
 import sys
 import tempfile
 import atexit
@@ -188,12 +187,10 @@ class ColorPicker:
         if self.color != old_color:
             self.reset_pulse()
 
-def win_text(total_tests, passing_tests=0, prev_total_tests=0):
+def win_text(total_tests, passing_tests=0):
     """
-    Compiles the text to show in the message window.
-    This message is typically shown when clicking the main window.
+    The text shown in the main window.
     """
-
     return "%d/%d" % (passing_tests, total_tests)
 
 class ScriptWriter:
@@ -319,10 +316,10 @@ class RealFileInfo(object):
 def find_monitored_files():
     " Finds all python modules in current directory and subdirectories "
     monitored_files = []
-    for root, subFolders, files in os.walk("."):
-        for file in files:
-            if file.endswith('.py'):
-                monitored_file = os.path.join(root, file)
+    for path, _folders, files in os.walk("."):
+        for filename in files:
+            if filename.endswith('.py'):
+                monitored_file = os.path.join(path, filename)
                 monitored_files.append(monitored_file)
     return monitored_files
     
@@ -441,7 +438,7 @@ class PytddmonFrame(tk.Frame):
         self.create_button()
         self.grid()
         self.failures = 0
-        self.last_checksum = None # impoertent to be different from any number
+        self.last_checksum = None # important to be different from any number
         self.num_tests = 0
         self.num_tests_prev = 0
         self.num_tests_diff = 0
@@ -528,7 +525,7 @@ class PytddmonFrame(tk.Frame):
         (green, total) = self.get_green_and_total()
         prev_total = self.num_tests_prev
         self.update_gui_color(green, total)
-        self.update_gui_text(green, total, prev_total)
+        self.update_gui_text(green, total)
 
     def update_gui_color(self, green, total):
         """
@@ -542,12 +539,11 @@ class PytddmonFrame(tk.Frame):
         self.button.configure(bg=rgb, activebackground=rgb)
         self.configure(background=rgb)
 
-    def update_gui_text(self, green, total, prev_total):
+    def update_gui_text(self, green, total):
         "Updates the text of the Main GUI."
         txt = win_text(
             passing_tests=green,
-            total_tests=total,
-            prev_total_tests=prev_total
+            total_tests=total
             )
         self.button.configure(text=txt)
 
