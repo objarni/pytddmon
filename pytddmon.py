@@ -331,6 +331,17 @@ class RecursiveFinder(object):
     and end with .py.
     """
     def __init__(self):
+        pass
+        
+    def __call__(self):
+        finder = FindFilesRecursively()
+        return finder()
+
+class FindFilesRecursively(object):
+    """
+    Recursively search for files that look like tests.
+    """
+    def __init__(self):
         self.files = []
         os.path.walk(".", self.visit, None)
         self.files = [
