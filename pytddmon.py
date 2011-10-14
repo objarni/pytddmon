@@ -316,14 +316,6 @@ class RealFileInfo(object):
         """
         return hash(path)
 
-def find_modules():
-    """
-    Simple module finder.
-    this finder only look for files in the current directory that starts 
-    with test_ and ends with .py.
-    """
-    return glob.glob("test_*.py")
-
 class RecursiveFinder(object):
     """
     A test finder which look recursively for files in current folder and
