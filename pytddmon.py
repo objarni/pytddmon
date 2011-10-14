@@ -559,7 +559,7 @@ def filter_existing_files(files):
     return [f for f in files if os.path.exists(f)]
 
 def run():
-    """The main function: dose the basic initialisation and starts the program
+    """The main function: basic initialisation and start program
     """
     # Command line argument handling
     args = list(sys.argv[1:])
@@ -574,6 +574,7 @@ def run():
     root.wm_attributes("-topmost", 1)
     if ON_WINDOWS:
         root.attributes("-toolwindow", 1)
+        print("Minimize me!")
        
     # Create main window
     if len(filtered)>0:
