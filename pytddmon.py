@@ -30,6 +30,7 @@ Neppord(Samuel Ytterbrink):
     Print(".") will not screw up test-counting (it did before).
     Docstring support.
     Recursive discovery of tests.
+    Refactoring to increase Pylint score from 6 to 9.5 out of 10 (!).
 '''
 
 import os
@@ -70,7 +71,7 @@ TEST_MODE_LOG_FILE = 'pytddmon.log'
 def file_name_to_module(file_name):
     """
     
-    Converts filenames of files in packages to import frendly dot seperated paths.
+    Converts filenames of files in packages to import friendly dot separated paths.
 
     >>> print(file_name_to_module("pytddmon.pyw"))
     pytddmon
@@ -153,10 +154,12 @@ def calculate_checksum(filelist, fileinfo):
     return val
 
 class ColorPicker:
-    ''' ColorPicker decides the background color the pytddmon window,
-        based on the number of green tests, and the total number of
-        tests. Also, there is a "pulse" (light color, dark color),
-        to increase the feeling of continous testing.'''
+    """
+    ColorPicker decides the background color the pytddmon window,
+    based on the number of green tests, and the total number of
+    tests. Also, there is a "pulse" (light color, dark color),
+    to increase the feeling of continous testing.
+    """
 
     def __init__(self):
         self.color = 'green'
@@ -175,7 +178,7 @@ class ColorPicker:
         self.light = True
 
     def set_result(self, green, total):
-        "calculates what colure should be used and may reset the lightnes"
+        "calculates what color should be used and may reset the lightness"
         old_color = self.color
         self.color = 'green'
         if green == total-1:
@@ -187,17 +190,17 @@ class ColorPicker:
 
 def win_text(total_tests, passing_tests=0, prev_total_tests=0):
     """
-        Compiles the text to show in the message window.
-        This message is typicaly shown when clicking the main window.
+    Compiles the text to show in the message window.
+    This message is typically shown when clicking the main window.
     """
 
     return "%d/%d" % (passing_tests, total_tests)
 
 class ScriptWriter:
-    '''
+    """
     ScriptWriter: gets it's modules from the Finder, and
     writes a test script using the FileWriter+script_builder
-    '''
+    """
     def __init__(self, finder, file_writer, script_builder):
         self.finder = finder
         self.file_writer = file_writer
@@ -214,11 +217,11 @@ class ScriptWriter:
         self.file_writer.write_file(RUN_TESTS_SCRIPT_FILE, result)
 
 class TestScriptRunner:
-    ''' TestScriptRunner -
-      Collaborators:
-       cmdrunner, runs a specified command line, returns stderr as string
-       Analyzer, analyses unittest-output into green,total number of tests
-    '''
+    """
+    TestScriptRunner has two collaborators:
+    cmdrunner, runs a specified command line, returns stderr as string
+    analyzer, analyses unittest-output into green,total number of tests
+    """
     def __init__(self, cmdrunner, analyzer):
         self.cmdrunner = cmdrunner
         self.analyzer = analyzer
@@ -231,11 +234,11 @@ class TestScriptRunner:
         return self.analyzer.analyze(output)
 
 class Analyzer:
-    '''
+    """
     Analyzer
-    Analyserar unittest-output efter gröna test, och antal test.
-    Medarbetare: Log, dit loggmeddelande skrivs.
-    '''
+    Analyzes unittest output to find green and total number of tests.
+    Collaborators: logger, log messages a written to the log
+    """
     def __init__(self, logger):
         self.logger = logger
 
@@ -254,7 +257,9 @@ class Analyzer:
         return (green, total)
 
 class Logger:
-    ''' Logger, remembers log messages.'''
+    """
+    Logger, remembers log messages.
+    """
 
     def __init__(self):
         self.complete_log = ""
@@ -312,16 +317,18 @@ class RealFileInfo(object):
         return hash(path)
 
 def find_modules():
-    """Simple module finder.
+    """
+    Simple module finder.
     this finder only look for files in the current directory that starts 
-    with test_ and ends with .py."""
+    with test_ and ends with .py.
+    """
     return glob.glob("test_*.py")
 
 class RecursiveFinder(object):
     """
-       A test finder which look recursevly for files in current folder and in 
-       folders which are packages. The files needs to start with test_ and
-       end with .py.
+    A test finder which look recursively for files in current folder and
+    in folders which are packages. The files needs to start with test_
+    and end with .py.
     """
     def __init__(self):
         self.files = []
@@ -359,14 +366,14 @@ class RecursiveFinder(object):
 
 class FinderWithFixedFileSet(object):
     """
-        Module finder which always return the Static filelist submited to the 
-        constructor.
+    Module finder which always return the Static filelist submited to the 
+    constructor.
     """
     def __init__(self, files):
         self.files = files
 
     def __call__(self):
-        "returns modules that was submited to the constructor."
+        "returns modules that was submitted to the constructor."
         return self.files
 
 def safe_remove(path):
@@ -377,7 +384,7 @@ def safe_remove(path):
         pass
 
 def run_cmdline(cmdline):
-    """runs a cmd and returns its output"""
+    "runs a cmd and returns its output"
     lst = shlex.split(cmdline)
     use_shell = True if ON_WINDOWS else False
     cmd = Popen(lst, stdout=PIPE, stderr=STDOUT, shell=use_shell)
@@ -398,7 +405,7 @@ class FileWriter(object):
         f_hand.close()
 
 def message_window(message):
-    """creates and shows a window with the message"""
+    "creates and shows a window with the message"
     win = tk.Toplevel()
     win.wm_attributes("-topmost", 1)
     if ON_WINDOWS:
@@ -412,7 +419,7 @@ def message_window(message):
     text.focus_set()
 
 class PytddmonFrame(tk.Frame):
-    """The Main GUI of pytddmon"""
+    "The Main GUI of pytddmon"
 
     def __init__(self, root=None, files=None, test_mode=False):
         tk.Frame.__init__(self, root)
@@ -456,7 +463,7 @@ class PytddmonFrame(tk.Frame):
 
     @staticmethod
     def compute_checksum():
-        """returns the checksum for all the sourcefiles as a single integer."""
+        "returns the checksum for all the sourcefiles as a single integer."
         files = glob.glob('*.py')
         try:
             files.remove(RUN_TESTS_SCRIPT_FILE)
@@ -474,11 +481,11 @@ class PytddmonFrame(tk.Frame):
 
     @staticmethod
     def clock_string():
-        """Formating the time for better readability"""
+        "Formating the time for better readability"
         return strftime("%H:%M:%S", gmtime())
 
     def create_button(self):
-        """Initialize the Button lable."""
+        "Initialize the Button label."
         button_width = 8
         if not ON_WINDOWS:
             # Hack: Window title cut if button too small!
@@ -494,25 +501,29 @@ class PytddmonFrame(tk.Frame):
         self.button.pack(expand=1, fill='both')
 
     def button_clicked(self, _widget):
-        """Event method triggerd if the button is clicked."""
+        "Event method triggerd if the button is clicked."
         msg = "Monitoring: %s\n%s" % (self.monitoring, self.logger.get_log())
         message_window(msg)
         
     def get_green_and_total(self):
-        """calculate the green results and returns that together with the 
-        total of tests as a tuple."""
+        """
+        Calculate the green results and returns that together with the 
+        total of tests as a tuple.
+        """
         return (self.num_tests-self.failures, self.num_tests)
 
     def update_gui(self):
-        """Calls all update methods related to the gui"""
+        "Calls all update methods related to the gui"
         (green, total) = self.get_green_and_total()
         prev_total = self.num_tests_prev
         self.update_gui_color(green, total)
         self.update_gui_text(green, total, prev_total)
 
     def update_gui_color(self, green, total):
-        """Calculates the new backgroundcolure and tells the GUI to switch to 
-        it."""
+        """
+        Calculates the new background color and tells the GUI to switch
+        to it.
+        """
         self.color_picker.set_result( green, total )
         (light, color) = self.color_picker.pick()
         self.color_picker.pulse()
@@ -521,7 +532,7 @@ class PytddmonFrame(tk.Frame):
         self.configure(background=rgb)
 
     def update_gui_text(self, green, total, prev_total):
-        """Updates the text of the Main GUI."""
+        "Updates the text of the Main GUI."
         txt = win_text(
             passing_tests=green,
             total_tests=total,
@@ -530,7 +541,7 @@ class PytddmonFrame(tk.Frame):
         self.button.configure(text=txt)
 
     def look_for_changes(self):
-        """Looking for changes in source files and runns tests if needed."""
+        "Look for changes in source files and runs tests if needed."
         newval = self.compute_checksum()
         if newval != self.last_checksum:
             self.last_checksum = newval
@@ -555,11 +566,12 @@ class PytddmonFrame(tk.Frame):
             self.after(750, self.look_for_changes)
 
 def filter_existing_files(files):
-    """simple filtering function checking for existence of files"""
+    "simple filtering function checking for existence of files"
     return [f for f in files if os.path.exists(f)]
 
 def run():
-    """The main function: basic initialisation and start program
+    """
+    The main function: basic initialization and program start
     """
     # Command line argument handling
     args = list(sys.argv[1:])
