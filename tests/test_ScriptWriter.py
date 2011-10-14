@@ -18,14 +18,14 @@ class test_ScriptWriter(unittest.TestCase):
 			self.received_modules = modules
 			return self.build_script_from_modules_returns
 			
-	class FakeFileWriter:
-		def write_file(self, filename, content):
+	class FakeWriteFile:
+		def __call__(self, filename, content):
 			self.received_content = content
 			self.received_filename = filename
 			
 	def setUp(self):
 		self.fake_finder = self.FakeFinder()
-		self.fake_file_writer = self.FakeFileWriter()
+		self.fake_file_writer = self.FakeWriteFile()
 		self.fake_script_builder = self.FakeScriptBuilder()
 		self.script_writer = ScriptWriter(
 			self.fake_finder,

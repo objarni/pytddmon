@@ -196,7 +196,8 @@ def win_text(total_tests, passing_tests=0):
 class ScriptWriter:
     """
     ScriptWriter: gets it's modules from the Finder, and
-    writes a test script using the FileWriter+script_builder
+    writes a test script using the file writer and script
+    builder.
     """
     def __init__(self, finder, file_writer, script_builder):
         self.finder = finder
@@ -211,7 +212,7 @@ class ScriptWriter:
         """
         modules = self.finder()
         result = self.script_builder(modules)
-        self.file_writer.write_file(RUN_TESTS_SCRIPT_FILE, result)
+        self.file_writer(RUN_TESTS_SCRIPT_FILE, result)
 
 class TestScriptRunner:
     """
@@ -405,12 +406,14 @@ def run_cmdline(cmdline):
     else:
         return output
 
-class FileWriter(object):
-    @staticmethod
-    def write_file(filename, content):
-        f_hand = open(filename, 'w')
-        f_hand.write(content)
-        f_hand.close()
+def write_file(filename, content):
+    """
+    Writes a string of text to a file, overwriting
+    any previous file with the same name.
+    """
+    f_hand = open(filename, 'w')
+    f_hand.write(content)
+    f_hand.close()
 
 def message_window(message):
     "creates and shows a window with the message"
@@ -456,7 +459,7 @@ class PytddmonFrame(tk.Frame):
 
         self.script_writer = ScriptWriter(
             finder, 
-            FileWriter(), 
+            write_file, 
             build_run_script
         )
         self.color_table = {
