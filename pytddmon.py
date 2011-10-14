@@ -316,10 +316,22 @@ class RealFileInfo(object):
         """
         return hash(path)
 
+def find_monitored_files():
+    " Finds all python modules in current directory and subdirectories "
+    monitored_files = []
+    for root, subFolders, files in os.walk("."):
+        for file in files:
+            if file.endswith('.py'):
+                monitored_file = os.path.join(root, file)
+                monitored_files.append(monitored_file)
+    return monitored_files
+    
 def find_test_files_recursively():
     """
-    Look recursively for files in current folder and in folders which are packages,The files needs to start with test_
-    and end with .py.
+    Look recursively for files in current folder and in folders
+    which are packages. The files needs to start with test_
+    and end with .py, and the packages need to have 'test'
+    somewhere in their name.
     """
     finder = FindTestFilesRecursively()
     return finder()
@@ -462,7 +474,7 @@ class PytddmonFrame(tk.Frame):
     @staticmethod
     def compute_checksum():
         "returns the checksum for all the sourcefiles as a single integer."
-        files = glob.glob('*.py')
+        files = find_monitored_files()
         try:
             files.remove(RUN_TESTS_SCRIPT_FILE)
         except ValueError:
