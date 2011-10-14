@@ -373,17 +373,15 @@ class FindTestFilesRecursively(object):
         "returns modules that we think contains tests"
         return self.files
 
-class FinderWithFixedFileSet(object):
+def finder_with_fixed_fileset(fileset):
     """
-    Module finder which always return the Static filelist submitted to the 
-    constructor.
+    Module finder which always returns the
+    same file list.
     """
-    def __init__(self, files):
-        self.files = files
-
-    def __call__(self):
-        "returns modules that was submitted to the constructor."
-        return self.files
+    def find():
+        "returns the sent-in file set"
+        return fileset
+    return find
 
 def safe_remove(path):
     "removes path and ignores all exceptions."
@@ -453,7 +451,7 @@ class PytddmonFrame(tk.Frame):
         finder = None
         if files != None:
             self.monitoring = ' '.join(files)
-            finder = FinderWithFixedFileSet(files)
+            finder = finder_with_fixed_fileset(files)
         else:
             finder = find_test_files_recursively
 
