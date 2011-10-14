@@ -334,10 +334,10 @@ class RecursiveFinder(object):
         pass
         
     def __call__(self):
-        finder = FindFilesRecursively()
+        finder = FindTestFilesRecursively()
         return finder()
 
-class FindFilesRecursively(object):
+class FindTestFilesRecursively(object):
     """
     Recursively search for files that look like tests.
     """
@@ -597,7 +597,8 @@ def run():
     root.wm_attributes("-topmost", 1)
     if ON_WINDOWS:
         root.attributes("-toolwindow", 1)
-        print("Minimize me!")
+        if not test_mode:
+            print("Minimize me!")
        
     # Create main window
     if len(filtered)>0:
