@@ -316,18 +316,13 @@ class RealFileInfo(object):
         """
         return hash(path)
 
-class RecursiveFinder(object):
+def find_test_files_recursively():
     """
-    A test finder which look recursively for files in current folder and
-    in folders which are packages. The files needs to start with test_
+    Look recursively for files in current folder and in folders which are packages,The files needs to start with test_
     and end with .py.
     """
-    def __init__(self):
-        pass
-        
-    def __call__(self):
-        finder = FindTestFilesRecursively()
-        return finder()
+    finder = FindTestFilesRecursively()
+    return finder()
 
 class FindTestFilesRecursively(object):
     """
@@ -447,7 +442,7 @@ class PytddmonFrame(tk.Frame):
             self.monitoring = ' '.join(files)
             finder = FinderWithFixedFileSet(files)
         else:
-            finder = RecursiveFinder()
+            finder = find_test_files_recursively
 
         self.script_writer = ScriptWriter(
             finder, 
