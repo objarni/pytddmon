@@ -328,10 +328,11 @@ def find_monitored_files():
     
 def find_test_files_recursively():
     """
-    Look recursively for files in current folder and in folders
-    which are packages. The files needs to start with test_
-    and end with .py, and the packages need to have 'test'
-    somewhere in their name.
+    Scan recursively for unit test files in current folder
+    and in folders which are packages. Packages are assumed
+    to contain the word 'test'. The same holds true for unit
+    test files, with the additional condition that they are
+    assumed to end with '.py'.
     """
     finder = FindTestFilesRecursively()
     return finder()
