@@ -39,6 +39,7 @@ import tempfile
 import atexit
 import shlex
 import platform
+import optparse
 
 from time import gmtime, strftime
 from subprocess import Popen, PIPE, STDOUT
@@ -576,17 +577,23 @@ def filter_existing_files(files):
     "simple filtering function checking for existence of files"
     return [f for f in files if os.path.exists(f)]
 
+def parse_commandline():
+    """
+    returns (files, test_mode) created from the command line arguments
+    passed to pytddmon.
+    """
+    parser = optparse.OptionParser()
+    parser.add_option("--log-and-exit", action="store_true", default=False)
+    (options, args) = parser.parse_args()
+    return (args, options.log_and_exit)
+
 def run():
     """
     The main function: basic initialization and program start
     """
     # Command line argument handling
-    args = list(sys.argv[1:])
-    test_mode = False
-    if TEST_MODE_FLAG in args:
-        test_mode = True
-        args.remove(TEST_MODE_FLAG)
-    filtered = filter_existing_files(args)
+    (static_file_set, test_mode) = parse_commandline()
+    static_file_set = filter_existing_files(static_file_set)
     
     # Basic tkinter initialization
     root = tk.Tk()
@@ -597,8 +604,8 @@ def run():
             print("Minimize me!")
        
     # Create main window
-    if len(filtered)>0:
-        PytddmonFrame(root, filtered, test_mode=test_mode)
+    if len(static_file_set)>0:
+        PytddmonFrame(root, static_file_set, test_mode=test_mode)
     else:
         PytddmonFrame(root, test_mode=test_mode)
 
