@@ -68,8 +68,8 @@ TEST_MODE_LOG_FILE = 'pytddmon.log'
 
 # End of Constants
 
-def file_name_to_module(base_dir, file_name):
-    """Converts filenames of files in packages to import friendly dot separated
+def file_name_to_module(base_path, file_name):
+    r"""Converts filenames of files in packages to import friendly dot separated
     paths.
 
     Examples:
@@ -81,11 +81,12 @@ def file_name_to_module(base_dir, file_name):
     tests.pytddmon
     >>> print(file_name_to_module("","./tests/pytddmon.py"))
     tests.pytddmon
-    >>> print(file_name_to_module("",".\\\\tests\\\\pytddmon.py"))
+    >>> print(file_name_to_module("",".\\tests\\pytddmon.py"))
+    tests.pytddmon
+    >>> print(file_name_to_module("/User/pytddmon\\ geek/pytddmon/","/User/pytddmon\\ geek/pytddmon/tests/pytddmon.py"))
     tests.pytddmon
     """
-    
-    symbol_stripped = file_name
+    symbol_stripped = os.path.relpath(file_name, base_path)
     for symbol in r"/\.":
         symbol_stripped = symbol_stripped.replace(symbol, " ")
     words = symbol_stripped.split()
