@@ -68,22 +68,23 @@ TEST_MODE_LOG_FILE = 'pytddmon.log'
 
 # End of Constants
 
-def file_name_to_module(file_name):
+def file_name_to_module(base_dir, file_name):
+    """Converts filenames of files in packages to import friendly dot separated
+    paths.
+
+    Examples:
+    >>> print(file_name_to_module("","pytddmon.pyw"))
+    pytddmon
+    >>> print(file_name_to_module("","pytddmon.py"))
+    pytddmon
+    >>> print(file_name_to_module("","tests/pytddmon.py"))
+    tests.pytddmon
+    >>> print(file_name_to_module("","./tests/pytddmon.py"))
+    tests.pytddmon
+    >>> print(file_name_to_module("",".\\\\tests\\\\pytddmon.py"))
+    tests.pytddmon
     """
     
-    Converts filenames of files in packages to import friendly dot separated paths.
-
-    >>> print(file_name_to_module("pytddmon.pyw"))
-    pytddmon
-    >>> print(file_name_to_module("pytddmon.py"))
-    pytddmon
-    >>> print(file_name_to_module("tests/pytddmon.py"))
-    tests.pytddmon
-    >>> print(file_name_to_module("./tests/pytddmon.py"))
-    tests.pytddmon
-    >>> print(file_name_to_module(".\\\\tests\\\\pytddmon.py"))
-    tests.pytddmon
-    """
     symbol_stripped = file_name
     for symbol in r"/\.":
         symbol_stripped = symbol_stripped.replace(symbol, " ")
@@ -123,7 +124,7 @@ def build_run_script(files):
     content.append("")
 
     for filename in files:
-        module = file_name_to_module(filename)
+        module = file_name_to_module("", filename)
         content.append('import ' + module)
         content.append('suite.addTests(load_module_tests(' + module + '))')
         content.append('try:')
