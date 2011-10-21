@@ -36,8 +36,8 @@ Rafael Capucho:
     Python shebang at start of script, enabling "./pytddmon.py" on unix systems
 '''
 
-"echo" "run with python"
-"exit" "-1" #shell scripts will quit here.
+"pyhton" "$0"
+"exit" #shell scripts will quit here.
 
 import os
 import sys
