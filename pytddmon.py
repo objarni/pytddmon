@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 #coding: utf-8
 
 '''
@@ -31,7 +32,12 @@ Neppord(Samuel Ytterbrink):
     Docstring support.
     Recursive discovery of tests.
     Refactoring to increase Pylint score from 6 to 9.5 out of 10 (!).
+Rafael Capucho:
+    Python shebang at start of script, enabling "./pytddmon.py" on unix systems
 '''
+
+"echo" "run with python"
+"exit" #shell scripts will quit here.
 
 import os
 import sys
@@ -138,7 +144,7 @@ def build_run_script(files):
         content.append('')
     
     content.append("if __name__ == '__main__':")
-    content.append("    out = file(%r, 'w')" % TEMP_OUT_FILE_NAME)
+    content.append("    out = open(%r, 'w')" % TEMP_OUT_FILE_NAME)
     content.append("    unittest.TextTestRunner(stream=out).run(suite)")
 
     return "\n".join(content)
@@ -403,7 +409,7 @@ def run_cmdline(cmdline):
     cmd = Popen(lst, stdout=PIPE, stderr=STDOUT, shell=use_shell)
     output = cmd.communicate()[0]
     if os.path.exists(TEMP_OUT_FILE_NAME):
-        output = file(TEMP_OUT_FILE_NAME).read()
+        output = open(TEMP_OUT_FILE_NAME).read()
         os.remove(TEMP_OUT_FILE_NAME)
     if ON_PYTHON3:
         return str(output, 'utf-8')
