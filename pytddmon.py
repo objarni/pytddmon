@@ -37,7 +37,7 @@ Rafael Capucho:
 '''
 
 "echo" "run with python"
-"exit" #shell scripts will quit here.
+"exit" "-1" #shell scripts will quit here.
 
 import os
 import sys
