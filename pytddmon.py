@@ -32,6 +32,8 @@ Neppord(Samuel Ytterbrink):
     Docstring support.
     Recursive discovery of tests.
     Refactoring to increase Pylint score from 6 to 9.5 out of 10 (!).
+Rafael Capucho:
+    Python shebang at start of script, enabling "./pytddmon.py" on unix systems
 '''
 
 import os
