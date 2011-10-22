@@ -75,8 +75,10 @@ TEST_FILE_REGEXP = "test_.*\\.py"
 PYTHON_FILE_REGEXP = ".*\\.py"
 
 def re_complete_match(regexp, string_to_match):
+    """Helper function that does a regexp check if the full string_to_match
+    matches the regexp"""
     match = re.match(regexp, string_to_match)
-    if match==None:
+    if match == None:
         return False
     elif match.end() == len(string_to_match):
         return True
@@ -112,9 +114,7 @@ def file_name_to_module(base_path, file_name):
     return module_name
 
 def build_run_script(files):
-    """
-    
-    Compiles a script to run all tests in the files.
+    """Compiles a script to run all tests in the files.
 
     >>> print(build_run_script(["pytddmon.py"]))
     import sys
@@ -161,11 +161,7 @@ def build_run_script(files):
     return "\n".join(content)
 
 def calculate_checksum(filelist, fileinfo):
-    """
-
-    Generates a checksum for all the files in the file list.
-
-    """
+    """Generates a checksum for all the files in the file list."""
     val = 0
     for filename in filelist:
         val += (
@@ -361,12 +357,13 @@ def find_test_files_recursively():
             if re_complete_match(TEST_FILE_REGEXP, filename):
                 test_file = os.path.join(path, filename)
                 test_files.append(test_file)
-        folders[:] = filter(
-            lambda folder:os.path.isfile(
+        folders[:] = [
+            folder
+            for folder in folders
+            if os.path.isfile(
                 os.path.join(path, folder, "__init__.py")
-            ), 
-            folders
-        )
+            )
+        ]
     return test_files
 
 def finder_with_fixed_fileset(fileset):
