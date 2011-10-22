@@ -46,6 +46,7 @@ import atexit
 import shlex
 import platform
 import optparse
+import re
 
 from time import gmtime, strftime
 from subprocess import Popen, PIPE, STDOUT
@@ -70,7 +71,17 @@ TEMP_OUT_FILE_NAME = os.path.join(TEMP_FILE_DIR_NAME, "out")
 # 3. exit
 TEST_MODE_FLAG = '--log-and-exit'
 TEST_MODE_LOG_FILE = 'pytddmon.log'
+TEST_FILE_REGEXP = "test_.*\\.py"
+PYTHON_FILE_REGEXP = ".*\\.py"
 
+def re_complete_match(regexp, string_to_match):
+    match = re.match(regexp, string_to_match)
+    if match==None:
+        return False
+    elif match.end() == len(string_to_match):
+        return True
+    else:
+        return False
 
 # End of Constants
 
@@ -331,7 +342,7 @@ def find_monitored_files():
     monitored_files = []
     for path, _folders, files in os.walk("."):
         for filename in files:
-            if filename.endswith('.py'):
+            if re_complete_match(PYTHON_FILE_REGEXP, filename):
                 monitored_file = os.path.join(path, filename)
                 monitored_files.append(monitored_file)
     return monitored_files
@@ -344,46 +355,19 @@ def find_test_files_recursively():
     test files, with the additional condition that they are
     assumed to end with '.py'.
     """
-    finder = FindTestFilesRecursively()
-    return finder()
-
-class FindTestFilesRecursively(object):
-    """
-    Recursively search for files that look like tests.
-    """
-    def __init__(self):
-        self.files = []
-        os.path.walk(".", self.visit, None)
-        self.files = [
-            filename for filename in self.files if os.path.isfile(filename)
-            ]
-
-    def visit(self, _arg, dirname, names):
-        "helper function that finds modules that we think contains tests"
-        self.files.extend([
-            os.path.join(dirname, name)
-            for name in names
-            if "test" in name and name[-3:] == ".py"
-        ])
-        dirs = [
-            (dir_path, os.path.join(dirname, dir_path))
-            for dir_path in names
-        ]
-        dirs = [
-            (dir_path, long_path, os.path.join(long_path, "__init__.py"))
-            for dir_path, long_path in dirs
-        ]
-        dirs = [
-            dir_path
-            for dir_path, long_path, init in dirs
-            if os.path.isdir(long_path) and not os.path.isfile(init)
-        ]
-        for dir_path in dirs:
-            names.remove(dir_path)
-
-    def __call__(self):
-        "returns modules that we think contains tests"
-        return self.files
+    test_files = []
+    for path, folders, files in os.walk("."):
+        for filename in files:
+            if re_complete_match(TEST_FILE_REGEXP, filename):
+                test_file = os.path.join(path, filename)
+                test_files.append(test_file)
+        folders[:] = filter(
+            lambda folder:os.path.isfile(
+                os.path.join(path, folder, "__init__.py")
+            ), 
+            folders
+        )
+    return test_files
 
 def finder_with_fixed_fileset(fileset):
     """

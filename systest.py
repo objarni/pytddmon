@@ -1,4 +1,6 @@
-﻿import os
+﻿#! /usr/bin/env python
+#coding: utf-8
+import os
 import subprocess
 
 def get_log_as_dictionary(path):
