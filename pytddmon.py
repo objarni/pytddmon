@@ -77,14 +77,7 @@ PYTHON_FILE_REGEXP = ".*\\.py"
 def re_complete_match(regexp, string_to_match):
     """Helper function that does a regexp check if the full string_to_match
     matches the regexp"""
-    match = re.match(regexp, string_to_match)
-    if match == None:
-        return False
-    elif match.end() == len(string_to_match):
-        return True
-    else:
-        return False
-
+    return bool(re.match(regexp+"$", string_to_match))
 # End of Constants
 
 def file_name_to_module(base_path, file_name):
