@@ -382,10 +382,7 @@ def run_cmdline(cmdline):
     if os.path.exists(TEMP_OUT_FILE_NAME):
         output = open(TEMP_OUT_FILE_NAME).read()
         os.remove(TEMP_OUT_FILE_NAME)
-    if ON_PYTHON3:
-        return str(output, 'utf-8')
-    else:
-        return output
+    return output
 
 def write_file(filename, content):
     """
