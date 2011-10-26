@@ -562,7 +562,11 @@ def parse_commandline():
     passed to pytddmon.
     """
     parser = optparse.OptionParser()
-    parser.add_option("--log-and-exit", action="store_true", default=False)
+    parser.add_option(
+        "--log-and-exit",
+        action="store_true",
+        default=False,
+        help='Run all tests, write the results to "' + TEST_MODE_LOG_FILE + '" and exit.')
     (options, args) = parser.parse_args()
     return (args, options.log_and_exit)
 
