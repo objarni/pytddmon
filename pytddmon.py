@@ -66,16 +66,156 @@ TEMP_OUT_FILE_NAME = os.path.join(TEMP_FILE_DIR_NAME, "out")
 # 2. write a log file, containing the information displayed 
 #    (most notably green/total)
 # 3. exit
-TEST_MODE_FLAG = '--log-and-exit'
 TEST_MODE_LOG_FILE = 'pytddmon.log'
 TEST_FILE_REGEXP = "test_.*\\.py"
 PYTHON_FILE_REGEXP = ".*\\.py"
+
+# End of Constants
+
+# Start of Classes
+class Pytddmon(object):
+    """The core class, all functionality are agregated and lives inside this 
+    class."""
+    def __init__(self, file_strategies=None, test_strategies=None):
+        # The different ways pytddmon can find changes to a project
+        self.file_strategies = (
+            file_strategies if file_strategies != None else []
+        )
+        # The different ways pytddmon can find tests and run them
+        self.test_strategies = (
+            test_strategies if test_strategies != None else []
+        )
+        self.total_tests_run = 0
+        self.total_tests_passed = 0
+        self.last_testrun_time = 0
+        self.test_loggs = []
+        self.changed_files = []
+
+    def which_files_has_changed(self):
+        """Returns list of changed files."""
+        self.changed_files = []
+        for file_strategy in self.file_strategies:
+            self.changed_files.extend(file_strategy.which_files_has_changed())
+        return self.changed_files
+
+    def run_tests(self, file_paths=None):
+        """Runns all tests and updates the time it took and the total test run
+        and passed."""
+        import time
+        file_paths = file_paths if file_paths != None else []
+        start = time.time()
+        self.total_tests_run = 0
+        self.total_tests_passed = 0
+        self.test_loggs = []
+        for test_strategy in self.test_strategies:
+            tests_run, passed, log = test_strategy.run_tests(file_paths)
+            self.total_tests_run += tests_run
+            self.total_tests_passed += passed
+            self.test_loggs.append(log)
+        self.last_testrun_time = time.time() - start
+
+    def main(self):
+        """This is the main loop body"""
+        file_paths = self.which_files_has_changed()
+        if file_paths != []:
+            self.run_tests(file_paths)
+
+    def get_loggs(self):
+        """Creates a readabel log of the all test strategies run""" 
+        return "===next_test_startegy===\n".join(self.test_loggs)
+
+class DefaultHasher(object):
+    """A simple hasher which takes the size and the modified time and returns
+    them xor-ed together."""
+    def __init__(self, os_module):
+        self.os_module = os_module
+    def __call__(self, file_path):
+        """Se Class description."""
+        stat = self.os_module.stat(file_path)
+        return stat.st_size ^ stat.st_mtime
+        
+
+class StaticFileStartegy(object):
+    """Looks for changeds in a static set of files."""
+    def __init__(self, hasher, file_paths):
+        self.file_paths = [
+            os.path.abspath(file_path) for file_path in file_paths
+        ]
+        self.last_hash = [-1] * len(self.file_paths)
+        self.hasher = hasher
+
+    def which_files_has_changed(self):
+        """Looks through all file paths and return which of them has changed."""
+        file_paths_to_return = []
+        hashes = self.hash_files()
+        iteration = zip(self.last_hash, hashes, self.file_paths)
+        for old_hash, new_hash, file_path in iteration:
+            if old_hash != new_hash:
+                file_paths_to_return.append(file_path)
+        self.last_hash = hashes
+        return file_paths_to_return
+
+    def hash_files(self):
+        """Helper method to hash all files."""
+        return [
+            self.hasher(file_path)
+            for file_path in self.file_paths
+        ]
+
+class RecursiveRegexpFileStartegy(object):
+    """Looks for files recursivly from a root dir with a specific regexp
+    pattern."""
+    def __init__(self, hasher, root, expr):
+        self.hasher = hasher
+        self.root = os.path.abspath(root)
+        self.expr = expr
+        self.pares = []
+
+    def get_pares(self):
+        """calculates the new list of pares (path, hash)"""
+        file_paths = set()
+        for path, _folder, filenames in os.walk(self.root):
+            for filename in filenames:
+                if re_complete_match(self.expr, filename):
+                    file_paths.add(
+                        os.path.abspath(os.path.join(path, filename))
+                    )
+        return [(file_path, self.hasher(file_path)) for file_path in file_paths]
+
+    def which_files_has_changed(self):
+        """Looks for files recursivly from a root dir with a specific regexp"""
+        paths = []
+        new_pares = self.get_pares()
+        new_pares.sort()
+        new = iter(new_pares)
+        old = iter(self.pares)
+        try:
+            new_path, new_hash = new.next()
+            old_path, old_hash = old.next()
+            while True:
+                if new_path == old_path and new_hash == old_hash:
+                    new_path, new_hash = new.next()
+                    old_path, old_hash = old.next()
+                elif new_path != old_path:
+                    if new_path < old_path:
+                        paths.append(new_path)
+                        new_path, new_hash = new.next()
+                    else:
+                        paths.append(old_path)
+                        old_path, old_hash = old.next()
+                else:
+                    paths.append(new_path)
+                    new_path, new_hash = new.next()
+                    old_path, old_hash = old.next()
+        except StopIteration:
+            paths += [path for path in new] + [path for path in old]
+        self.pares = new_pares
+        return paths
 
 def re_complete_match(regexp, string_to_match):
     """Helper function that does a regexp check if the full string_to_match
     matches the regexp"""
     return bool(re.match(regexp+"$", string_to_match))
-# End of Constants
 
 def file_name_to_module(base_path, file_name):
     r"""Converts filenames of files in packages to import friendly dot separated
