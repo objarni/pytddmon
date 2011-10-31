@@ -20,7 +20,7 @@ class test_calculate_checksum(unittest.TestCase):
     def tearDown(self):
         val2 = calculate_checksum(["somefile.py"], self.fileinfo_fake)
         change_detected = val2 != self.val1
-        assert change_detected
+        assert change_detected, "%r, %r" % (self.val1, val2)
         
     def test_modified_time_changed(self):
         self.fileinfo_fake.fake_time = 3123213

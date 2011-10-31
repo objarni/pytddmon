@@ -126,13 +126,13 @@ class Pytddmon(object):
 
 class DefaultHasher(object):
     """A simple hasher which takes the size and the modified time and returns
-    them xor-ed together."""
+    a checksum."""
     def __init__(self, os_module):
         self.os_module = os_module
     def __call__(self, file_path):
         """Se Class description."""
         stat = self.os_module.stat(file_path)
-        return stat.st_size ^ stat.st_mtime
+        return stat.st_size + (stat.st_mtime * 1j)
         
 
 class StaticFileStartegy(object):
@@ -301,7 +301,7 @@ def calculate_checksum(filelist, fileinfo):
     for filename in filelist:
         val += (
             fileinfo.get_modified_time(filename) +
-            fileinfo.get_size(filename) +
+            (fileinfo.get_size(filename) * 1j) +
             fileinfo.get_name_hash(filename)
             )
     return val
