@@ -567,45 +567,51 @@ def run():
     """
     The main function: basic initialization and program start
     """
+    import sys
+    import os
+    sys.path[:0] = [os.getcwd()]
     # Command line argument handling
     (static_file_set, test_mode) = parse_commandline()
-    static_file_set = filter_existing_files(static_file_set)
-    
-    # Basic tkinter initialization
-    root = tk.Tk()
-    root.wm_attributes("-topmost", 1)
-    if ON_WINDOWS:
-        root.attributes("-toolwindow", 1)
-        if not test_mode:
-            print("Minimize me!")
-       
-    # Create main window
-    if len(static_file_set)>0:
-        PytddmonFrame(root, static_file_set, test_mode=test_mode)
+    file_strategies = []
+    if static_file_set:
+        file_strategies.append(
+            StaticFileStartegy(
+                static_file_set
+            )
+        )
     else:
-        PytddmonFrame(root, test_mode=test_mode)
-
-    # Main loop
-    try:
-        root.mainloop()
-    except Exception as exception:
-        print(exception)
-
-if __name__ == '__main__':
-    #run()
-    pytddmon = Pytddmon(
-        file_strategies=[
+        file_strategies.append(
             RecursiveGlobFileStartegy(
                 root=".",
                 expr="*.py"
             )
-        ],
-        test_strategies=[
-            RecursiveRegexpTestStartegy(
-                root=".",
-                expr="test_.*\\.py"
-            )
-        ]
-    )
-    build_tk_gui(pytddmon)
+        )
+    test_strategies = []
 
+    test_strategies.append(
+        RecursiveRegexpTestStartegy(
+            root=".",
+            expr="test_.*\\.py"
+        )
+    )
+
+    pytddmon = Pytddmon(
+        project_name=os.path.basename(os.getcwd()),
+        file_strategies=file_strategies,
+        test_strategies=test_strategies
+    )
+    if test_mode:
+        pytddmon.main()
+        with open("pytddmon.log", "w") as log_file:
+            log_file.write(
+                "green=%d\ntotal=%d\n" % (
+                    pytddmon.total_tests_passed,
+                    pytddmon.total_tests_run
+                ) 
+            )
+    else:
+        build_tk_gui(pytddmon)
+        
+
+if __name__ == '__main__':
+    run()
