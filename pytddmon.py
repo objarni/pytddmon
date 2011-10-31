@@ -112,7 +112,7 @@ class Pytddmon(object):
         self.total_tests_passed = 0
         self.test_loggs = []
         for test_strategy in self.test_strategies:
-            tests_run, passed, log = test_strategy.run_tests(file_paths)
+            passed, tests_run, log = test_strategy.run_tests(file_paths)
             self.total_tests_run += tests_run
             self.total_tests_passed += passed
             self.test_loggs.append(log)
@@ -291,11 +291,15 @@ def run_doctests(arguments):
         0,
         """Error when trying to find doctests in:
             module:%r
-            path:%r""" % (module. file_path)
+            path:%r""" % (module, file_path)
         )
     text_test_runner = unittest.TextTestRunner(stream=err_log)
     result = text_test_runner.run(suite)
-    return (result.testsRun - len(result.failures), result.testsRun, err_log.getvalue())
+    return (
+        result.testsRun - len(result.failures),
+        result.testsRun,
+        err_log.getvalue()
+    )
 
 
     
@@ -330,7 +334,7 @@ class StaticDoctestStrategy(StaticFileStartegy):
         from multiprocessing import Pool
         file_paths_to_run = []
         for file_path in self.file_paths:
-            file_paths_to_run.append(os.getcwd(), file_path)
+            file_paths_to_run.append((os.getcwd(), file_path))
         pool = Pool()
         results = pool.map(run_doctests, file_paths_to_run)
         loggs = []
@@ -360,6 +364,7 @@ class RecursiveRegexpTestStartegy(object):
         from multiprocessing import Pool
         file_paths_to_run = [] 
         for path, folders, file_paths in self.walker(self.root):
+            #print("walking:%r"%path)
             to_remove = []
             for folder in folders:
                 if not self.is_package(path, folder):
@@ -367,7 +372,9 @@ class RecursiveRegexpTestStartegy(object):
             for folder in to_remove:
                 folders.remove(folder)
             for file_path in file_paths:
+                #print("checking file:%r"%file_path)
                 if re_complete_match(self.expr, file_path):
+                    #print("accepted")
                     file_paths_to_run.append(
                         (
                             self.root,
@@ -380,6 +387,10 @@ class RecursiveRegexpTestStartegy(object):
                         )
                     
                     )
+                else:
+                    #print("rejected")
+                    pass
+        #print("runing tests:%r" % file_paths_to_run)
         pool = Pool()
         results = pool.map(
             run_unittests,
@@ -587,13 +598,24 @@ def run():
             )
         )
     test_strategies = []
-
-    test_strategies.append(
-        RecursiveRegexpTestStartegy(
-            root=".",
-            expr="test_.*\\.py"
+    if static_file_set:
+        test_strategies.append(
+            StaticUnitTestStrategy(
+                static_file_set
+            )
         )
-    )
+        test_strategies.append(
+            StaticDoctestStrategy(
+                static_file_set
+            )
+        )
+    else:
+        test_strategies.append(
+            RecursiveRegexpTestStartegy(
+                root=".",
+                expr="test_.*\\.py"
+            )
+        )
 
     pytddmon = Pytddmon(
         project_name=os.path.basename(os.getcwd()),
@@ -604,7 +626,7 @@ def run():
         pytddmon.main()
         with open("pytddmon.log", "w") as log_file:
             log_file.write(
-                "green=%d\ntotal=%d\n" % (
+                "green=%r\ntotal=%r\n" % (
                     pytddmon.total_tests_passed,
                     pytddmon.total_tests_run
                 ) 
