@@ -79,7 +79,8 @@ PYTHON_FILE_REGEXP = ".*\\.py"
 class Pytddmon(object):
     """The core class, all functionality are agregated and lives inside this 
     class."""
-    def __init__(self, file_strategies=None, test_strategies=None):
+    def __init__(self, project_name="<pytddmon>", file_strategies=None, test_strategies=None):
+        self.project_name = project_name
         # The different ways pytddmon can find changes to a project
         self.file_strategies = (
             file_strategies if file_strategies != None else []
@@ -90,7 +91,7 @@ class Pytddmon(object):
         )
         self.total_tests_run = 0
         self.total_tests_passed = 0
-        self.last_testrun_time = 0
+        self.last_testrun_time = -1
         self.test_loggs = []
         self.changed_files = []
 
@@ -223,7 +224,10 @@ class RecursiveRegexpFileStartegy(object):
                     new_path, new_hash = new.next()
                     old_path, old_hash = old.next()
         except StopIteration:
-            paths += [path for path in new] + [path for path in old]
+            paths += (
+                [path for path, _hash in new] +
+                [path for path, _hash in old]
+            )
         self.pares = new_pares
         return paths
 
@@ -231,8 +235,8 @@ class RecursiveGlobFileStartegy(RecursiveRegexpFileStartegy):
     def __init__(self, root, expr, walker=os.walk, hasher=DefaultHasher(os)):
         import fnmatch
         super(RecursiveGlobFileStartegy, self).__init__(
-            root,
-            fnmatch.translate(expr),
+            root=root,
+            expr=fnmatch.translate(expr),
             walker=walker,
             hasher=hasher
         )
@@ -240,6 +244,46 @@ class RecursiveGlobFileStartegy(RecursiveRegexpFileStartegy):
 ####
 ## Test Strategies
 ####
+def run_unittests(arguments):
+    """Loads all unittests in file, with root as package location."""
+    root, file_path = arguments
+    import unittest
+    import StringIO
+    module = file_name_to_module(root, file_path)
+    err_log = StringIO.StringIO()
+    test_loader = unittest.TestLoader()
+    suite = test_loader.loadTestsFromName(module)
+    text_test_runner = unittest.TextTestRunner(stream=err_log)
+    result = text_test_runner.run(suite)
+    return (
+        result.testsRun - len(result.failures),
+        result.testsRun, 
+        err_log.getvalue()
+    )
+def run_doctests(arguments):
+    """Loads all doctests in file, with root as package location."""
+    root, file_path = arguments
+    import unittest
+    import doctest
+    import StringIO
+    module = file_name_to_module(root, file_path)
+    err_log = StringIO.StringIO()
+    try:
+        suite = doctest.DocTestSuite(module, optionflags=doctest.ELLIPSIS)
+    except ValueError:
+        return (
+        0,
+        0,
+        """Error when trying to find doctests in:
+            module:%r
+            path:%r""" % (module. file_path)
+        )
+    text_test_runner = unittest.TextTestRunner(stream=err_log)
+    result = text_test_runner.run(suite)
+    return (result.testsRun - len(result.failures), result.testsRun, err_log.getvalue())
+
+
+    
 
 class StaticUnitTestStrategy(StaticFileStartegy):
     """Runns a Static set of files as if thay where Unitttest suits. They must
@@ -249,33 +293,18 @@ class StaticUnitTestStrategy(StaticFileStartegy):
         from multiprocessing import Pool
         file_paths_to_run = []
         for file_path in self.file_paths:
-            file_paths_to_run.append(file_path)
+            file_paths_to_run.append((os.getcwd(), file_path))
         pool = Pool()
-        results = pool.map(self.run_tests, file_paths_to_run)
+        results = pool.map(run_unittests, file_paths_to_run)
         loggs = []
         all_green = 0
         all_total = 0
-        for green, total, log in results:
+        for (green, total, log), (_rt, pth) in zip(results, file_paths_to_run):
             all_green += green
             all_total += total
-            logg.append(log)
+            loggs.append("file:%s\n%s" % (pth, log))
             
         return (all_green, all_total, "\n".join(loggs))
-
-    @staticmethod
-    def run_test(file_path):
-        """Runns all unittests in file file_path. This should not be called
-        without creating a new processs, due to that it will not reload modules
-        ."""
-        import unittest
-        import StringIO
-        module = file_name_to_module("", file_path)
-        err_log = StringIO.StringIO()
-        test_loader = unittest.TestLoader()
-        suite = test_loader.loadTestsFromName(module)
-        text_test_runner = unittest.TextTestRunner(stream=err_log)
-        result = text_test_runner.run(suite)
-        return (result.testsRun - len(result.failures), result.testsRun, err_log.getvalue())
 
 class StaticDoctestStrategy(StaticFileStartegy):
     """Runns a Static set of files as if thay where Doctests, using unittests
@@ -286,50 +315,27 @@ class StaticDoctestStrategy(StaticFileStartegy):
         from multiprocessing import Pool
         file_paths_to_run = []
         for file_path in self.file_paths:
-            file_paths_to_run.append(file_path)
+            file_paths_to_run.append(os.getcwd(), file_path)
         pool = Pool()
-        results = pool.map(self.run_tests, file_paths_to_run)
+        results = pool.map(run_doctests, file_paths_to_run)
         loggs = []
         all_green = 0
         all_total = 0
-        for green, total, log in results:
+        for (green, total, log), (_rt, pth) in zip(results, file_paths_to_run):
             all_green += green
             all_total += total
-            logg.append(log)
+            loggs.append("file:%s\n%s" % (pth, log))
             
         return (all_green, all_total, "\n".join(loggs))
 
-    @staticmethod
-    def run_test(file_path):
-        """Runns all unittests in file file_path. This should not be called
-        without creating a new processs, due to that it will not reload modules
-        ."""
-        import unittest
-        import doctest
-        import StringIO
-        module = file_name_to_module("", file_path)
-        err_log = StringIO.StringIO()
-        try:
-            suite = doctest.DocTestSuite(module, optionflags=doctest.ELLIPSIS)
-        except ValueError:
-            return (
-            0,
-            0,
-            """Error when trying to find doctests in:
-                module:%r
-                path:%r""" % (module. file_path)
-            )
-        text_test_runner = unittest.TextTestRunner(stream=err_log)
-        result = text_test_runner.run(suite)
-        return (result.testsRun - len(result.failures), result.testsRun, err_log.getvalue())
-
-def RecursiveRegexpTestStartegy(object):
+class RecursiveRegexpTestStartegy(object):
     """Recursivly looking for tests in packages with a filename matching the 
     regexpr."""
     def __init__(self, root, expr, walker=os.walk):
         self.root = os.path.abspath(root)
         self.expr = expr
         self.walker = walker
+
     @staticmethod
     def is_package(path, folder):
         """Check if folder in path is a package"""
@@ -347,38 +353,31 @@ def RecursiveRegexpTestStartegy(object):
                 folders.remove(folder)
             for file_path in file_paths:
                 if re_complete_match(self.expr, file_path):
-                    files_paths_to_run.append(
-                        os.path.abspath(
-                            os.path.join(
-                                path,
-                                file_path
+                    file_paths_to_run.append(
+                        (
+                            self.root,
+                            os.path.abspath(
+                                os.path.join(
+                                    path,
+                                    file_path
+                                )
                             )
                         )
                     
                     )
-            pool = Pool()
-            results = pool.map(self.run_tests, file_paths_to_run)
-            all_green = 0
-            all_total = 0
-            loggs = []
-            for green, total, log in results:
-                all_green += green
-                all_total += total
-                loggs.append(log)
-            return (all_green, all_total, "\n".join(loggs))
-        
-        def run_tests(self, file_path):
-            """runs a test relative to root, this method needs to be called
-            from a nother process cause it dont reload modules."""
-            import unittest
-            import StringIO
-            module = file_name_to_module(self.root, file_path)
-            err_log = StringIO.StringIO()
-            test_loader = unittest.TestLoader()
-            suite = test_loader.loadTestsFromName(module)
-            text_test_runner = unittest.TextTestRunner(stream=err_log)
-            result = text_test_runner.run(suite)
-            return (result.testsRun - len(result.failures), result.testsRun, err_log.getvalue())
+        pool = Pool()
+        results = pool.map(
+            run_unittests,
+            file_paths_to_run
+        )
+        all_green = 0
+        all_total = 0
+        loggs = []
+        for (green, total, log), (_rt, pth) in zip(results, file_paths_to_run):
+            all_green += green
+            all_total += total
+            loggs.append("file:%s\n%s" % (pth, log))
+        return (all_green, all_total, "\n".join(loggs))
 ####
 ## GUI
 ####
@@ -396,23 +395,23 @@ def build_tk_gui(pytddmon):
     frame = tk.Frame(root)
     frame.master.title("pytddmon")  # Sets the title of the gui
     frame.master.resizable(False, False)    # Forces the window to not be resizeable
-    button = tk.Lable(
+    button = tk.Label(
         frame,
         text = "loading...",
         relief='raised',
-        font=("Helvetica", 16),
+        font=("Helvetica", 28),
         justify=tk.CENTER,
         anchor=tk.CENTER
     )
     button.bind(
         "<Button-1>",
-        lambda:message_window("monitoring: %s\ntime:%d\n%s" % (
+        lambda *a:message_window("monitoring: %s\ntime:%r\n%s" % (
             pytddmon.project_name,
             pytddmon.last_testrun_time, 
             pytddmon.get_loggs()
             ))
     )
-    self.button.pack(expand=1, fill="both")
+    button.pack(expand=1, fill="both")
     color_picker = ColorPicker()
     def update_gui():
         color_picker.set_result(
@@ -431,10 +430,13 @@ def build_tk_gui(pytddmon):
             )
         )
         frame.configure(background=rgb)
+        #frame.grid()
 
         
+    frame.grid()
     loop = lambda:pytddmon.main() or update_gui() or frame.after(750,loop)
     loop()
+    root.mainloop()
 
 ####
 ## Un Organized
@@ -977,5 +979,20 @@ def run():
         print(exception)
 
 if __name__ == '__main__':
-    run()
+    #run()
+    pytddmon = Pytddmon(
+        file_strategies=[
+            RecursiveGlobFileStartegy(
+                root=".",
+                expr="*.py"
+            )
+        ],
+        test_strategies=[
+            RecursiveRegexpTestStartegy(
+                root=".",
+                expr="test_.*\\.py"
+            )
+        ]
+    )
+    build_tk_gui(pytddmon)
 
