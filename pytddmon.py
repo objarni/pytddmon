@@ -138,11 +138,16 @@ class DefaultHasher(object):
 class StaticFileStartegy(object):
     """Looks for changeds in a static set of files."""
     def __init__(self, hasher, file_paths):
-        self.file_paths = [
-            os.path.abspath(file_path) for file_path in file_paths
-        ]
-        self.last_hash = [-1] * len(self.file_paths)
+        self.file_paths = None
+        self.last_hash = None
+        self.change_file_set(file_paths)
         self.hasher = hasher
+
+    def change_file_set(self, file_paths):
+        self.file_paths = set([
+            os.path.abspath(file_path) for file_path in file_paths
+        ])
+        self.last_hash = [-1] * len(self.file_paths)
 
     def which_files_has_changed(self):
         """Looks through all file paths and return which of them has changed."""
