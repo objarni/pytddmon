@@ -125,7 +125,7 @@ class Pytddmon(object):
 
     def get_loggs(self):
         """Creates a readabel log of the all test strategies run""" 
-        return "===next_test_startegy===\n".join(self.test_loggs)
+        return "===Log delemeter===\n".join(self.test_loggs)
 
 ####
 ## Hashing
@@ -242,14 +242,199 @@ class RecursiveGlobFileStartegy(RecursiveRegexpFileStartegy):
 ####
 
 class StaticUnitTestStrategy(StaticFileStartegy):
+    """Runns a Static set of files as if thay where Unitttest suits. They must
+    however be on the python path or be inside a package that is."""
     def run_tests(self, file_paths):
+        """Runns all staticly selected files as if they where UnitTests"""
+        from multiprocessing import Pool
         file_paths_to_run = []
-        for file_path in file_paths:
-            if file_path in self.file_paths:
-                file_paths_to_run.append(file_path)
-        return (0, 0, "")
-                
-    
+        for file_path in self.file_paths:
+            file_paths_to_run.append(file_path)
+        pool = Pool()
+        results = pool.map(self.run_tests, file_paths_to_run)
+        loggs = []
+        all_green = 0
+        all_total = 0
+        for green, total, log in results:
+            all_green += green
+            all_total += total
+            logg.append(log)
+            
+        return (all_green, all_total, "\n".join(loggs))
+
+    @staticmethod
+    def run_test(file_path):
+        """Runns all unittests in file file_path. This should not be called
+        without creating a new processs, due to that it will not reload modules
+        ."""
+        import unittest
+        import StringIO
+        module = file_name_to_module("", file_path)
+        err_log = StringIO.StringIO()
+        test_loader = unittest.TestLoader()
+        suite = test_loader.loadTestsFromName(module)
+        text_test_runner = unittest.TextTestRunner(stream=err_log)
+        result = text_test_runner.run(suite)
+        return (result.testsRun - len(result.failures), result.testsRun, err_log.getvalue())
+
+class StaticDoctestStrategy(StaticFileStartegy):
+    """Runns a Static set of files as if thay where Doctests, using unittests
+    whraper. They must however be on the python path or be inside a package
+    that is."""
+    def run_tests(self, file_paths):
+        """Runns all staticly selected files as if they where doctest"""
+        from multiprocessing import Pool
+        file_paths_to_run = []
+        for file_path in self.file_paths:
+            file_paths_to_run.append(file_path)
+        pool = Pool()
+        results = pool.map(self.run_tests, file_paths_to_run)
+        loggs = []
+        all_green = 0
+        all_total = 0
+        for green, total, log in results:
+            all_green += green
+            all_total += total
+            logg.append(log)
+            
+        return (all_green, all_total, "\n".join(loggs))
+
+    @staticmethod
+    def run_test(file_path):
+        """Runns all unittests in file file_path. This should not be called
+        without creating a new processs, due to that it will not reload modules
+        ."""
+        import unittest
+        import doctest
+        import StringIO
+        module = file_name_to_module("", file_path)
+        err_log = StringIO.StringIO()
+        try:
+            suite = doctest.DocTestSuite(module, optionflags=doctest.ELLIPSIS)
+        except ValueError:
+            return (
+            0,
+            0,
+            """Error when trying to find doctests in:
+                module:%r
+                path:%r""" % (module. file_path)
+            )
+        text_test_runner = unittest.TextTestRunner(stream=err_log)
+        result = text_test_runner.run(suite)
+        return (result.testsRun - len(result.failures), result.testsRun, err_log.getvalue())
+
+def RecursiveRegexpTestStartegy(object):
+    """Recursivly looking for tests in packages with a filename matching the 
+    regexpr."""
+    def __init__(self, root, expr, walker=os.walk):
+        self.root = os.path.abspath(root)
+        self.expr = expr
+        self.walker = walker
+    @staticmethod
+    def is_package(path, folder):
+        """Check if folder in path is a package"""
+        return os.path.isfile(os.path.join(path,folder,"__init__.py"))
+
+    def run_tests(self, file_paths):
+        from multiprocessing import Pool
+        file_paths_to_run = [] 
+        for path, folders, file_paths in self.walker(self.root):
+            to_remove = []
+            for folder in folders:
+                if not self.is_package(path, folder):
+                    to_remove.append(folder)
+            for folder in to_remove:
+                folders.remove(folder)
+            for file_path in file_paths:
+                if re_complete_match(self.expr, file_path):
+                    files_paths_to_run.append(
+                        os.path.abspath(
+                            os.path.join(
+                                path,
+                                file_path
+                            )
+                        )
+                    
+                    )
+            pool = Pool()
+            results = pool.map(self.run_tests, file_paths_to_run)
+            all_green = 0
+            all_total = 0
+            loggs = []
+            for green, total, log in results:
+                all_green += green
+                all_total += total
+                loggs.append(log)
+            return (all_green, all_total, "\n".join(loggs))
+        
+        def run_tests(self, file_path):
+            """runs a test relative to root, this method needs to be called
+            from a nother process cause it dont reload modules."""
+            import unittest
+            import StringIO
+            module = file_name_to_module(self.root, file_path)
+            err_log = StringIO.StringIO()
+            test_loader = unittest.TestLoader()
+            suite = test_loader.loadTestsFromName(module)
+            text_test_runner = unittest.TextTestRunner(stream=err_log)
+            result = text_test_runner.run(suite)
+            return (result.testsRun - len(result.failures), result.testsRun, err_log.getvalue())
+####
+## GUI
+####
+
+def build_tk_gui(pytddmon):
+    if not ON_PYTHON3:
+        import Tkinter as tk
+    else:
+        import tkinter as tk
+    root = tk.Tk()
+    root.wm_attributes("-topmost", 1)
+    if ON_WINDOWS:
+        root.attributes("-toolwindow", 1)
+        print("Minimize me!")
+    frame = tk.Frame(root)
+    frame.master.title("pytddmon")  # Sets the title of the gui
+    frame.master.resizable(False, False)    # Forces the window to not be resizeable
+    button = tk.Lable(
+        frame,
+        text = "loading...",
+        relief='raised',
+        font=("Helvetica", 16),
+        justify=tk.CENTER,
+        anchor=tk.CENTER
+    )
+    button.bind(
+        "<Button-1>",
+        lambda:message_window("monitoring: %s\ntime:%d\n%s" % (
+            pytddmon.project_name,
+            pytddmon.last_testrun_time, 
+            pytddmon.get_loggs()
+            ))
+    )
+    self.button.pack(expand=1, fill="both")
+    color_picker = ColorPicker()
+    def update_gui():
+        color_picker.set_result(
+            pytddmon.total_tests_passed,
+            pytddmon.total_tests_run,
+        )
+        light, color = color_picker.pick()
+        rgb = color_picker.translate_colure(light, color)
+        color_picker.pulse()
+        button.configure(
+            bg=rgb,
+            activebackground=rgb,
+            text=win_text(
+                pytddmon.total_tests_passed,
+                pytddmon.total_tests_run
+            )
+        )
+        frame.configure(background=rgb)
+
+        
+    loop = lambda:pytddmon.main() or update_gui() or frame.after(750,loop)
+    loop()
 
 ####
 ## Un Organized
@@ -351,6 +536,14 @@ class ColorPicker:
     tests. Also, there is a "pulse" (light color, dark color),
     to increase the feeling of continous testing.
     """
+    color_table = {
+        (True, 'green'): '0f0',
+        (False, 'green'): '0c0',
+        (True, 'red'): 'f00',
+        (False, 'red'): 'c00',
+        (True, 'gray'): '999',
+        (False, 'gray'): '555'
+    }
 
     def __init__(self):
         self.color = 'green'
@@ -378,6 +571,9 @@ class ColorPicker:
             self.color = 'gray'
         if self.color != old_color:
             self.reset_pulse()
+    @classmethod
+    def translate_colure(cls, light, color):
+        return "#" + cls.color_table[(light, color)]
 
 def win_text(total_tests, passing_tests=0):
     """
