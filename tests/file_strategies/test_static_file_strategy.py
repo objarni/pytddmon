@@ -14,12 +14,12 @@ class StaticFileStartegyTest(unittest.TestCase):
     def test_firstrun(self):
         hasher = FakeHasher()
         all_files = ["/file1.py", "/data1.dat"]
-        sfs = StaticFileStartegy(hasher, all_files)
+        sfs = StaticFileStartegy(all_files, hasher=hasher)
         assert sfs.which_files_has_changed() == all_files
     def test_one_file_change_of_two(self):
         hasher = FakeHasher()
         all_files = ["/file1.py", "/data1.dat"]
-        sfs = StaticFileStartegy(hasher, all_files)
+        sfs = StaticFileStartegy(all_files, hasher=hasher)
         sfs.which_files_has_changed()
         hasher.change_file("/data1.dat")
         assert sfs.which_files_has_changed() == ["/data1.dat"]

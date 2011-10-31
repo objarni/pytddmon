@@ -72,7 +72,10 @@ PYTHON_FILE_REGEXP = ".*\\.py"
 
 # End of Constants
 
-# Start of Classes
+####
+## Core
+####
+
 class Pytddmon(object):
     """The core class, all functionality are agregated and lives inside this 
     class."""
@@ -124,6 +127,10 @@ class Pytddmon(object):
         """Creates a readabel log of the all test strategies run""" 
         return "===next_test_startegy===\n".join(self.test_loggs)
 
+####
+## Hashing
+####
+
 class DefaultHasher(object):
     """A simple hasher which takes the size and the modified time and returns
     a checksum."""
@@ -133,11 +140,13 @@ class DefaultHasher(object):
         """Se Class description."""
         stat = self.os_module.stat(file_path)
         return stat.st_size + (stat.st_mtime * 1j)
-        
+####
+## File Strategies
+####
 
 class StaticFileStartegy(object):
     """Looks for changeds in a static set of files."""
-    def __init__(self, hasher, file_paths):
+    def __init__(self, file_paths, hasher=DefaultHasher(os)):
         self.file_paths = None
         self.last_hash = None
         self.change_file_set(file_paths)
@@ -170,7 +179,8 @@ class StaticFileStartegy(object):
 class RecursiveRegexpFileStartegy(object):
     """Looks for files recursivly from a root dir with a specific regexp
     pattern."""
-    def __init__(self, hasher, root, expr):
+    def __init__(self, root, expr, walker=os.walk, hasher=DefaultHasher(os)):
+        self.walker = walker
         self.hasher = hasher
         self.root = os.path.abspath(root)
         self.expr = expr
@@ -179,7 +189,7 @@ class RecursiveRegexpFileStartegy(object):
     def get_pares(self):
         """calculates the new list of pares (path, hash)"""
         file_paths = set()
-        for path, _folder, filenames in os.walk(self.root):
+        for path, _folder, filenames in self.walker(self.root):
             for filename in filenames:
                 if re_complete_match(self.expr, filename):
                     file_paths.add(
@@ -216,6 +226,34 @@ class RecursiveRegexpFileStartegy(object):
             paths += [path for path in new] + [path for path in old]
         self.pares = new_pares
         return paths
+
+class RecursiveGlobFileStartegy(RecursiveRegexpFileStartegy):
+    def __init__(self, root, expr, walker=os.walk, hasher=DefaultHasher(os)):
+        import fnmatch
+        super(RecursiveGlobFileStartegy, self).__init__(
+            root,
+            fnmatch.translate(expr),
+            walker=walker,
+            hasher=hasher
+        )
+
+####
+## Test Strategies
+####
+
+class StaticUnitTestStrategy(StaticFileStartegy):
+    def run_tests(self, file_paths):
+        file_paths_to_run = []
+        for file_path in file_paths:
+            if file_path in self.file_paths:
+                file_paths_to_run.append(file_path)
+        return (0, 0, "")
+                
+    
+
+####
+## Un Organized
+####
 
 def re_complete_match(regexp, string_to_match):
     """Helper function that does a regexp check if the full string_to_match
