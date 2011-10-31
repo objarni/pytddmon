@@ -382,10 +382,7 @@ def run_cmdline(cmdline):
     if os.path.exists(TEMP_OUT_FILE_NAME):
         output = open(TEMP_OUT_FILE_NAME).read()
         os.remove(TEMP_OUT_FILE_NAME)
-    if ON_PYTHON3:
-        return str(output, 'utf-8')
-    else:
-        return output
+    return output
 
 def write_file(filename, content):
     """
@@ -565,7 +562,11 @@ def parse_commandline():
     passed to pytddmon.
     """
     parser = optparse.OptionParser()
-    parser.add_option("--log-and-exit", action="store_true", default=False)
+    parser.add_option(
+        "--log-and-exit",
+        action="store_true",
+        default=False,
+        help='Run all tests, write the results to "' + TEST_MODE_LOG_FILE + '" and exit.')
     (options, args) = parser.parse_args()
     return (args, options.log_and_exit)
 
