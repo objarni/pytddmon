@@ -52,7 +52,12 @@ ON_WINDOWS = platform.system() == "Windows"
 class Pytddmon(object):
     """The core class, all functionality are agregated and lives inside this 
     class."""
-    def __init__(self, project_name="<pytddmon>", file_strategies=None, test_strategies=None):
+    def __init__(
+        self, 
+        project_name="<pytddmon>", 
+        file_strategies=None, 
+        test_strategies=None
+    ):
         self.project_name = project_name
         # The different ways pytddmon can find changes to a project
         self.file_strategies = (
@@ -66,14 +71,13 @@ class Pytddmon(object):
         self.total_tests_passed = 0
         self.last_testrun_time = -1
         self.test_loggs = []
-        self.changed_files = []
 
     def which_files_has_changed(self):
         """Returns list of changed files."""
-        self.changed_files = []
+        changed_files = []
         for file_strategy in self.file_strategies:
-            self.changed_files.extend(file_strategy.which_files_has_changed())
-        return self.changed_files
+            changed_files.extend(file_strategy.which_files_has_changed())
+        return changed_files
 
     def run_tests(self, file_paths=None):
         """Runns all tests and updates the time it took and the total test run
@@ -127,6 +131,7 @@ class StaticFileStartegy(object):
         self.hasher = hasher
 
     def change_file_set(self, file_paths):
+        """Used to change what set of files that are monitored for change"""
         self.file_paths = set([
             os.path.abspath(file_path) for file_path in file_paths
         ])
@@ -177,11 +182,13 @@ class RecursiveRegexpFileStartegy(object):
         new = set(new_pares)
         old = set(self.pares)
         paths = new.symmetric_difference(old)
-        paths = [path for path, file_hash in paths]
+        paths = [path for path, _file_hash in paths]
         self.pares = new_pares
         return paths
 
 class RecursiveGlobFileStartegy(RecursiveRegexpFileStartegy):
+    """Like the RecursiveRegexpFileStartegy but it takes a glob expr instead of
+    a regexp expr"""
     def __init__(self, root, expr, walker=os.walk, hasher=DefaultHasher(os)):
         import fnmatch
         super(RecursiveGlobFileStartegy, self).__init__(
@@ -196,9 +203,13 @@ class RecursiveGlobFileStartegy(RecursiveRegexpFileStartegy):
 ####
 
 def log_exceptions(func):
+    """Decorator that forwards the error message from an expetion to the log
+    slot of the return value and also returnsa a complexnumber to signal that
+    the result is an error."""
     from functools import wraps
     @wraps(func)
     def wraper(*a,**k):
+        "Docstring"
         try:
             return func(*a, **k)
         except:
@@ -257,7 +268,7 @@ def run_doctests(arguments):
 class StaticUnitTestStrategy(StaticFileStartegy):
     """Runns a Static set of files as if thay where Unitttest suits. They must
     however be on the python path or be inside a package that is."""
-    def run_tests(self, file_paths):
+    def run_tests(self, _file_paths):
         """Runns all staticly selected files as if they where UnitTests"""
         from multiprocessing import Pool
         file_paths_to_run = []
@@ -279,7 +290,7 @@ class StaticDoctestStrategy(StaticFileStartegy):
     """Runns a Static set of files as if thay where Doctests, using unittests
     whraper. They must however be on the python path or be inside a package
     that is."""
-    def run_tests(self, file_paths):
+    def run_tests(self, _file_paths):
         """Runns all staticly selected files as if they where doctest"""
         from multiprocessing import Pool
         file_paths_to_run = []
@@ -308,10 +319,10 @@ class RecursiveRegexpTestStartegy(object):
     @staticmethod
     def is_package(path, folder):
         """Check if folder in path is a package"""
-        return os.path.isfile(os.path.join(path,folder,"__init__.py"))
+        return os.path.isfile(os.path.join(path, folder, "__init__.py"))
 
-    def run_tests(self, file_paths):
-        from multiprocessing import Pool
+    def find_tests(self):
+        """Helper method that finds the tests"""
         file_paths_to_run = [] 
         for path, folders, file_paths in self.walker(self.root):
             to_remove = []
@@ -336,6 +347,12 @@ class RecursiveRegexpTestStartegy(object):
                     )
                 else:
                     pass
+        return file_paths_to_run
+
+    def run_tests(self, _file_paths):
+        """finds and run all tests"""
+        from multiprocessing import Pool
+        file_paths_to_run = self.find_tests()
         pool = Pool()
         results = pool.map(
             run_unittests,
@@ -354,25 +371,29 @@ class RecursiveRegexpTestStartegy(object):
 ####
 
 def build_tk_gui(pytddmon):
+    """handels the building and hookingup of the tk gui"""
+    tkinter = None
     if not ON_PYTHON3:
-        import Tkinter as tk
+        import Tkinter as tkinter
     else:
-        import tkinter as tk
-    root = tk.Tk()
+        import tkinter
+    root = tkinter.Tk()
     root.wm_attributes("-topmost", 1)
     if ON_WINDOWS:
         root.attributes("-toolwindow", 1)
         print("Minimize me!")
-    frame = tk.Frame(root)
-    frame.master.title("pytddmon")  # Sets the title of the gui
-    frame.master.resizable(False, False)    # Forces the window to not be resizeable
-    button = tk.Label(
+    frame = tkinter.Frame(root)
+    # Sets the title of the gui
+    frame.master.title("pytddmon")
+    # Forces the window to not be resizeable
+    frame.master.resizable(False, False)
+    button = tkinter.Label(
         frame,
         text = "loading...",
         relief='raised',
         font=("Helvetica", 28),
-        justify=tk.CENTER,
-        anchor=tk.CENTER
+        justify=tkinter.CENTER,
+        anchor=tkinter.CENTER
     )
     button.bind(
         "<Button-1>",
@@ -385,6 +406,7 @@ def build_tk_gui(pytddmon):
     button.pack(expand=1, fill="both")
     color_picker = ColorPicker()
     def update_gui():
+        """updates the tk gui"""
         color_picker.set_result(
             pytddmon.total_tests_passed,
             pytddmon.total_tests_run,
@@ -405,7 +427,7 @@ def build_tk_gui(pytddmon):
 
         
     frame.grid()
-    loop = lambda:pytddmon.main() or update_gui() or frame.after(750,loop)
+    loop = lambda:pytddmon.main() or update_gui() or frame.after(750, loop)
     loop()
     root.mainloop()
 
@@ -492,19 +514,24 @@ class ColorPicker:
             self.reset_pulse()
     @classmethod
     def translate_colure(cls, light, color):
+        """helper method to create a rgb string"""
         return "#" + cls.color_table[(light, color)]
 
 def message_window(message):
     "creates and shows a window with the message"
-    win = tk.Toplevel()
+    if not ON_PYTHON3:
+        import Tkinter as tkinter
+    else:
+        import tkinter
+    win = tkinter.Toplevel()
     win.wm_attributes("-topmost", 1)
     if ON_WINDOWS:
         win.attributes("-toolwindow", 1)
     win.title('Details')
     message = message.replace('\r\n', '\n')
-    text = tk.Text(win)
-    text.insert(tk.INSERT, message)
-    text['state'] = tk.DISABLED
+    text = tkinter.Text(win)
+    text.insert(tkinter.INSERT, message)
+    text['state'] = tkinter.DISABLED
     text.pack(expand=1, fill='both')
     text.focus_set()
 
@@ -523,8 +550,6 @@ def run():
     """
     The main function: basic initialization and program start
     """
-    import sys
-    import os
     sys.path[:0] = [os.getcwd()]
     # Command line argument handling
     (static_file_set, test_mode) = parse_commandline()
