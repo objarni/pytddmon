@@ -38,39 +38,12 @@ Rafael Capucho:
 
 import os
 import sys
-import tempfile
-import atexit
-import shlex
 import platform
 import optparse
 import re
 
-from time import gmtime, strftime
-from subprocess import Popen, PIPE, STDOUT
-
 ON_PYTHON3 = sys.version_info[0] == 3
 ON_WINDOWS = platform.system() == "Windows"
-
-if not ON_PYTHON3:
-    import Tkinter as tk
-else:
-    import tkinter as tk
-
-# Constants
-
-TEMP_FILE_DIR_NAME = tempfile.mkdtemp()
-RUN_TESTS_SCRIPT_FILE = os.path.join(TEMP_FILE_DIR_NAME, 'pytddmon_tmp.py')
-TEMP_OUT_FILE_NAME = os.path.join(TEMP_FILE_DIR_NAME, "out")
-# If pytddmon is run in test mode, it will:
-# 1. display the GUI for a very short time
-# 2. write a log file, containing the information displayed 
-#    (most notably green/total)
-# 3. exit
-TEST_MODE_LOG_FILE = 'pytddmon.log'
-TEST_FILE_REGEXP = "test_.*\\.py"
-PYTHON_FILE_REGEXP = ".*\\.py"
-
-# End of Constants
 
 ####
 ## Core
