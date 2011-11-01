@@ -200,34 +200,11 @@ class RecursiveRegexpFileStartegy(object):
 
     def which_files_has_changed(self):
         """Looks for files recursivly from a root dir with a specific regexp"""
-        paths = []
         new_pares = self.get_pares()
-        new_pares.sort()
-        new = iter(new_pares)
-        old = iter(self.pares)
-        try:
-            new_path, new_hash = new.next()
-            old_path, old_hash = old.next()
-            while True:
-                if new_path == old_path and new_hash == old_hash:
-                    new_path, new_hash = new.next()
-                    old_path, old_hash = old.next()
-                elif new_path != old_path:
-                    if new_path < old_path:
-                        paths.append(new_path)
-                        new_path, new_hash = new.next()
-                    else:
-                        paths.append(old_path)
-                        old_path, old_hash = old.next()
-                else:
-                    paths.append(new_path)
-                    new_path, new_hash = new.next()
-                    old_path, old_hash = old.next()
-        except StopIteration:
-            paths += (
-                [path for path, _hash in new] +
-                [path for path, _hash in old]
-            )
+        new = set(new_pares)
+        old = set(self.pares)
+        paths = new.symmetric_difference(old)
+        paths = [path for path, file_hash in paths]
         self.pares = new_pares
         return paths
 
@@ -364,7 +341,6 @@ class RecursiveRegexpTestStartegy(object):
         from multiprocessing import Pool
         file_paths_to_run = [] 
         for path, folders, file_paths in self.walker(self.root):
-            #print("walking:%r"%path)
             to_remove = []
             for folder in folders:
                 if not self.is_package(path, folder):
@@ -372,9 +348,7 @@ class RecursiveRegexpTestStartegy(object):
             for folder in to_remove:
                 folders.remove(folder)
             for file_path in file_paths:
-                #print("checking file:%r"%file_path)
                 if re_complete_match(self.expr, file_path):
-                    #print("accepted")
                     file_paths_to_run.append(
                         (
                             self.root,
@@ -388,9 +362,7 @@ class RecursiveRegexpTestStartegy(object):
                     
                     )
                 else:
-                    #print("rejected")
                     pass
-        #print("runing tests:%r" % file_paths_to_run)
         pool = Pool()
         results = pool.map(
             run_unittests,
@@ -593,7 +565,7 @@ def run():
     else:
         file_strategies.append(
             RecursiveGlobFileStartegy(
-                root=".",
+                root=os.getcwd(),
                 expr="*.py"
             )
         )
@@ -612,7 +584,7 @@ def run():
     else:
         test_strategies.append(
             RecursiveRegexpTestStartegy(
-                root=".",
+                root=os.getcwd(),
                 expr="test_.*\\.py"
             )
         )
