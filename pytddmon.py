@@ -628,7 +628,7 @@ def run():
                 ) 
             )
     else:
-       TkGUI(pytddmon).run()
+        TkGUI(pytddmon).run()
         
 
 if __name__ == '__main__':
