@@ -369,68 +369,113 @@ class RecursiveRegexpTestStartegy(object):
 ####
 ## GUI
 ####
+class TkGUI(object):
+    """A cloection class for all that is tkinter"""
+    def __init__(self, pytddmon):
+        self.pytddmon = pytddmon
+        self.color_picker = ColorPicker()
+        self.tkinter = None
+        self.building_tkinter()
+        self.root = None
+        self.building_root()
+        self.frame = None
+        self.building_frame()
+        self.button = None
+        self.building_button()
+        self.frame.grid()
 
-def build_tk_gui(pytddmon):
-    """handels the building and hookingup of the tk gui"""
-    tkinter = None
-    if not ON_PYTHON3:
-        import Tkinter as tkinter
-    else:
-        import tkinter
-    root = tkinter.Tk()
-    root.wm_attributes("-topmost", 1)
-    if ON_WINDOWS:
-        root.attributes("-toolwindow", 1)
-        print("Minimize me!")
-    frame = tkinter.Frame(root)
-    # Sets the title of the gui
-    frame.master.title("pytddmon")
-    # Forces the window to not be resizeable
-    frame.master.resizable(False, False)
-    button = tkinter.Label(
-        frame,
-        text = "loading...",
-        relief='raised',
-        font=("Helvetica", 28),
-        justify=tkinter.CENTER,
-        anchor=tkinter.CENTER
-    )
-    button.bind(
-        "<Button-1>",
-        lambda *a:message_window("monitoring: %s\ntime:%r\n%s" % (
-            pytddmon.project_name,
-            pytddmon.last_testrun_time, 
-            pytddmon.get_loggs()
-            ))
-    )
-    button.pack(expand=1, fill="both")
-    color_picker = ColorPicker()
-    def update_gui():
-        """updates the tk gui"""
-        color_picker.set_result(
-            pytddmon.total_tests_passed,
-            pytddmon.total_tests_run,
+    def building_tkinter(self):
+        """imports the tkinter module as self.tkinter"""
+        if not ON_PYTHON3:
+            import Tkinter as tkinter
+        else:
+            import tkinter
+        self.tkinter = tkinter
+
+    def building_root(self):
+        """take hold of the tk root object as self.root"""
+        self.root = self.tkinter.Tk()
+        self.root.wm_attributes("-topmost", 1)
+        if ON_WINDOWS:
+            self.root.attributes("-toolwindow", 1)
+            print("Minimize me!")
+
+    def building_frame(self):
+        """Creates a frame and assigns it to self.frame"""
+        self.frame = self.tkinter.Frame(self.root)
+        # Sets the title of the gui
+        self.frame.master.title("pytddmon")
+        # Forces the window to not be resizeable
+        self.frame.master.resizable(False, False)
+
+    def building_button(self):
+        """Builds  abutton and assign it to self.button"""
+        self.button = self.tkinter.Label(
+            self.frame,
+            text = "loading...",
+            relief='raised',
+            font=("Helvetica", 28),
+            justify=self.tkinter.CENTER,
+            anchor=self.tkinter.CENTER
         )
-        light, color = color_picker.pick()
-        rgb = color_picker.translate_colure(light, color)
-        color_picker.pulse()
-        button.configure(
+        self.button.bind(
+            "<Button-1>",
+            self.display_log_message
+        )
+        self.button.pack(expand=1, fill="both")
+
+    def update(self):
+        """updates the tk gui"""
+        self.color_picker.set_result(
+            self.pytddmon.total_tests_passed,
+            self.pytddmon.total_tests_run,
+        )
+        light, color = self.color_picker.pick()
+        rgb = self.color_picker.translate_colure(light, color)
+        self.color_picker.pulse()
+        self.button.configure(
             bg=rgb,
             activebackground=rgb,
             text="%r/%r" % (
-                pytddmon.total_tests_passed,
-                pytddmon.total_tests_run
+                self.pytddmon.total_tests_passed,
+                self.pytddmon.total_tests_run
             )
         )
-        frame.configure(background=rgb)
-        #frame.grid()
 
+    def display_log_message(self, _arg):
+        """displays the logmessage from pytddmon in a window"""
+        self.message_window(
+            "monitoring: %s\ntime:%r\n%s" % (
+                self.pytddmon.project_name,
+                self.pytddmon.last_testrun_time, 
+                self.pytddmon.get_loggs()
+            )
+        )
+
+    def loop(self):
+        """the main loop"""
+        self.pytddmon.main()
+        self.update()
+        self.frame.after(750, self.loop)
+
+    def run(self):
+        """starts the main loop and goes into sleep"""
+        self.loop()
+        self.root.mainloop()
+    def message_window(self, message):
+        "creates and shows a window with the message"
+        win = self.tkinter.Toplevel()
+        win.wm_attributes("-topmost", 1)
+        if ON_WINDOWS:
+            win.attributes("-toolwindow", 1)
+        win.title('Details')
+        message = message.replace('\r\n', '\n')
+        text = self.tkinter.Text(win)
+        text.insert(self.tkinter.INSERT, message)
+        text['state'] = self.tkinter.DISABLED
+        text.pack(expand=1, fill='both')
+        text.focus_set()
         
-    frame.grid()
-    loop = lambda:pytddmon.main() or update_gui() or frame.after(750, loop)
-    loop()
-    root.mainloop()
-
 ####
 ## Un Organized
 ####
@@ -517,25 +562,6 @@ class ColorPicker:
         """helper method to create a rgb string"""
         return "#" + cls.color_table[(light, color)]
 
-def message_window(message):
-    "creates and shows a window with the message"
-    if not ON_PYTHON3:
-        import Tkinter as tkinter
-    else:
-        import tkinter
-    win = tkinter.Toplevel()
-    win.wm_attributes("-topmost", 1)
-    if ON_WINDOWS:
-        win.attributes("-toolwindow", 1)
-    win.title('Details')
-    message = message.replace('\r\n', '\n')
-    text = tkinter.Text(win)
-    text.insert(tkinter.INSERT, message)
-    text['state'] = tkinter.DISABLED
-    text.pack(expand=1, fill='both')
-    text.focus_set()
-
-
 def parse_commandline():
     """
     returns (files, test_mode) created from the command line arguments
@@ -602,7 +628,7 @@ def run():
                 ) 
             )
     else:
-        build_tk_gui(pytddmon)
+       TkGUI(pytddmon).run()
         
 
 if __name__ == '__main__':
