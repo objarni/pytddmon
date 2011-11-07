@@ -23,11 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 CONTRIBUTIONS
-Fredrik Wendt: 
+Fredrik Wendt:
     Help with Tkinter implementation (replacing the pygame dependency).
-KrunoSaho: 
+KrunoSaho:
     Added always-on-top to the pytddmon window.
-Neppord(Samuel Ytterbrink): 
+Neppord(Samuel Ytterbrink):
     Print(".") will not screw up test-counting (it did before).
     Docstring support.
     Recursive discovery of tests.
@@ -49,13 +49,14 @@ ON_WINDOWS = platform.system() == "Windows"
 ## Core
 ####
 
+
 class Pytddmon(object):
-    """The core class, all functionality are agregated and lives inside this 
+    """The core class, all functionality are agregated and lives inside this
     class."""
     def __init__(
-        self, 
-        project_name="<pytddmon>", 
-        file_strategies=None, 
+        self,
+        project_name="<pytddmon>",
+        file_strategies=None,
         test_strategies=None
     ):
         self.project_name = project_name
@@ -102,18 +103,20 @@ class Pytddmon(object):
             self.run_tests(file_paths)
 
     def get_loggs(self):
-        """Creates a readabel log of the all test strategies run""" 
+        """Creates a readabel log of the all test strategies run"""
         return "===Log delemeter===\n".join(self.test_loggs)
 
 ####
 ## Hashing
 ####
 
+
 class DefaultHasher(object):
     """A simple hasher which takes the size and the modified time and returns
     a checksum."""
     def __init__(self, os_module):
         self.os_module = os_module
+
     def __call__(self, file_path):
         """Se Class description."""
         stat = self.os_module.stat(file_path)
@@ -121,6 +124,7 @@ class DefaultHasher(object):
 ####
 ## File Strategies
 ####
+
 
 class StaticFileStartegy(object):
     """Looks for changeds in a static set of files."""
@@ -138,7 +142,8 @@ class StaticFileStartegy(object):
         self.last_hash = [-1] * len(self.file_paths)
 
     def which_files_has_changed(self):
-        """Looks through all file paths and return which of them has changed."""
+        """Looks through all file paths and return which of them has changed.
+        """
         file_paths_to_return = []
         hashes = self.hash_files()
         iteration = zip(self.last_hash, hashes, self.file_paths)
@@ -157,6 +162,7 @@ class StaticFileStartegy(object):
             except IOError:
                 pass
         return ret
+
 
 class RecursiveRegexpFileStartegy(object):
     """Looks for files recursivly from a root dir with a specific regexp
@@ -177,7 +183,9 @@ class RecursiveRegexpFileStartegy(object):
                     file_paths.add(
                         os.path.abspath(os.path.join(path, filename))
                     )
-        return [(file_path, self.hasher(file_path)) for file_path in file_paths]
+        return [
+            (file_path, self.hasher(file_path)) for file_path in file_paths
+        ]
 
     def which_files_has_changed(self):
         """Looks for files recursivly from a root dir with a specific regexp"""
@@ -188,6 +196,7 @@ class RecursiveRegexpFileStartegy(object):
         paths = [path for path, _file_hash in paths]
         self.pares = new_pares
         return paths
+
 
 class RecursiveGlobFileStartegy(RecursiveRegexpFileStartegy):
     """Like the RecursiveRegexpFileStartegy but it takes a glob expr instead of
@@ -205,13 +214,15 @@ class RecursiveGlobFileStartegy(RecursiveRegexpFileStartegy):
 ## Test Strategies
 ####
 
+
 def log_exceptions(func):
     """Decorator that forwards the error message from an expetion to the log
     slot of the return value and also returnsa a complexnumber to signal that
     the result is an error."""
     from functools import wraps
+
     @wraps(func)
-    def wraper(*a,**k):
+    def wraper(*a, **k):
         "Docstring"
         try:
             return func(*a, **k)
@@ -224,9 +235,10 @@ def log_exceptions(func):
 @log_exceptions
 def run_unittests(arguments):
     """Loads all unittests in file, with root as package location."""
-    root, file_path = arguments
     import unittest
     import StringIO
+
+    root, file_path = arguments
     module = file_name_to_module(root, file_path)
     err_log = StringIO.StringIO()
     test_loader = unittest.TestLoader()
@@ -235,9 +247,11 @@ def run_unittests(arguments):
     result = text_test_runner.run(suite)
     return (
         result.testsRun - len(result.failures) - len(result.errors),
-        result.testsRun, 
+        result.testsRun,
         err_log.getvalue()
     )
+
+
 @log_exceptions
 def run_doctests(arguments):
     """Loads all doctests in file, with root as package location."""
@@ -266,15 +280,13 @@ def run_doctests(arguments):
     )
 
 
-    
-
 class StaticUnitTestStrategy(StaticFileStartegy):
     """Runns a Static set of files as if thay where Unitttest suits. They must
     however be on the python path or be inside a package that is."""
     def __init__(
-        self, 
-        file_paths, 
-        unittest_runner=run_unittests, 
+        self,
+        file_paths,
+        unittest_runner=run_unittests,
         hasher=DefaultHasher(os)
     ):
         self.unittest_runner = run_unittests
@@ -282,6 +294,7 @@ class StaticUnitTestStrategy(StaticFileStartegy):
             file_paths=file_paths,
             hasher=hasher
         )
+
     def run_tests(self, _file_paths):
         """Runns all staticly selected files as if they where UnitTests"""
         from multiprocessing import Pool
@@ -297,17 +310,17 @@ class StaticUnitTestStrategy(StaticFileStartegy):
             all_green += green
             all_total += total
             loggs.append("file:%s\n%s" % (pth, log))
-            
         return (all_green, all_total, "\n".join(loggs))
+
 
 class StaticDocTestStrategy(StaticFileStartegy):
     """Runns a Static set of files as if thay where Doctests, using unittests
     whraper. They must however be on the python path or be inside a package
     that is."""
     def __init__(
-        self, 
-        file_paths, 
-        doctest_runner=run_doctests, 
+        self,
+        file_paths,
+        doctest_runner=run_doctests,
         hasher=DefaultHasher(os)
     ):
         self.doctest_runner = doctest_runner
@@ -315,9 +328,11 @@ class StaticDocTestStrategy(StaticFileStartegy):
             file_paths=file_paths,
             hasher=hasher
         )
+
     def run_tests(self, _file_paths):
         """Runns all staticly selected files as if they where doctest"""
         from multiprocessing import Pool
+
         file_paths_to_run = []
         for file_path in self.file_paths:
             file_paths_to_run.append((os.getcwd(), file_path))
@@ -330,11 +345,11 @@ class StaticDocTestStrategy(StaticFileStartegy):
             all_green += green
             all_total += total
             loggs.append("file:%s\n%s" % (pth, log))
-            
         return (all_green, all_total, "\n".join(loggs))
 
+
 class RecursiveRegexpTestStartegy(object):
-    """Recursivly looking for tests in packages with a filename matching the 
+    """Recursivly looking for tests in packages with a filename matching the
     regexpr."""
     def __init__(self, root, expr, walker=os.walk):
         self.root = os.path.abspath(root)
@@ -348,7 +363,7 @@ class RecursiveRegexpTestStartegy(object):
 
     def find_tests(self):
         """Helper method that finds the tests"""
-        file_paths_to_run = [] 
+        file_paths_to_run = []
         for path, folders, file_paths in self.walker(self.root):
             to_remove = []
             for folder in folders:
@@ -368,7 +383,6 @@ class RecursiveRegexpTestStartegy(object):
                                 )
                             )
                         )
-                    
                     )
                 else:
                     pass
@@ -377,6 +391,7 @@ class RecursiveRegexpTestStartegy(object):
     def run_tests(self, _file_paths):
         """finds and run all tests"""
         from multiprocessing import Pool
+
         file_paths_to_run = self.find_tests()
         pool = Pool()
         results = pool.map(
@@ -394,6 +409,8 @@ class RecursiveRegexpTestStartegy(object):
 ####
 ## GUI
 ####
+
+
 class TkGUI(object):
     """A cloection class for all that is tkinter"""
     def __init__(self, pytddmon):
@@ -437,7 +454,7 @@ class TkGUI(object):
         """Builds  abutton and assign it to self.button"""
         self.button = self.tkinter.Label(
             self.frame,
-            text = "loading...",
+            text="loading...",
             relief='raised',
             font=("Helvetica", 28),
             justify=self.tkinter.CENTER,
@@ -472,7 +489,7 @@ class TkGUI(object):
         self.message_window(
             "monitoring: %s\ntime:%r\n%s" % (
                 self.pytddmon.project_name,
-                self.pytddmon.last_testrun_time, 
+                self.pytddmon.last_testrun_time,
                 self.pytddmon.get_loggs()
             )
         )
@@ -487,6 +504,7 @@ class TkGUI(object):
         """starts the main loop and goes into sleep"""
         self.loop()
         self.root.mainloop()
+
     def message_window(self, message):
         "creates and shows a window with the message"
         win = self.tkinter.Toplevel()
@@ -500,19 +518,21 @@ class TkGUI(object):
         text['state'] = self.tkinter.DISABLED
         text.pack(expand=1, fill='both')
         text.focus_set()
-        
+
 ####
 ## Un Organized
 ####
 
+
 def re_complete_match(regexp, string_to_match):
     """Helper function that does a regexp check if the full string_to_match
     matches the regexp"""
-    return bool(re.match(regexp+"$", string_to_match))
+    return bool(re.match(regexp + "$", string_to_match))
+
 
 def file_name_to_module(base_path, file_name):
-    r"""Converts filenames of files in packages to import friendly dot separated
-    paths.
+    r"""Converts filenames of files in packages to import friendly dot
+    separated paths.
 
     Examples:
     >>> print(file_name_to_module("","pytddmon.pyw"))
@@ -525,16 +545,23 @@ def file_name_to_module(base_path, file_name):
     tests.pytddmon
     >>> print(file_name_to_module("",".\\tests\\pytddmon.py"))
     tests.pytddmon
-    >>> print(file_name_to_module("/User/pytddmon\\ geek/pytddmon/","/User/pytddmon\\ geek/pytddmon/tests/pytddmon.py"))
+    >>> print(
+    ...     file_name_to_module(
+    ...         "/User/pytddmon\\ geek/pytddmon/",
+    ...         "/User/pytddmon\\ geek/pytddmon/tests/pytddmon.py"
+    ...     )
+    ... )
     tests.pytddmon
     """
     symbol_stripped = os.path.relpath(file_name, base_path)
     for symbol in r"/\.":
         symbol_stripped = symbol_stripped.replace(symbol, " ")
     words = symbol_stripped.split()
-    module_words = words[:-1] # remove .py/.pyw
+    # remove .py/.pyw
+    module_words = words[:-1]
     module_name = '.'.join(module_words)
     return module_name
+
 
 class ColorPicker:
     """
@@ -576,16 +603,18 @@ class ColorPicker:
         self.color = 'green'
         if green.imag or total.imag:
             self.color = "orange"
-        elif green == total-1:
+        elif green == total - 1:
             self.color = 'red'
-        elif green < total-1:
+        elif green < total - 1:
             self.color = 'gray'
         if self.color != old_color:
             self.reset_pulse()
+
     @classmethod
     def translate_colure(cls, light, color):
         """helper method to create a rgb string"""
         return "#" + cls.color_table[(light, color)]
+
 
 def parse_commandline():
     """
@@ -596,6 +625,7 @@ def parse_commandline():
     parser.add_option("--log-and-exit", action="store_true", default=False)
     (options, args) = parser.parse_args()
     return (args, options.log_and_exit)
+
 
 def run():
     """
@@ -650,11 +680,10 @@ def run():
                 "green=%r\ntotal=%r\n" % (
                     pytddmon.total_tests_passed,
                     pytddmon.total_tests_run
-                ) 
+                )
             )
     else:
         TkGUI(pytddmon).run()
-        
 
 if __name__ == '__main__':
     run()
