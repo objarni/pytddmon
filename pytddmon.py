@@ -271,8 +271,13 @@ def run_doctests(arguments):
 class StaticUnitTestStrategy(StaticFileStartegy):
     """Runns a Static set of files as if thay where Unitttest suits. They must
     however be on the python path or be inside a package that is."""
-    def __init__(self, file_paths, unittest_runner=run_unittests, hasher=DefaultHasher(os)):
-        self.unittest_runner=run_unittests
+    def __init__(
+        self, 
+        file_paths, 
+        unittest_runner=run_unittests, 
+        hasher=DefaultHasher(os)
+    ):
+        self.unittest_runner = run_unittests
         super(StaticUnitTestStrategy, self).__init__(
             file_paths=file_paths,
             hasher=hasher
@@ -299,8 +304,13 @@ class StaticDocTestStrategy(StaticFileStartegy):
     """Runns a Static set of files as if thay where Doctests, using unittests
     whraper. They must however be on the python path or be inside a package
     that is."""
-    def __init__(self, file_paths, doctest_runner=run_doctests, hasher=DefaultHasher(os)):
-        self.doctest_runner=doctest_runner
+    def __init__(
+        self, 
+        file_paths, 
+        doctest_runner=run_doctests, 
+        hasher=DefaultHasher(os)
+    ):
+        self.doctest_runner = doctest_runner
         super(StaticDocTestStrategy, self).__init__(
             file_paths=file_paths,
             hasher=hasher
