@@ -150,10 +150,13 @@ class StaticFileStartegy(object):
 
     def hash_files(self):
         """Helper method to hash all files."""
-        return [
-            self.hasher(file_path)
-            for file_path in self.file_paths
-        ]
+        ret = []
+        for file_path in self.file_paths:
+            try:
+                ret.append(self.hasher(file_path))
+            except IOError:
+                pass
+        return ret
 
 class RecursiveRegexpFileStartegy(object):
     """Looks for files recursivly from a root dir with a specific regexp
@@ -231,7 +234,7 @@ def run_unittests(arguments):
     text_test_runner = unittest.TextTestRunner(stream=err_log)
     result = text_test_runner.run(suite)
     return (
-        result.testsRun - len(result.failures),
+        result.testsRun - len(result.failures) - len(result.errors),
         result.testsRun, 
         err_log.getvalue()
     )
@@ -257,7 +260,7 @@ def run_doctests(arguments):
     text_test_runner = unittest.TextTestRunner(stream=err_log)
     result = text_test_runner.run(suite)
     return (
-        result.testsRun - len(result.failures),
+        result.testsRun - len(result.failures) - len(result.errors),
         result.testsRun,
         err_log.getvalue()
     )
