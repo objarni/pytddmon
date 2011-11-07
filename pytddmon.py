@@ -271,6 +271,12 @@ def run_doctests(arguments):
 class StaticUnitTestStrategy(StaticFileStartegy):
     """Runns a Static set of files as if thay where Unitttest suits. They must
     however be on the python path or be inside a package that is."""
+    def __init__(self, file_paths, unittest_runner=run_unittests, hasher=DefaultHasher(os)):
+        self.unittest_runner=run_unittests
+        super(StaticUnitTestStrategy, self).__init__(
+            file_paths=file_paths,
+            hasher=hasher
+        )
     def run_tests(self, _file_paths):
         """Runns all staticly selected files as if they where UnitTests"""
         from multiprocessing import Pool
@@ -278,7 +284,7 @@ class StaticUnitTestStrategy(StaticFileStartegy):
         for file_path in self.file_paths:
             file_paths_to_run.append((os.getcwd(), file_path))
         pool = Pool()
-        results = pool.map(run_unittests, file_paths_to_run)
+        results = pool.map(self.unittest_runner, file_paths_to_run)
         loggs = []
         all_green = 0
         all_total = 0
@@ -289,10 +295,16 @@ class StaticUnitTestStrategy(StaticFileStartegy):
             
         return (all_green, all_total, "\n".join(loggs))
 
-class StaticDoctestStrategy(StaticFileStartegy):
+class StaticDocTestStrategy(StaticFileStartegy):
     """Runns a Static set of files as if thay where Doctests, using unittests
     whraper. They must however be on the python path or be inside a package
     that is."""
+    def __init__(self, file_paths, doctest_runner=run_doctests, hasher=DefaultHasher(os)):
+        self.doctest_runner=doctest_runner
+        super(StaticDocTestStrategy, self).__init__(
+            file_paths=file_paths,
+            hasher=hasher
+        )
     def run_tests(self, _file_paths):
         """Runns all staticly selected files as if they where doctest"""
         from multiprocessing import Pool
@@ -300,7 +312,7 @@ class StaticDoctestStrategy(StaticFileStartegy):
         for file_path in self.file_paths:
             file_paths_to_run.append((os.getcwd(), file_path))
         pool = Pool()
-        results = pool.map(run_doctests, file_paths_to_run)
+        results = pool.map(self.doctest_runner, file_paths_to_run)
         loggs = []
         all_green = 0
         all_total = 0
@@ -604,7 +616,7 @@ def run():
             )
         )
         test_strategies.append(
-            StaticDoctestStrategy(
+            StaticDocTestStrategy(
                 static_file_set
             )
         )
