@@ -267,9 +267,7 @@ def run_doctests(arguments):
         return (
         0,
         0,
-        """Error when trying to find doctests in:
-            module:%r
-            path:%r""" % (module, file_path)
+        """No doctests found in:%r\n""" % (module)  
         )
     text_test_runner = unittest.TextTestRunner(stream=err_log)
     result = text_test_runner.run(suite)
@@ -280,17 +278,18 @@ def run_doctests(arguments):
     )
 
 
-class StaticUnitTestStrategy(StaticFileStartegy):
+class StaticTestStrategy(StaticFileStartegy):
     """Runns a Static set of files as if thay where Unitttest suits. They must
-    however be on the python path or be inside a package that is."""
+    however be on the python path or be inside a package that are on the path.
+    """
     def __init__(
         self,
         file_paths,
-        unittest_runner=run_unittests,
+        test_runner,
         hasher=DefaultHasher(os)
     ):
-        self.unittest_runner = run_unittests
-        super(StaticUnitTestStrategy, self).__init__(
+        self.test_runner = test_runner
+        super(StaticTestStrategy, self).__init__(
             file_paths=file_paths,
             hasher=hasher
         )
@@ -302,42 +301,7 @@ class StaticUnitTestStrategy(StaticFileStartegy):
         for file_path in self.file_paths:
             file_paths_to_run.append((os.getcwd(), file_path))
         pool = Pool()
-        results = pool.map(self.unittest_runner, file_paths_to_run)
-        loggs = []
-        all_green = 0
-        all_total = 0
-        for (green, total, log), (_rt, pth) in zip(results, file_paths_to_run):
-            all_green += green
-            all_total += total
-            loggs.append("file:%s\n%s" % (pth, log))
-        return (all_green, all_total, "\n".join(loggs))
-
-
-class StaticDocTestStrategy(StaticFileStartegy):
-    """Runns a Static set of files as if thay where Doctests, using unittests
-    whraper. They must however be on the python path or be inside a package
-    that is."""
-    def __init__(
-        self,
-        file_paths,
-        doctest_runner=run_doctests,
-        hasher=DefaultHasher(os)
-    ):
-        self.doctest_runner = doctest_runner
-        super(StaticDocTestStrategy, self).__init__(
-            file_paths=file_paths,
-            hasher=hasher
-        )
-
-    def run_tests(self, _file_paths):
-        """Runns all staticly selected files as if they where doctest"""
-        from multiprocessing import Pool
-
-        file_paths_to_run = []
-        for file_path in self.file_paths:
-            file_paths_to_run.append((os.getcwd(), file_path))
-        pool = Pool()
-        results = pool.map(self.doctest_runner, file_paths_to_run)
+        results = pool.map(self.test_runner, file_paths_to_run)
         loggs = []
         all_green = 0
         all_total = 0
@@ -351,7 +315,8 @@ class StaticDocTestStrategy(StaticFileStartegy):
 class RecursiveRegexpTestStartegy(object):
     """Recursivly looking for tests in packages with a filename matching the
     regexpr."""
-    def __init__(self, root, expr, walker=os.walk):
+    def __init__(self, root, expr, test_runner, walker=os.walk):
+        self.test_runner = test_runner
         self.root = os.path.abspath(root)
         self.expr = expr
         self.walker = walker
@@ -395,7 +360,7 @@ class RecursiveRegexpTestStartegy(object):
         file_paths_to_run = self.find_tests()
         pool = Pool()
         results = pool.map(
-            run_unittests,
+            self.test_runner,
             file_paths_to_run
         )
         all_green = 0
@@ -651,20 +616,30 @@ def run():
     test_strategies = []
     if static_file_set:
         test_strategies.append(
-            StaticUnitTestStrategy(
-                static_file_set
+            StaticTestStrategy(
+                static_file_set,
+                test_runner=run_unittests
             )
         )
         test_strategies.append(
-            StaticDocTestStrategy(
-                static_file_set
+            StaticTestStrategy(
+                static_file_set,
+                test_runner=run_doctests
             )
         )
     else:
         test_strategies.append(
             RecursiveRegexpTestStartegy(
                 root=os.getcwd(),
-                expr="test_.*\\.py"
+                expr="test_.*\\.py",
+                test_runner=run_unittests
+            )
+        )
+        test_strategies.append(
+            RecursiveRegexpTestStartegy(
+                root=os.getcwd(),
+                expr="test_.*\\.py",
+                test_runner=run_doctests
             )
         )
 
