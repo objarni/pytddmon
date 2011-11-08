@@ -1,5 +1,7 @@
 syntax:glob
 
 *.pyc
+*.pyo
+*.swp
 pyTDDmon.log
 pytddmon.log
