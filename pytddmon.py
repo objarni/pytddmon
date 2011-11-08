@@ -210,10 +210,6 @@ class RecursiveGlobFileStartegy(RecursiveRegexpFileStartegy):
             hasher=hasher
         )
 
-####
-## Test Strategies
-####
-
 
 def log_exceptions(func):
     """Decorator that forwards the error message from an expetion to the log
@@ -231,6 +227,13 @@ def log_exceptions(func):
             return (0, 1j, traceback.format_exc())
     return wraper
 
+
+####
+## Test Runners
+####
+# These needs to be functions due to that they are going to be called in a
+# nother procces and multiprocessing demands that they should be picabel.
+####
 
 @log_exceptions
 def run_unittests(arguments):
@@ -278,6 +281,11 @@ def run_doctests(arguments):
     )
 
 
+####
+## Test Strategies
+####
+
+
 class StaticTestStrategy(StaticFileStartegy):
     """Runns a Static set of files as if thay where Unitttest suits. They must
     however be on the python path or be inside a package that are on the path.
@@ -294,14 +302,17 @@ class StaticTestStrategy(StaticFileStartegy):
             hasher=hasher
         )
 
-    def run_tests(self, _file_paths):
+    def run_tests(self, _file_paths, pool=True):
         """Runns all staticly selected files as if they where UnitTests"""
         from multiprocessing import Pool
         file_paths_to_run = []
         for file_path in self.file_paths:
             file_paths_to_run.append((os.getcwd(), file_path))
-        pool = Pool()
-        results = pool.map(self.test_runner, file_paths_to_run)
+        if pool:
+            pool = Pool()
+            results = pool.map(self.test_runner, file_paths_to_run)
+        else:
+            results = map(self.test_runner, file_paths_to_run)
         loggs = []
         all_green = 0
         all_total = 0
@@ -353,16 +364,22 @@ class RecursiveRegexpTestStartegy(object):
                     pass
         return file_paths_to_run
 
-    def run_tests(self, _file_paths):
+    def run_tests(self, _file_paths, pool=True):
         """finds and run all tests"""
         from multiprocessing import Pool
 
         file_paths_to_run = self.find_tests()
-        pool = Pool()
-        results = pool.map(
-            self.test_runner,
-            file_paths_to_run
-        )
+        if pool:
+            pool = Pool()
+            results = pool.map(
+                self.test_runner,
+                file_paths_to_run
+            )
+        else:
+            results = map(
+                self.test_runner,
+                file_paths_to_run
+            )
         all_green = 0
         all_total = 0
         loggs = []
