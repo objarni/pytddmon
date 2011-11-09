@@ -2,24 +2,8 @@
 #coding: utf-8
 
 '''
-COPYRIGHT (c) 2009, 2010, 2011
-.. in order of first contribution
-Olof Bjarnason
-    Initial proof-of-concept pygame implementation.
-Fredrik Wendt:
-    Help with Tkinter implementation (replacing the pygame dependency)
-KrunoSaho
-    Added always-on-top to the pytddmon window
-Neppord(Samuel Ytterbrink)
-    Print(".") will not screw up test-counting (it did before)
-    Docstring support
-    Recursive discovery of tests
-    Refactoring to increase Pylint score from 6 to 9.5 out of 10 (!)
-    Numerous refactorings & other improvements
-Rafael Capucho
-    Python shebang at start of script, enabling "./pytddmon.py" on unix systems
+Copyright (c) 2009,2010,2011 Olof Bjarnason
 
-LICENSE
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -37,6 +21,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+CONTRIBUTIONS
+Fredrik Wendt:
+    Help with Tkinter implementation (replacing the pygame dependency).
+KrunoSaho:
+    Added always-on-top to the pytddmon window.
+Neppord(Samuel Ytterbrink):
+    Print(".") will not screw up test-counting (it did before).
+    Docstring support.
+    Recursive discovery of tests.
+    Refactoring to increase Pylint score from 6 to 9.5 out of 10 (!).
+Rafael Capucho:
+    Python shebang at start of script, enabling "./pytddmon.py" on unix systems
 '''
 
 import os
