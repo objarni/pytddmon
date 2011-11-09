@@ -18,6 +18,8 @@ Neppord(Samuel Ytterbrink)
     Numerous refactorings & other improvements
 Rafael Capucho
     Python shebang at start of script, enabling "./pytddmon.py" on unix systems
+Ilian Iliev
+    Use integers instead of floats in file modified time (checksum calc)
 
 LICENSE
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -125,11 +127,12 @@ class DefaultHasher(object):
     a checksum."""
     def __init__(self, os_module):
         self.os_module = os_module
-
+        self.os_module.stat_float_times(False)
+        
     def __call__(self, file_path):
         """Se Class description."""
         stat = self.os_module.stat(file_path)
-        return stat.st_size + (stat.st_mtime * 1j)
+        return stat.st_size + (stat.st_mtime * 1j) + hash(file_path)
 ####
 ## File Strategies
 ####
