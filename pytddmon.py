@@ -48,6 +48,12 @@ import re
 ON_PYTHON3 = sys.version_info[0] == 3
 ON_WINDOWS = platform.system() == "Windows"
 
+if ON_PYTHON3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
+
+
 ####
 ## Core
 ####
@@ -242,11 +248,10 @@ def log_exceptions(func):
 def run_unittests(arguments):
     """Loads all unittests in file, with root as package location."""
     import unittest
-    import StringIO
 
     root, file_path = arguments
     module = file_name_to_module(root, file_path)
-    err_log = StringIO.StringIO()
+    err_log = StringIO()
     test_loader = unittest.TestLoader()
     suite = test_loader.loadTestsFromName(module)
     text_test_runner = unittest.TextTestRunner(stream=err_log)
@@ -264,9 +269,8 @@ def run_doctests(arguments):
     root, file_path = arguments
     import unittest
     import doctest
-    import StringIO
     module = file_name_to_module(root, file_path)
-    err_log = StringIO.StringIO()
+    err_log = StringIO()
     try:
         suite = doctest.DocTestSuite(module, optionflags=doctest.ELLIPSIS)
     except ValueError:
