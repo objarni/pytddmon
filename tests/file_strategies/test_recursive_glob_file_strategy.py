@@ -37,7 +37,7 @@ class RecursiveGlobFileStartegyTest(unittest.TestCase):
             walker=lambda root:((root,[],["file.py"]) for n in [1]),
             hasher=hasher
         )
-        assert ["/file.py"] == rrfs.which_files_has_changed()
+        assert [os.path.abspath("/file.py")] == rrfs.which_files_has_changed()
 
     def test_project_with_two_files_one_match_expr(self):
         hasher = FakeHasher()
@@ -47,7 +47,7 @@ class RecursiveGlobFileStartegyTest(unittest.TestCase):
             walker=lambda root:((root,[],["data.dat","file.py"]) for n in [1]),
             hasher=hasher
         )
-        assert ["/file.py"] == rrfs.which_files_has_changed()
+        assert [os.path.abspath("/file.py")] == rrfs.which_files_has_changed()
         
     def tests_project_with_one_file_in_folder(self):
         hasher = FakeHasher()
@@ -62,4 +62,8 @@ class RecursiveGlobFileStartegyTest(unittest.TestCase):
             ),
             hasher=hasher
         )
-        assert [os.path.join("/","folder","file.py")] == rrfs.which_files_has_changed()
+        assert [
+            os.path.abspath(
+                os.path.join("/","folder","file.py")
+            )
+        ] == rrfs.which_files_has_changed()
