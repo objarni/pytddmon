@@ -440,7 +440,7 @@ class TkGUI(object):
         """Creates a frame and assigns it to self.frame"""
         self.frame = self.tkinter.Frame(self.root)
         # Sets the title of the gui
-        self.frame.master.title("pytddmon")
+        self.frame.master.title(self.pytddmon.project_name)
         # Forces the window to not be resizeable
         self.frame.master.resizable(False, False)
 
