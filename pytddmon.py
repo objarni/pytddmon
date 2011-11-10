@@ -82,7 +82,7 @@ class Pytddmon(object):
         self.total_tests_run = 0
         self.total_tests_passed = 0
         self.last_testrun_time = -1
-        self.test_loggs = []
+        self.test_logs = []
 
     def which_files_has_changed(self):
         """Returns list of changed files."""
@@ -99,12 +99,12 @@ class Pytddmon(object):
         start = time.time()
         self.total_tests_run = 0
         self.total_tests_passed = 0
-        self.test_loggs = []
+        self.test_logs = []
         for test_strategy in self.test_strategies:
             passed, tests_run, log = test_strategy.run_tests(file_paths)
             self.total_tests_run += tests_run
             self.total_tests_passed += passed
-            self.test_loggs.append(log)
+            self.test_logs.append(log)
         self.last_testrun_time = time.time() - start
 
     def main(self):
@@ -113,9 +113,9 @@ class Pytddmon(object):
         if file_paths != []:
             self.run_tests(file_paths)
 
-    def get_loggs(self):
-        """Creates a readabel log of the all test strategies run"""
-        return "===Log delemeter===\n".join(self.test_loggs)
+    def get_logs(self):
+        """Creates a readable log of the all test strategies run"""
+        return "===Log delimeter===\n".join(self.test_logs)
 
 ####
 ## Hashing
@@ -323,14 +323,14 @@ class StaticTestStrategy(StaticFileStartegy):
             results = pool.map(self.test_runner, file_paths_to_run)
         else:
             results = map(self.test_runner, file_paths_to_run)
-        loggs = []
+        logs = []
         all_green = 0
         all_total = 0
         for (green, total, log), (_rt, pth) in zip(results, file_paths_to_run):
             all_green += green
             all_total += total
-            loggs.append("file:%s\n%s" % (pth, log))
-        return (all_green, all_total, "\n".join(loggs))
+            logs.append("file:%s\n%s" % (pth, log))
+        return (all_green, all_total, "\n".join(logs))
 
 
 class RecursiveRegexpTestStartegy(object):
@@ -392,12 +392,12 @@ class RecursiveRegexpTestStartegy(object):
             )
         all_green = 0
         all_total = 0
-        loggs = []
+        logs = []
         for (green, total, log), (_rt, pth) in zip(results, file_paths_to_run):
             all_green += green
             all_total += total
-            loggs.append("file:%s\n%s" % (pth, log))
-        return (all_green, all_total, "\n".join(loggs))
+            logs.append("file:%s\n%s" % (pth, log))
+        return (all_green, all_total, "\n".join(logs))
 
 
 ####
@@ -484,7 +484,7 @@ class TkGUI(object):
             "monitoring: %s\ntime:%r\n%s" % (
                 self.pytddmon.project_name,
                 self.pytddmon.last_testrun_time,
-                self.pytddmon.get_loggs()
+                self.pytddmon.get_logs()
             )
         )
 
