@@ -50,12 +50,6 @@ import re
 ON_PYTHON3 = sys.version_info[0] == 3
 ON_WINDOWS = platform.system() == "Windows"
 
-if ON_PYTHON3:
-    from io import StringIO
-else:
-    from StringIO import StringIO
-
-
 ####
 ## Core
 ####
@@ -246,6 +240,13 @@ def log_exceptions(func):
 # These needs to be functions due to that they are going to be called in a
 # nother procces and multiprocessing demands that they should be picabel.
 ####
+
+def StringIO():
+    if ON_PYTHON3:
+        import io as StringIO
+    else:
+        import StringIO 
+    return StringIO.StringIO()
 
 @log_exceptions
 def run_unittests(arguments):
