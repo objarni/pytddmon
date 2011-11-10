@@ -18,6 +18,8 @@ Neppord(Samuel Ytterbrink)
     Numerous refactorings & other improvements
 Rafael Capucho
     Python shebang at start of script, enabling "./pytddmon.py" on unix systems
+Ilian Iliev
+    Use integers instead of floats in file modified time (checksum calc)
 
 LICENSE
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -47,6 +49,12 @@ import re
 
 ON_PYTHON3 = sys.version_info[0] == 3
 ON_WINDOWS = platform.system() == "Windows"
+
+if ON_PYTHON3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
+
 
 ####
 ## Core
@@ -119,11 +127,12 @@ class DefaultHasher(object):
     a checksum."""
     def __init__(self, os_module):
         self.os_module = os_module
-
+        self.os_module.stat_float_times(False)
+        
     def __call__(self, file_path):
         """Se Class description."""
         stat = self.os_module.stat(file_path)
-        return stat.st_size + (stat.st_mtime * 1j)
+        return stat.st_size + (stat.st_mtime * 1j) + hash(file_path)
 ####
 ## File Strategies
 ####
@@ -242,11 +251,10 @@ def log_exceptions(func):
 def run_unittests(arguments):
     """Loads all unittests in file, with root as package location."""
     import unittest
-    import StringIO
 
     root, file_path = arguments
     module = file_name_to_module(root, file_path)
-    err_log = StringIO.StringIO()
+    err_log = StringIO()
     test_loader = unittest.TestLoader()
     suite = test_loader.loadTestsFromName(module)
     text_test_runner = unittest.TextTestRunner(stream=err_log)
@@ -264,9 +272,8 @@ def run_doctests(arguments):
     root, file_path = arguments
     import unittest
     import doctest
-    import StringIO
     module = file_name_to_module(root, file_path)
-    err_log = StringIO.StringIO()
+    err_log = StringIO()
     try:
         suite = doctest.DocTestSuite(module, optionflags=doctest.ELLIPSIS)
     except ValueError:
@@ -433,7 +440,7 @@ class TkGUI(object):
         """Creates a frame and assigns it to self.frame"""
         self.frame = self.tkinter.Frame(self.root)
         # Sets the title of the gui
-        self.frame.master.title("pytddmon")
+        self.frame.master.title(self.pytddmon.project_name)
         # Forces the window to not be resizeable
         self.frame.master.resizable(False, False)
 
