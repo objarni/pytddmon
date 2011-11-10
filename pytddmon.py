@@ -443,7 +443,7 @@ class TkGUI(object):
         "building fonts"
         import tkFont
         if ON_WINDOWS:
-            self.title_font = tkFont.nametofont("dtTitleBar")
+            self.title_font = tkFont.nametofont("TkCaptionFont")
         else:
             self.title_font = tkFont.nametofont("systemWindowTitleFont")
         self.button_font = tkFont.Font(name="Helvetica", size=28)
