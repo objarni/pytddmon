@@ -86,7 +86,7 @@ class Pytddmon(object):
         return changed_files
 
     def run_tests(self, file_paths=None):
-        """Runns all tests and updates the time it took and the total test run
+        """Runs all tests and updates the time it took and the total test run
         and passed."""
         import time
         file_paths = file_paths if file_paths != None else []
@@ -133,7 +133,7 @@ class DefaultHasher(object):
 
 
 class StaticFileStartegy(object):
-    """Looks for changeds in a static set of files."""
+    """Looks for changes in a static set of files."""
     def __init__(self, file_paths, hasher=DefaultHasher(os)):
         self.file_paths = None
         self.last_hash = None
@@ -141,7 +141,7 @@ class StaticFileStartegy(object):
         self.hasher = hasher
 
     def change_file_set(self, file_paths):
-        """Used to change what set of files that are monitored for change"""
+        """Used to change what set of files are monitored for change"""
         self.file_paths = set([
             os.path.abspath(file_path) for file_path in file_paths
         ])
@@ -171,7 +171,7 @@ class StaticFileStartegy(object):
 
 
 class RecursiveRegexpFileStartegy(object):
-    """Looks for files recursivly from a root dir with a specific regexp
+    """Looks for files recursively from a root dir with a specific regexp
     pattern."""
     def __init__(self, root, expr, walker=os.walk, hasher=DefaultHasher(os)):
         self.walker = walker
@@ -181,7 +181,7 @@ class RecursiveRegexpFileStartegy(object):
         self.pares = []
 
     def get_pares(self):
-        """calculates the new list of pares (path, hash)"""
+        """calculates a new list of (path, hash) pairs"""
         file_paths = set()
         for path, _folder, filenames in self.walker(self.root):
             for filename in filenames:
@@ -194,7 +194,7 @@ class RecursiveRegexpFileStartegy(object):
         ]
 
     def which_files_has_changed(self):
-        """Looks for files recursivly from a root dir with a specific regexp"""
+        """Looks for files recursively from a root dir with a specific regexp"""
         new_pares = self.get_pares()
         new = set(new_pares)
         old = set(self.pares)
@@ -224,14 +224,14 @@ def log_exceptions(func):
     from functools import wraps
 
     @wraps(func)
-    def wraper(*a, **k):
+    def wrapper(*a, **k):
         "Docstring"
         try:
             return func(*a, **k)
         except:
             import traceback
             return (0, 1j, traceback.format_exc())
-    return wraper
+    return wrapper
 
 
 ####
@@ -298,7 +298,7 @@ def run_doctests(arguments):
 
 
 class StaticTestStrategy(StaticFileStartegy):
-    """Runns a Static set of files as if thay where Unitttest suits. They must
+    """Runs a Static set of files as if thay where Unitttest suits. They must
     however be on the python path or be inside a package that are on the path.
     """
     def __init__(
@@ -314,7 +314,7 @@ class StaticTestStrategy(StaticFileStartegy):
         )
 
     def run_tests(self, _file_paths, pool=True):
-        """Runns all staticly selected files as if they where UnitTests"""
+        """Runs all staticly selected files as if they where UnitTests"""
         from multiprocessing import Pool
         file_paths_to_run = []
         for file_path in self.file_paths:
@@ -335,7 +335,7 @@ class StaticTestStrategy(StaticFileStartegy):
 
 
 class RecursiveRegexpTestStartegy(object):
-    """Recursivly looking for tests in packages with a filename matching the
+    """Recursively look for tests in packages with a filename matching the
     regexpr."""
     def __init__(self, root, expr, test_runner, walker=os.walk):
         self.test_runner = test_runner
@@ -345,7 +345,7 @@ class RecursiveRegexpTestStartegy(object):
 
     @staticmethod
     def is_package(path, folder):
-        """Check if folder in path is a package"""
+        """Check if folder is a package"""
         return os.path.isfile(os.path.join(path, folder, "__init__.py"))
 
     def find_tests(self):
