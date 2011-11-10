@@ -414,6 +414,9 @@ class TkGUI(object):
         self.building_tkinter()
         self.root = None
         self.building_root()
+        self.title_font = None
+        self.button_font = None
+        self.building_fonts()
         self.frame = None
         self.building_frame()
         self.button = None
@@ -436,8 +439,18 @@ class TkGUI(object):
             self.root.attributes("-toolwindow", 1)
             print("Minimize me!")
 
+    def building_fonts(self):
+        "building fonts"
+        import tkFont
+        if ON_WINDOWS:
+            self.title_font = tkFont.nametofont("System")
+        else:
+            self.title_font = tkFont.nametofont("systemWindowTitleFont")
+        self.button_font = tkFont.Font(name="Helvetica", size=28)
+
     def building_frame(self):
         """Creates a frame and assigns it to self.frame"""
+        # Calculate the width of the tilte + buttons
         self.frame = self.tkinter.Frame(self.root)
         # Sets the title of the gui
         self.frame.master.title(self.pytddmon.project_name)
@@ -450,7 +463,7 @@ class TkGUI(object):
             self.frame,
             text="loading...",
             relief='raised',
-            font=("Helvetica", 28),
+            font=self.button_font,
             justify=self.tkinter.CENTER,
             anchor=self.tkinter.CENTER
         )
@@ -469,15 +482,25 @@ class TkGUI(object):
         light, color = self.color_picker.pick()
         rgb = self.color_picker.translate_colure(light, color)
         self.color_picker.pulse()
+        text = "%r/%r" % (
+            self.pytddmon.total_tests_passed,
+            self.pytddmon.total_tests_run
+        )
+
+        if ON_WINDOWS:
+            base_x = 40
+        else:
+            base_x = 55
+        project_name_length = self.title_font.measure(self.pytddmon.project_name)
+        message_width = self.button_font.measure(text)
+        padx = (project_name_length - message_width)/2 + base_x
+
         self.button.configure(
             bg=rgb,
             activebackground=rgb,
-            text="%r/%r" % (
-                self.pytddmon.total_tests_passed,
-                self.pytddmon.total_tests_run
-            )
+            text=text,
+            padx=padx
         )
-
     def display_log_message(self, _arg):
         """displays the logmessage from pytddmon in a window"""
         self.message_window(
