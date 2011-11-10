@@ -12,12 +12,17 @@ class FakeOsModule(object):
         self.st_size, self.st_mtime = self.stats.next()
         return self
 
+    def stat_float_times(self, boolean):
+        pass
+
 class FakeErrorOsModule(object):
     def stat(self, file_path):
         raise IOError(
             "OSError: [Errno 2] No such file or directory: '%s'" %
             file_path
         )
+    def stat_float_times(self, boolean):
+        pass
 
 class DefaultHasherTester(unittest.TestCase):
 
