@@ -1,6 +1,6 @@
 import unittest
 
-from pytddmon import DefaultHasher
+from pytddmon import DefaultHasher, ON_PYTHON3
 
 class FakeOsModule(object):
     def __init__(self, stats):
@@ -9,7 +9,10 @@ class FakeOsModule(object):
         self.st_mtime = 0
 
     def stat(self, file_path):
-        self.st_size, self.st_mtime = self.stats.next()
+        if ON_PYTHON3:
+            self.st_size, self.st_mtime = self.stats.__next__()
+        else:
+            self.st_size, self.st_mtime = self.stats.next()
         return self
 
     def stat_float_times(self, boolean):

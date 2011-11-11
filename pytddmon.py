@@ -62,7 +62,8 @@ class Pytddmon(object):
         self,
         project_name="<pytddmon>",
         file_strategies=None,
-        test_strategies=None
+        test_strategies=None,
+        log_level=None
     ):
         self.project_name = project_name
         # The different ways pytddmon can find changes to a project
@@ -76,7 +77,12 @@ class Pytddmon(object):
         self.total_tests_run = 0
         self.total_tests_passed = 0
         self.last_testrun_time = -1
+<<<<<<< mine
+        self.log_level = log_level
+        self.test_logger = DefaultLogger()
+=======
         self.test_logs = []
+>>>>>>> theirs
 
     def which_files_has_changed(self):
         """Returns list of changed files."""
@@ -93,12 +99,11 @@ class Pytddmon(object):
         start = time.time()
         self.total_tests_run = 0
         self.total_tests_passed = 0
-        self.test_logs = []
+        self.test_logger = DefaultLogger()
         for test_strategy in self.test_strategies:
-            passed, tests_run, log = test_strategy.run_tests(file_paths)
+            passed, tests_run = test_strategy.run_tests(file_paths, logger=self.test_logger)
             self.total_tests_run += tests_run
             self.total_tests_passed += passed
-            self.test_logs.append(log)
         self.last_testrun_time = time.time() - start
 
     def main(self):
@@ -107,10 +112,57 @@ class Pytddmon(object):
         if file_paths != []:
             self.run_tests(file_paths)
 
-    def get_logs(self):
-        """Creates a readable log of the all test strategies run"""
-        return "===Log delimeter===\n".join(self.test_logs)
+    def get_loggs(self):
+        """Creates a readabel log of the all test strategies run"""
+        log = self.test_logger.getlog(self.log_level)
+        return log
 
+class DefaultLogger(object):
+    """class that handels accumilation of loggs. It also take care of tagging
+    logs so that you can qury for specific log messages."""
+    levels = {
+        None: int("1111",2),
+        "info": int("1",2),
+        "warning": int("10",2),
+        "error": int("100",2),
+        "debug": int("1000",2),
+        "all": int("1111",2)
+    }
+
+    levels_back = dict(
+        (value, key)
+        for key, value in levels.items() if key!=None
+    )
+
+    def __init__(self):
+        # loggs is a list with int keys and list with strings as values
+        self.loggs = []
+
+    def getlog(self, level=None):
+        level = self.level_2_int(level)
+        return "\n".join(
+            "[%s]%s" % (
+                self.int_2_level(level_),
+                log
+            )
+            for level_, log in self.loggs if level_ & level
+        )
+
+    @classmethod
+    def level_2_int(cls, level=None):
+        return cls.levels.get(level, level)
+    @classmethod
+    def int_2_level(cls, level):
+        return cls.levels_back.get(level, "Un Known")
+
+    def log(self, log, level=None):
+        level = self.level_2_int(level)
+        self.loggs.append(
+            (level, log)
+        )
+            
+        
+    
 ####
 ## Hashing
 ####
@@ -127,6 +179,8 @@ class DefaultHasher(object):
         """Se Class description."""
         stat = self.os_module.stat(file_path)
         return stat.st_size + (stat.st_mtime * 1j) + hash(file_path)
+
+
 ####
 ## File Strategies
 ####
@@ -324,14 +378,19 @@ class StaticTestStrategy(StaticFileStartegy):
             results = pool.map(self.test_runner, file_paths_to_run)
         else:
             results = map(self.test_runner, file_paths_to_run)
-        logs = []
         all_green = 0
         all_total = 0
         for (green, total, log), (_rt, pth) in zip(results, file_paths_to_run):
             all_green += green
             all_total += total
-            logs.append("file:%s\n%s" % (pth, log))
-        return (all_green, all_total, "\n".join(logs))
+            if green.imag != 0 or total.imag != 0:
+                level = "error"
+            elif green == total:
+                level = "info"
+            else:
+                level = "warning"
+            logger.log(log, level=level)
+        return (all_green, all_total)
 
 
 class RecursiveRegexpTestStartegy(object):
@@ -375,7 +434,7 @@ class RecursiveRegexpTestStartegy(object):
                     pass
         return file_paths_to_run
 
-    def run_tests(self, _file_paths, pool=True):
+    def run_tests(self, _file_paths, logger, pool=True):
         """finds and run all tests"""
         from multiprocessing import Pool
 
@@ -393,12 +452,17 @@ class RecursiveRegexpTestStartegy(object):
             )
         all_green = 0
         all_total = 0
-        logs = []
         for (green, total, log), (_rt, pth) in zip(results, file_paths_to_run):
             all_green += green
             all_total += total
-            logs.append("file:%s\n%s" % (pth, log))
-        return (all_green, all_total, "\n".join(logs))
+            if green.imag != 0 or total.imag != 0:
+                level = "error"
+            elif green == total:
+                level = "info"
+            else:
+                level = "warning"
+            logger.log(log, level=level)
+        return (all_green, all_total)
 
 
 ####
@@ -415,11 +479,26 @@ class TkGUI(object):
         self.building_tkinter()
         self.root = None
         self.building_root()
+        self.title_font = None
+        self.button_font = None
+        self.building_fonts()
         self.frame = None
         self.building_frame()
         self.button = None
         self.building_button()
         self.frame.grid()
+
+        if ON_WINDOWS:
+            buttons_width = 25
+        else:
+            buttons_width = 75
+        self.root.minsize(
+            width=self.title_font.measure(
+                self.pytddmon.project_name
+            ) + buttons_width, 
+            height=0
+        )
+        self.frame.pack(expand=1, fill="both")
 
     def building_tkinter(self):
         """imports the tkinter module as self.tkinter"""
@@ -437,13 +516,26 @@ class TkGUI(object):
             self.root.attributes("-toolwindow", 1)
             print("Minimize me!")
 
+    def building_fonts(self):
+        "building fonts"
+        if not ON_PYTHON3:
+            import tkFont
+        else:
+            from tkinter import font as tkFont 
+        self.title_font = tkFont.nametofont("TkCaptionFont")
+        self.button_font = tkFont.Font(name="Helvetica", size=28)
+
     def building_frame(self):
         """Creates a frame and assigns it to self.frame"""
-        self.frame = self.tkinter.Frame(self.root)
+        # Calculate the width of the tilte + buttons
+        self.frame = self.tkinter.Frame(
+            self.root
+        )
         # Sets the title of the gui
         self.frame.master.title(self.pytddmon.project_name)
         # Forces the window to not be resizeable
         self.frame.master.resizable(False, False)
+        self.frame.pack(expand=1, fill="both")
 
     def building_button(self):
         """Builds  abutton and assign it to self.button"""
@@ -451,7 +543,7 @@ class TkGUI(object):
             self.frame,
             text="loading...",
             relief='raised',
-            font=("Helvetica", 28),
+            font=self.button_font,
             justify=self.tkinter.CENTER,
             anchor=self.tkinter.CENTER
         )
@@ -460,6 +552,7 @@ class TkGUI(object):
             self.display_log_message
         )
         self.button.pack(expand=1, fill="both")
+        
 
     def update(self):
         """updates the tk gui"""
@@ -470,13 +563,18 @@ class TkGUI(object):
         light, color = self.color_picker.pick()
         rgb = self.color_picker.translate_colure(light, color)
         self.color_picker.pulse()
+        text = "%r/%r" % (
+            self.pytddmon.total_tests_passed,
+            self.pytddmon.total_tests_run
+        )
+
         self.button.configure(
             bg=rgb,
             activebackground=rgb,
-            text="%r/%r" % (
-                self.pytddmon.total_tests_passed,
-                self.pytddmon.total_tests_run
-            )
+            text=text
+        )
+        self.root.configure(
+            bg=rgb,
         )
 
     def display_log_message(self, _arg):
@@ -680,7 +778,8 @@ def run():
     pytddmon = Pytddmon(
         project_name=os.path.basename(os.getcwd()),
         file_strategies=file_strategies,
-        test_strategies=test_strategies
+        test_strategies=test_strategies,
+        log_level=DefaultLogger.levels["error"] | DefaultLogger.levels["warning"]
     )
     if test_mode:
         pytddmon.main()

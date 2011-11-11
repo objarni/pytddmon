@@ -24,10 +24,10 @@ class StaticFileStartegyTest(unittest.TestCase):
         all_files = sorted(
             ["/file1.py", "/data1.dat"]
         )
-        all_files = map(
-            os.path.abspath,
-            all_files
-        )
+        all_files = [
+            os.path.abspath(file_path)
+            for file_path in all_files
+        ]
         sfs = StaticFileStartegy(all_files, hasher=hasher)
         out = sorted(
             sfs.which_files_has_changed() 
@@ -40,10 +40,10 @@ class StaticFileStartegyTest(unittest.TestCase):
     def test_one_file_change_of_two(self):
         hasher = FakeHasher()
         all_files = ["/file1.py", "/data1.dat"]
-        all_files = map(
-            os.path.abspath,
-            all_files
-        )
+        all_files = [
+            os.path.abspath(file_path)
+            for file_path in all_files
+        ]
         sfs = StaticFileStartegy(all_files, hasher=hasher)
         sfs.which_files_has_changed()
         hasher.change_file(all_files[-1])

@@ -1,6 +1,8 @@
 import unittest
 import os.path
 from pytddmon import StaticTestStrategy
+from pytddmon import ON_PYTHON3
+from pytddmon import DefaultLogger
 
 
 class FakeHasher(object):
@@ -26,11 +28,18 @@ class StaticTestRunner(object):
         self.things = things
         self.iter = iter(self.things)
     def __call__(self,argument):
-        try:
-            return self.iter.next()
-        except:
-            self.iter = iter(self.thing)
-            return self.iter.next()
+        if ON_PYTHON3:
+            try:
+                return self.iter.__next__()
+            except:
+                self.iter = iter(self.thing)
+                return self.iter.__next__()
+        else:
+            try:
+                return self.iter.next()
+            except:
+                self.iter = iter(self.thing)
+                return self.iter.next()
         
 
 class StaticTestStrategyTestCase(unittest.TestCase):
@@ -43,7 +52,7 @@ class StaticTestStrategyTestCase(unittest.TestCase):
             test_runner=rtr,
             hasher=FakeHasher()
         )
-        sts.run_tests([], pool=False)
+        sts.run_tests([], DefaultLogger(), pool=False)
         file_names = map(os.path.basename, rtr.file_paths)
         assert sorted(file_names) == sorted(files)
 
@@ -60,7 +69,7 @@ class StaticTestStrategyTestCase(unittest.TestCase):
             test_runner=strunner,
             hasher=FakeHasher()
         )
-        greens, total, log = sts.run_tests([], pool=False)
+        greens, total, log = sts.run_tests([], DefaultLogger(), pool=False)
         assert greens==2 and total == 2
         
         
