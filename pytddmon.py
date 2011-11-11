@@ -442,10 +442,7 @@ class TkGUI(object):
     def building_fonts(self):
         "building fonts"
         import tkFont
-        if ON_WINDOWS:
-            self.title_font = tkFont.nametofont("TkCaptionFont")
-        else:
-            self.title_font = tkFont.nametofont("systemWindowTitleFont")
+        self.title_font = tkFont.nametofont("TkCaptionFont")
         self.button_font = tkFont.Font(name="Helvetica", size=28)
 
     def building_frame(self):
@@ -488,9 +485,9 @@ class TkGUI(object):
         )
 
         if ON_WINDOWS:
-            base_x = 40
+            base_x = 20
         else:
-            base_x = 55
+            base_x = 35
         project_name_length = self.title_font.measure(self.pytddmon.project_name)
         message_width = self.button_font.measure(text)
         padx = (project_name_length - message_width)/2 + base_x
