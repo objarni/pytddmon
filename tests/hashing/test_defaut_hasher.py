@@ -1,6 +1,6 @@
 import unittest
 
-from pytddmon import DefaultHasher, ON_PYHTON3
+from pytddmon import DefaultHasher, ON_PYTHON3
 
 class FakeOsModule(object):
     def __init__(self, stats):
