@@ -423,6 +423,18 @@ class TkGUI(object):
         self.building_button()
         self.frame.grid()
 
+        if ON_WINDOWS:
+            buttons_width = 25
+        else:
+            buttons_width = 75
+        self.root.minsize(
+            width=self.title_font.measure(
+                self.pytddmon.project_name
+            ) + buttons_width, 
+            height=0
+        )
+        self.frame.pack(expand=1, fill="both")
+
     def building_tkinter(self):
         """imports the tkinter module as self.tkinter"""
         if not ON_PYTHON3:
@@ -448,11 +460,14 @@ class TkGUI(object):
     def building_frame(self):
         """Creates a frame and assigns it to self.frame"""
         # Calculate the width of the tilte + buttons
-        self.frame = self.tkinter.Frame(self.root)
+        self.frame = self.tkinter.Frame(
+            self.root
+        )
         # Sets the title of the gui
         self.frame.master.title(self.pytddmon.project_name)
         # Forces the window to not be resizeable
         self.frame.master.resizable(False, False)
+        self.frame.pack(expand=1, fill="both")
 
     def building_button(self):
         """Builds  abutton and assign it to self.button"""
@@ -469,6 +484,7 @@ class TkGUI(object):
             self.display_log_message
         )
         self.button.pack(expand=1, fill="both")
+        
 
     def update(self):
         """updates the tk gui"""
@@ -484,19 +500,13 @@ class TkGUI(object):
             self.pytddmon.total_tests_run
         )
 
-        if ON_WINDOWS:
-            base_x = 20
-        else:
-            base_x = 35
-        project_name_length = self.title_font.measure(self.pytddmon.project_name)
-        message_width = self.button_font.measure(text)
-        padx = (project_name_length - message_width)/2 + base_x
-
         self.button.configure(
             bg=rgb,
             activebackground=rgb,
-            text=text,
-            padx=padx
+            text=text
+        )
+        self.root.configure(
+            bg=rgb,
         )
     def display_log_message(self, _arg):
         """displays the logmessage from pytddmon in a window"""
