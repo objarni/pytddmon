@@ -108,7 +108,7 @@ class Pytddmon(object):
         if file_paths != []:
             self.run_tests(file_paths)
 
-    def get_loggs(self):
+    def get_logs(self):
         """Creates a readabel log of the all test strategies run"""
         log = self.test_logger.getlog(self.log_level)
         return log
@@ -363,7 +363,7 @@ class StaticTestStrategy(StaticFileStartegy):
             hasher=hasher
         )
 
-    def run_tests(self, _file_paths, pool=True):
+    def run_tests(self, _file_paths, logger, pool=True):
         """Runs all staticly selected files as if they where UnitTests"""
         from multiprocessing import Pool
         file_paths_to_run = []

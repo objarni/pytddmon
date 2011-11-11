@@ -69,7 +69,7 @@ class StaticTestStrategyTestCase(unittest.TestCase):
             test_runner=strunner,
             hasher=FakeHasher()
         )
-        greens, total, log = sts.run_tests([], DefaultLogger(), pool=False)
+        greens, total = sts.run_tests([], DefaultLogger(), pool=False)
         assert greens==2 and total == 2
         
         
