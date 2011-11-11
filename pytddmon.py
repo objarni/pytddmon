@@ -68,7 +68,8 @@ class Pytddmon(object):
         self,
         project_name="<pytddmon>",
         file_strategies=None,
-        test_strategies=None
+        test_strategies=None,
+        log_level=None
     ):
         self.project_name = project_name
         # The different ways pytddmon can find changes to a project
@@ -82,7 +83,8 @@ class Pytddmon(object):
         self.total_tests_run = 0
         self.total_tests_passed = 0
         self.last_testrun_time = -1
-        self.test_loggs = []
+        self.log_level = log_level
+        self.test_logger = DefaultLogger()
 
     def which_files_has_changed(self):
         """Returns list of changed files."""
@@ -99,12 +101,11 @@ class Pytddmon(object):
         start = time.time()
         self.total_tests_run = 0
         self.total_tests_passed = 0
-        self.test_loggs = []
+        self.test_logger = DefaultLogger()
         for test_strategy in self.test_strategies:
-            passed, tests_run, log = test_strategy.run_tests(file_paths)
+            passed, tests_run = test_strategy.run_tests(file_paths, logger=self.test_logger)
             self.total_tests_run += tests_run
             self.total_tests_passed += passed
-            self.test_loggs.append(log)
         self.last_testrun_time = time.time() - start
 
     def main(self):
@@ -115,7 +116,8 @@ class Pytddmon(object):
 
     def get_loggs(self):
         """Creates a readabel log of the all test strategies run"""
-        return "===Log delemeter===\n".join(self.test_loggs)
+        log = self.test_logger.getlog(self.log_level)
+        return log
 
 class DefaultLogger(object):
     """class that handels accumilation of loggs. It also take care of tagging
@@ -145,7 +147,7 @@ class DefaultLogger(object):
                 self.int_2_level(level_),
                 log
             )
-            for level_, log in self.loggs if level_ | level
+            for level_, log in self.loggs if level_ & level
         )
 
     @classmethod
@@ -359,7 +361,7 @@ class StaticTestStrategy(StaticFileStartegy):
             hasher=hasher
         )
 
-    def run_tests(self, _file_paths, pool=True):
+    def run_tests(self, _file_paths, logger, pool=True):
         """Runns all staticly selected files as if they where UnitTests"""
         from multiprocessing import Pool
         file_paths_to_run = []
@@ -376,7 +378,13 @@ class StaticTestStrategy(StaticFileStartegy):
         for (green, total, log), (_rt, pth) in zip(results, file_paths_to_run):
             all_green += green
             all_total += total
-            loggs.append("file:%s\n%s" % (pth, log))
+            if green.imag != 0 or total.imag != 0:
+                level = "error"
+            elif green == total:
+                level = "info"
+            else:
+                level = "warning"
+            logger.log(log, level=level)
         return (all_green, all_total, "\n".join(loggs))
 
 
@@ -421,7 +429,7 @@ class RecursiveRegexpTestStartegy(object):
                     pass
         return file_paths_to_run
 
-    def run_tests(self, _file_paths, pool=True):
+    def run_tests(self, _file_paths, logger, pool=True):
         """finds and run all tests"""
         from multiprocessing import Pool
 
@@ -439,12 +447,17 @@ class RecursiveRegexpTestStartegy(object):
             )
         all_green = 0
         all_total = 0
-        loggs = []
         for (green, total, log), (_rt, pth) in zip(results, file_paths_to_run):
             all_green += green
             all_total += total
-            loggs.append("file:%s\n%s" % (pth, log))
-        return (all_green, all_total, "\n".join(loggs))
+            if green.imag != 0 or total.imag != 0:
+                level = "error"
+            elif green == total:
+                level = "info"
+            else:
+                level = "warning"
+            logger.log(log, level=level)
+        return (all_green, all_total)
 
 
 ####
@@ -558,6 +571,7 @@ class TkGUI(object):
         self.root.configure(
             bg=rgb,
         )
+
     def display_log_message(self, _arg):
         """displays the logmessage from pytddmon in a window"""
         self.message_window(
@@ -759,7 +773,8 @@ def run():
     pytddmon = Pytddmon(
         project_name=os.path.basename(os.getcwd()),
         file_strategies=file_strategies,
-        test_strategies=test_strategies
+        test_strategies=test_strategies,
+        log_level=DefaultLogger.levels["error"] | DefaultLogger.levels["warning"]
     )
     if test_mode:
         pytddmon.main()

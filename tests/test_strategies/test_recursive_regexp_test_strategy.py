@@ -1,6 +1,7 @@
 import unittest
 import os.path
 from pytddmon import RecursiveRegexpTestStartegy, ON_PYTHON3
+from pytddmon import DefaultLogger
 
 
 class RememberTestRunner(object):
@@ -46,7 +47,7 @@ class RecursiveRegexpTestStrategyTestCase(unittest.TestCase):
             test_runner=rtr,
             walker=lambda root:((root, [], all_files) for n in [None])
         )
-        rrts.run_tests([], pool=False)
+        rrts.run_tests([], DefaultLogger(), pool=False)
         file_names = [
             os.path.basename(file_path)
             for file_path in rtr.file_paths
@@ -74,7 +75,7 @@ class RecursiveRegexpTestStrategyTestCase(unittest.TestCase):
             test_runner=strunner,
             walker=lambda root:((root, [], all_files) for n in [None])
         )
-        green, totals, log = rrts.run_tests([], pool=False)
+        green, totals = rrts.run_tests([], DefaultLogger(), pool=False)
         assert green==3 and totals==3, "greens=%r, totals=%r" % (
             green,
             total

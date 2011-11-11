@@ -6,10 +6,10 @@ class FakeTestStrategy(object):
     def __init__(self):
         self.run = False
         self.files = []
-    def run_tests(self, filepaths=None):
+    def run_tests(self, filepaths=None, logger=None):
         self.run = True
         self.files = filepaths
-        return (0, 0, "")
+        return (0, 0)
 
 class PytddmonTestCase(unittest.TestCase):
     def test_which_files_hash_changed(self):
