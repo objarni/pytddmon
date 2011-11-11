@@ -441,7 +441,10 @@ class TkGUI(object):
 
     def building_fonts(self):
         "building fonts"
-        import tkFont
+        if not ON_PYTHON3:
+            import tkFont
+        else:
+            from tkinter import font as tkFont 
         self.title_font = tkFont.nametofont("TkCaptionFont")
         self.button_font = tkFont.Font(name="Helvetica", size=28)
 
