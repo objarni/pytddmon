@@ -1,6 +1,6 @@
 import unittest
 import os.path
-from pytddmon import RecursiveRegexpTestStartegy
+from pytddmon import RecursiveRegexpTestStartegy, ON_PYTHON3
 
 
 class RememberTestRunner(object):
@@ -19,11 +19,18 @@ class StaticTestRunner(object):
         self.things = things
         self.iter = iter(self.things)
     def __call__(self,argument):
-        try:
-            return self.iter.next()
-        except:
-            self.iter = iter(self.thing)
-            return self.iter.next()
+        if ON_PYTHON3:
+            try:
+                return self.iter.__next__()
+            except:
+                self.iter = iter(self.thing)
+                return self.iter.__next__()
+        else:
+            try:
+                return self.iter.next()
+            except:
+                self.iter = iter(self.thing)
+                return self.iter.next()
         
 
 class RecursiveRegexpTestStrategyTestCase(unittest.TestCase):
@@ -40,7 +47,10 @@ class RecursiveRegexpTestStrategyTestCase(unittest.TestCase):
             walker=lambda root:((root, [], all_files) for n in [None])
         )
         rrts.run_tests([], pool=False)
-        file_names = map(os.path.basename, rtr.file_paths)
+        file_names = [
+            os.path.basename(file_path)
+            for file_path in rtr.file_paths
+        ]
         sorted_file_names = sorted(file_names)
         sorted_test_files = sorted(test_files)
         assert sorted_file_names == sorted_test_files ,"%r!=%r" % (
