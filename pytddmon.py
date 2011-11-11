@@ -117,11 +117,11 @@ class Pytddmon(object):
         """Creates a readabel log of the all test strategies run"""
         return "===Log delemeter===\n".join(self.test_loggs)
 
-class Logger(object):
+class DefaultLogger(object):
     """class that handels accumilation of loggs. It also take care of tagging
     logs so that you can qury for specific log messages."""
     levels = {
-        None: int("1",2),
+        None: int("1111",2),
         "info": int("1",2),
         "warning": int("10",2),
         "error": int("100",2),
@@ -131,25 +131,22 @@ class Logger(object):
 
     levels_back = dict(
         (value, key)
-        for key, value in levels.items()
+        for key, value in levels.items() if key!=None
     )
 
     def __init__(self):
-        # loggs is a dict with int keys and list with strings as values
-        self.loggs = {}
+        # loggs is a list with int keys and list with strings as values
+        self.loggs = []
 
     def getlog(self, level=None):
-        if level != None:
-            level = self.level_2_int(level)
-            return "\n".join(
-                "\n".join(logg_list)
-                for level_, logg_list in self.loggs.items() if level_ | level
+        level = self.level_2_int(level)
+        return "\n".join(
+            "[%s]%s" % (
+                self.int_2_level(level_),
+                log
             )
-        else:
-            return "\n".join(
-                "\n".join(logg_list)
-                for logg_list in self.loggs.values()
-            )
+            for level_, log in self.loggs if level_ | level
+        )
 
     @classmethod
     def level_2_int(cls, level=None):
@@ -160,7 +157,9 @@ class Logger(object):
 
     def log(self, log, level=None):
         level = self.level_2_int(level)
-        self.loggs[level].append(log)
+        self.loggs.append(
+            (level, log)
+        )
             
         
     
