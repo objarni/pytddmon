@@ -77,12 +77,8 @@ class Pytddmon(object):
         self.total_tests_run = 0
         self.total_tests_passed = 0
         self.last_testrun_time = -1
-<<<<<<< mine
         self.log_level = log_level
         self.test_logger = DefaultLogger()
-=======
-        self.test_logs = []
->>>>>>> theirs
 
     def which_files_has_changed(self):
         """Returns list of changed files."""
