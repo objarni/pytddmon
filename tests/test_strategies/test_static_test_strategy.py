@@ -1,6 +1,6 @@
 import unittest
 import os.path
-from pytddmon import StaticTestStrategy
+from pytddmon import StaticTestStrategy, ON_PYTHON3
 
 
 class FakeHasher(object):
@@ -26,11 +26,18 @@ class StaticTestRunner(object):
         self.things = things
         self.iter = iter(self.things)
     def __call__(self,argument):
-        try:
-            return self.iter.next()
-        except:
-            self.iter = iter(self.thing)
-            return self.iter.next()
+        if ON_PYTHON3:
+            try:
+                return self.iter.__next__()
+            except:
+                self.iter = iter(self.thing)
+                return self.iter.__next__()
+        else:
+            try:
+                return self.iter.next()
+            except:
+                self.iter = iter(self.thing)
+                return self.iter.next()
         
 
 class StaticTestStrategyTestCase(unittest.TestCase):
