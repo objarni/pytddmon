@@ -579,7 +579,7 @@ class TkGUI(object):
     def display_log_message(self, _arg):
         """displays the logmessage from pytddmon in a window"""
         self.message_window(
-            "monitoring: %s\ntime:%r\n%s" % (
+            "monitoring: %s\ntime: %.2f seconds\n%s" % (
                 self.pytddmon.project_name,
                 self.pytddmon.last_testrun_time,
                 self.pytddmon.get_logs()
