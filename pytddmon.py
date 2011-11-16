@@ -559,10 +559,13 @@ class TkGUI(object):
         light, color = self.color_picker.pick()
         rgb = self.color_picker.translate_colure(light, color)
         self.color_picker.pulse()
-        text = "%r/%r" % (
-            self.pytddmon.total_tests_passed,
-            self.pytddmon.total_tests_run
-        )
+        if self.pytddmon.total_tests_run.imag!=0:
+            text = "*%i*" % self.pytddmon.total_tests_run.imag
+        else:
+            text = "%r/%r" % (
+                self.pytddmon.total_tests_passed,
+                self.pytddmon.total_tests_run
+            )
 
         self.button.configure(
             bg=rgb,
