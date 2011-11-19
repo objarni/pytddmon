@@ -3,15 +3,7 @@ import os.path
 from pytddmon import StaticTestStrategy
 from pytddmon import ON_PYTHON3
 from pytddmon import DefaultLogger
-
-
-class FakeHasher(object):
-    def __init__(self):
-        self.file_paths = {}
-    def __call__(self, file_path):
-        return self.file_paths.get(file_path, 0)
-    def change_file(self, file_path):
-        self.file_paths[file_path] = self.file_paths.get(file_path, 0) + 1
+from tests.fakes import FakeHasher
 
 class RememberTestRunner(object):
     def __init__(self):
