@@ -20,6 +20,7 @@ Rafael Capucho
     Python shebang at start of script, enabling "./pytddmon.py" on unix systems
 Ilian Iliev
     Use integers instead of floats in file modified time (checksum calc)
+    Auto-update of text in Details window when the log changes
 
 LICENSE
 Permission is hereby granted, free of charge, to any person obtaining a copy
