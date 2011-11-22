@@ -79,6 +79,7 @@ class Pytddmon(object):
         self.last_testrun_time = -1
         self.log_level = log_level
         self.test_logger = DefaultLogger()
+        self.files_are_changed = False
 
     def which_files_has_changed(self):
         """Returns list of changed files."""
@@ -105,7 +106,9 @@ class Pytddmon(object):
     def main(self):
         """This is the main loop body"""
         file_paths = self.which_files_has_changed()
+        self.files_are_changed = False
         if file_paths != []:
+            self.files_are_changed = True
             self.run_tests(file_paths)
 
     def get_logs(self):
@@ -483,6 +486,8 @@ class TkGUI(object):
         self.button = None
         self.building_button()
         self.frame.grid()
+        self.message_window = None
+        self.text = None
 
         if ON_WINDOWS:
             buttons_width = 25
@@ -548,7 +553,12 @@ class TkGUI(object):
             self.display_log_message
         )
         self.button.pack(expand=1, fill="both")
-        
+
+    def window_is_open(self):
+        """checks whether the textwdiget windows is open"""
+        if not self.message_window or not self.message_window.winfo_exists():
+            return False
+        return True
 
     def update(self):
         """updates the tk gui"""
@@ -572,16 +582,45 @@ class TkGUI(object):
         self.root.configure(
             bg=rgb,
         )
+        
+        if self.pytddmon.files_are_changed and self.window_is_open():
+            self.update_text_window()
+
+    def get_text_message(self):
+        """returns the logmessage from pytddmon"""
+        message = "monitoring: %s\ntime:%r\n%s" % (
+            self.pytddmon.project_name,
+            self.pytddmon.last_testrun_time,
+            self.pytddmon.get_logs(),
+        )
+        return message
+
+    def open_text_window(self):
+        """creates new window and text widget""" 
+        win = self.tkinter.Toplevel()
+        win.wm_attributes("-topmost", 1)
+        if ON_WINDOWS:
+            win.attributes("-toolwindow", 1)
+        win.title('Details')
+        self.message_window = win
+        self.text = self.tkinter.Text(win)
+
+    def update_text_window(self):
+        """inserts/replaces the log message in the text widget"""
+        text = self.text
+        text['state'] = self.tkinter.NORMAL
+        text.delete(1.0, self.tkinter.END)
+        text.insert(self.tkinter.INSERT, self.get_text_message())
+        text.see(self.tkinter.END)
+        text['state'] = self.tkinter.DISABLED
+        text.pack(expand=1, fill='both')
+        text.focus_set()
 
     def display_log_message(self, _arg):
         """displays the logmessage from pytddmon in a window"""
-        self.message_window(
-            "monitoring: %s\ntime:%r\n%s" % (
-                self.pytddmon.project_name,
-                self.pytddmon.last_testrun_time,
-                self.pytddmon.get_logs()
-            )
-        )
+        if not self.window_is_open():
+            self.open_text_window()
+            self.update_text_window()
 
     def loop(self):
         """the main loop"""
@@ -594,19 +633,6 @@ class TkGUI(object):
         self.loop()
         self.root.mainloop()
 
-    def message_window(self, message):
-        "creates and shows a window with the message"
-        win = self.tkinter.Toplevel()
-        win.wm_attributes("-topmost", 1)
-        if ON_WINDOWS:
-            win.attributes("-toolwindow", 1)
-        win.title('Details')
-        message = message.replace('\r\n', '\n')
-        text = self.tkinter.Text(win)
-        text.insert(self.tkinter.INSERT, message)
-        text['state'] = self.tkinter.DISABLED
-        text.pack(expand=1, fill='both')
-        text.focus_set()
 
 ####
 ## Un Organized
