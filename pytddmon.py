@@ -390,6 +390,8 @@ class StaticTestStrategy(StaticFileStartegy):
             else:
                 level = "warning"
             logger.log(log, level=level)
+        if type(pool) != bool:
+            pool.terminate()
         return (all_green, all_total)
 
 
@@ -462,6 +464,8 @@ class RecursiveRegexpTestStartegy(object):
             else:
                 level = "warning"
             logger.log(log, level=level)
+        if type(pool) != bool:
+            pool.terminate()
         return (all_green, all_total)
 
 
