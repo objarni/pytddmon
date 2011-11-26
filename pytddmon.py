@@ -232,9 +232,9 @@ class RecursiveRegexpFileStartegy(object):
         self.hasher = hasher
         self.root = os.path.abspath(root)
         self.expr = expr
-        self.pares = []
+        self.pairs = []
 
-    def get_pares(self):
+    def get_pairs(self):
         """calculates a new list of (path, hash) pairs"""
         file_paths = set()
         for path, _folder, filenames in self.walker(self.root):
@@ -249,12 +249,12 @@ class RecursiveRegexpFileStartegy(object):
 
     def which_files_has_changed(self):
         """Looks for files recursively from a root dir with a specific regexp"""
-        new_pares = self.get_pares()
-        new = set(new_pares)
-        old = set(self.pares)
+        new_pairs = self.get_pairs()
+        new = set(new_pairs)
+        old = set(self.pairs)
         paths = new.symmetric_difference(old)
         paths = [path for path, _file_hash in paths]
-        self.pares = new_pares
+        self.pairs = new_pairs
         return paths
 
 
