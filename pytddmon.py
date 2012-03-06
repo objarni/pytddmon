@@ -118,8 +118,8 @@ class Pytddmon(object):
         return log
 
 class DefaultLogger(object):
-    """class that handels accumilation of loggs. It also take care of tagging
-    logs so that you can qury for specific log messages."""
+    """class that handels accumulation of logs. It also take care of tagging
+    logs so that you can query for specific log messages."""
     levels = {
         None: int("1111",2),
         "info": int("1",2),
@@ -572,7 +572,7 @@ class TkGUI(object):
             self.pytddmon.total_tests_run,
         )
         light, color = self.color_picker.pick()
-        rgb = self.color_picker.translate_colure(light, color)
+        rgb = self.color_picker.translate_color(light, color)
         self.color_picker.pulse()
         if self.pytddmon.total_tests_run.imag!=0:
             text = "*%i*" % self.pytddmon.total_tests_run.imag
@@ -734,7 +734,7 @@ class ColorPicker:
             self.reset_pulse()
 
     @classmethod
-    def translate_colure(cls, light, color):
+    def translate_color(cls, light, color):
         """helper method to create a rgb string"""
         return "#" + cls.color_table[(light, color)]
 
