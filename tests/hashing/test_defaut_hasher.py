@@ -46,8 +46,7 @@ class DefaultHasherTester(unittest.TestCase):
     def test_when_file_dont_exist(self):
         os_module = FakeErrorOsModule()
         hasher = DefaultHasher(os_module)
-        with self.assertRaises(IOError):
-            hasher("")
+        self.assertRaises(IOError, hasher, "")
         
         
         
