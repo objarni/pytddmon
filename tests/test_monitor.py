@@ -82,5 +82,18 @@ class test_change_detection(unittest.TestCase):
         change_detected = monitor.look_for_changes()
         assert change_detected
 
+    def test_file_order_does_not_matter(self):
+        files = ['file', 'file2']
+        def file_finder():
+            return files
+        def get_file_size(file):
+            return 1
+        def get_file_modification_time(file):
+            return 1
+        monitor = Monitor(file_finder, get_file_size, get_file_modification_time)
+        files[:] = ['file2', 'file']
+        change_detected = monitor.look_for_changes()
+        assert not change_detected
+
 if __name__ == '__main__':
     unittest.main()
