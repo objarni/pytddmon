@@ -117,6 +117,29 @@ class Pytddmon(object):
         log = self.test_logger.getlog(self.log_level)
         return log
 
+class Monitor:
+    def __init__(self, file_finder, get_file_size, get_file_modtime):
+        self.file_finder = file_finder
+        self.get_file_size = get_file_size
+        self.get_file_modtime = get_file_modtime
+        self.snapshot = self.get_snapshot()
+
+    def get_snapshot(self):
+        snapshot = {}
+        for file in self.file_finder():
+            file_size = self.get_file_size(file)
+            file_modtime = self.get_file_modtime(file)
+            snapshot[file] = (file_size, file_modtime)
+        return snapshot
+
+    def look_for_changes(self):
+        print "\nused to be: " + str(self.snapshot)
+        new_snapshot = self.get_snapshot()
+        change_detected = new_snapshot != self.snapshot
+        self.snapshot = new_snapshot
+        print "now is: " + str(new_snapshot)
+        return change_detected
+
 class DefaultLogger(object):
     """class that handels accumulation of logs. It also take care of tagging
     logs so that you can query for specific log messages."""
