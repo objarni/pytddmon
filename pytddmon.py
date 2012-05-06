@@ -133,11 +133,9 @@ class Monitor:
         return snapshot
 
     def look_for_changes(self):
-        print("\nused to be: " + str(self.snapshot))
         new_snapshot = self.get_snapshot()
         change_detected = new_snapshot != self.snapshot
         self.snapshot = new_snapshot
-        print("now is: " + str(new_snapshot))
         return change_detected
 
 class DefaultLogger(object):
