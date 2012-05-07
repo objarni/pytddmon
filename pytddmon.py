@@ -47,6 +47,8 @@ import sys
 import platform
 import optparse
 import re
+import unittest
+import doctest
 
 ON_PYTHON3 = sys.version_info[0] == 3
 ON_WINDOWS = platform.system() == "Windows"
@@ -55,69 +57,62 @@ ON_WINDOWS = platform.system() == "Windows"
 ## Core
 ####
 
-
-class Pytddmon(object):
-    """The core class, all functionality are agregated and lives inside this
-    class."""
+class Pytddmon:
+    "The core class, all functionality is combined into this class"
     def __init__(
         self,
-        project_name="<pytddmon>",
-        file_strategies=None,
-        test_strategies=None,
-        log_level=None
+        file_finder,
+        project_name = "<pytddmon>",
+        log_level = None
     ):
+        self.file_finder = file_finder
         self.project_name = project_name
-        # The different ways pytddmon can find changes to a project
-        self.file_strategies = (
-            file_strategies if file_strategies != None else []
-        )
-        # The different ways pytddmon can find tests and run them
-        self.test_strategies = (
-            test_strategies if test_strategies != None else []
-        )
+        self.log_level = log_level
+        
         self.total_tests_run = 0
         self.total_tests_passed = 0
         self.last_testrun_time = -1
-        self.log_level = log_level
-        self.test_logger = DefaultLogger()
-        self.files_are_changed = False
+        self.logger = Logger()
+        
+        self.setup_monitor()
+        
+    def setup_monitor(self):
+        import os
+        os.stat_float_times(False)
+        def get_file_size(file_path):
+            stat = os.stat(file_path)
+            return stat.st_size
+        def get_file_modtime(file_path):
+            stat = os.stat(file_path)
+            return stat.st_mtime
+        self.monitor = Monitor(file_finder, get_file_size, get_file_modtime)
 
-    def which_files_has_changed(self):
-        """Returns list of changed files."""
-        changed_files = []
-        for file_strategy in self.file_strategies:
-            changed_files.extend(file_strategy.which_files_has_changed())
-        return changed_files
-
-    def run_tests(self, file_paths=None):
+    def run_tests(self, file_paths):
         """Runs all tests and updates the time it took and the total test run
         and passed."""
         import time
-        file_paths = file_paths if file_paths != None else []
         start = time.time()
         self.total_tests_run = 0
         self.total_tests_passed = 0
-        self.test_logger = DefaultLogger()
+        self.logger = Logger()
         for test_strategy in self.test_strategies:
-            passed, tests_run = test_strategy.run_tests(file_paths, logger=self.test_logger)
+            passed, tests_run = test_strategy.run_tests(file_paths, logger = self.logger)
             self.total_tests_run += tests_run
             self.total_tests_passed += passed
         self.last_testrun_time = time.time() - start
 
     def main(self):
         """This is the main loop body"""
-        file_paths = self.which_files_has_changed()
-        self.files_are_changed = False
-        if file_paths != []:
-            self.files_are_changed = True
-            self.run_tests(file_paths)
+        file_paths = self.file_finder()
+        self.run_tests(file_paths)
 
     def get_logs(self):
-        """Creates a readabel log of the all test strategies run"""
-        log = self.test_logger.getlog(self.log_level)
-        return log
+        """Creates a text log of all tests run"""
+        return self.logger.getlog(self.log_level)
 
 class Monitor:
+    'Looks for file changes when prompted to'
+    
     def __init__(self, file_finder, get_file_size, get_file_modtime):
         self.file_finder = file_finder
         self.get_file_size = get_file_size
@@ -138,16 +133,20 @@ class Monitor:
         self.snapshot = new_snapshot
         return change_detected
 
-class DefaultLogger(object):
-    """class that handels accumulation of logs. It also take care of tagging
-    logs so that you can query for specific log messages."""
+####
+## Logging
+####
+
+class Logger:
+    """handles accumulation of logs. It also take care of tagging
+    logs so that you can query for a specific log message."""
     levels = {
-        None: int("1111",2),
-        "info": int("1",2),
-        "warning": int("10",2),
-        "error": int("100",2),
-        "debug": int("1000",2),
-        "all": int("1111",2)
+        None: int("1111", 2),
+        "info": int("1", 2),
+        "warning": int("10", 2),
+        "error": int("100", 2),
+        "debug": int("1000", 2),
+        "all": int("1111", 2)
     }
 
     levels_back = dict(
@@ -156,165 +155,86 @@ class DefaultLogger(object):
     )
 
     def __init__(self):
-        # loggs is a list with int keys and list with strings as values
-        self.loggs = []
+        # logs is a list with int keys and list of strings as values
+        self.logs = []
 
-    def getlog(self, level=None):
+    def getlog(self, level = None):
         level = self.level_2_int(level)
         return "\n".join(
             "[%s]%s" % (
                 self.int_2_level(level_),
                 log
             )
-            for level_, log in self.loggs if level_ & level
+            for level_, log in self.logs if level_ & level
         )
 
     @classmethod
-    def level_2_int(cls, level=None):
+    def level_2_int(cls, level = None):
         return cls.levels.get(level, level)
+
     @classmethod
     def int_2_level(cls, level):
-        return cls.levels_back.get(level, "Un Known")
+        return cls.levels_back.get(level, "Unknown")
 
-    def log(self, log, level=None):
+    def log(self, log, level = None):
         level = self.level_2_int(level)
         self.loggs.append(
             (level, log)
         )
-            
-        
+
+####
+## Finding files
+####
+
+class FileFinder:
+    "Returns all files matching given regular expression from root downwards"
+    import os
+    import re
     
-####
-## Hashing
-####
-
-
-class DefaultHasher(object):
-    """A simple hasher which takes the size and the modified time and returns
-    a checksum."""
-    def __init__(self, os_module):
-        self.os_module = os_module
-        self.os_module.stat_float_times(False)
-        
-    def __call__(self, file_path):
-        """Se Class description."""
-        stat = self.os_module.stat(file_path)
-        return stat.st_size + (stat.st_mtime * 1j) + hash(file_path)
-
-
-####
-## File Strategies
-####
-
-
-class StaticFileStartegy(object):
-    """Looks for changes in a static set of files."""
-    def __init__(self, file_paths, hasher=DefaultHasher(os)):
-        self.file_paths = None
-        self.last_hash = None
-        self.change_file_set(file_paths)
-        self.hasher = hasher
-
-    def change_file_set(self, file_paths):
-        """Used to change what set of files are monitored for change"""
-        self.file_paths = set([
-            os.path.abspath(file_path) for file_path in file_paths
-        ])
-        self.last_hash = [-1] * len(self.file_paths)
-
-    def which_files_has_changed(self):
-        """Looks through all file paths and return which of them has changed.
-        """
-        file_paths_to_return = []
-        hashes = self.hash_files()
-        iteration = zip(self.last_hash, hashes, self.file_paths)
-        for old_hash, new_hash, file_path in iteration:
-            if old_hash != new_hash:
-                file_paths_to_return.append(file_path)
-        self.last_hash = hashes
-        return file_paths_to_return
-
-    def hash_files(self):
-        """Helper method to hash all files."""
-        ret = []
-        for file_path in self.file_paths:
-            try:
-                ret.append(self.hasher(file_path))
-            except IOError:
-                pass
-        return ret
-
-
-class RecursiveRegexpFileStartegy(object):
-    """Looks for files recursively from a root dir with a specific regexp
-    pattern."""
-    def __init__(self, root, expr, walker=os.walk, hasher=DefaultHasher(os)):
-        self.walker = walker
-        self.hasher = hasher
+    def __init__(self, root, regexp):
         self.root = os.path.abspath(root)
-        self.expr = expr
-        self.pairs = []
+        self.regexp = regexp
 
-    def get_pairs(self):
-        """calculates a new list of (path, hash) pairs"""
+    def find_files(self):
+        "recursively finds files matching regexp"
         file_paths = set()
-        for path, _folder, filenames in self.walker(self.root):
+        for path, _folder, filenames in os.walk(self.root):
             for filename in filenames:
-                if re_complete_match(self.expr, filename):
+                if self.re_complete_match(filename):
                     file_paths.add(
                         os.path.abspath(os.path.join(path, filename))
                     )
-        return [
-            (file_path, self.hasher(file_path)) for file_path in file_paths
-        ]
-
-    def which_files_has_changed(self):
-        """Looks for files recursively from a root dir with a specific regexp"""
-        new_pairs = self.get_pairs()
-        new = set(new_pairs)
-        old = set(self.pairs)
-        paths = new.symmetric_difference(old)
-        paths = [path for path, _file_hash in paths]
-        self.pairs = new_pairs
-        return paths
-
-
-class RecursiveGlobFileStartegy(RecursiveRegexpFileStartegy):
-    """Like the RecursiveRegexpFileStartegy but it takes a glob expr instead of
-    a regexp expr"""
-    def __init__(self, root, expr, walker=os.walk, hasher=DefaultHasher(os)):
-        import fnmatch
-        super(RecursiveGlobFileStartegy, self).__init__(
-            root=root,
-            expr=fnmatch.translate(expr),
-            walker=walker,
-            hasher=hasher
-        )
-
-
-def log_exceptions(func):
-    """Decorator that forwards the error message from an expetion to the log
-    slot of the return value and also returnsa a complexnumber to signal that
-    the result is an error."""
-    from functools import wraps
-
-    @wraps(func)
-    def wrapper(*a, **k):
-        "Docstring"
-        try:
-            return func(*a, **k)
-        except:
-            import traceback
-            return (0, 1j, traceback.format_exc())
-    return wrapper
-
+        return file_paths
+        
+    def re_complete_match(self, string_to_match):
+        "full string regexp check"
+        return bool(re.match(self.regexp + "$", string_to_match))
 
 ####
-## Test Runners
+## Finding & running tests
 ####
-# These needs to be functions due to that they are going to be called in a
-# nother procces and multiprocessing demands that they should be picabel.
-####
+
+@log_exceptions
+def run_tests(root, file_path):
+    module = file_name_to_module(root, file_path)
+    suite = find_tests_in_module(module)
+    return run_suite(suite)
+
+def find_tests_in_module(module):
+    suite = unittest.TestSuite()
+    suite.addTests(find_unittests_in_module(module))
+    suite.addTests(find_doctests_in_module(module))
+    return suite
+
+def find_unittests_in_module(module):
+    test_loader = unittest.TestLoader()
+    return test_loader.loadTestsFromName(module)
+
+def find_doctests_in_module(module):
+    try:
+        return doctest.DocTestSuite(module, optionflags = doctest.ELLIPSIS)
+    except ValueError:
+        return unittest.TestSuite()
 
 def StringIO():
     if ON_PYTHON3:
@@ -323,171 +243,15 @@ def StringIO():
         import StringIO 
     return StringIO.StringIO()
 
-@log_exceptions
-def run_unittests(arguments):
-    """Loads all unittests in file, with root as package location."""
-    import unittest
-
-    root, file_path = arguments
-    module = file_name_to_module(root, file_path)
+def run_suite(suite):
     err_log = StringIO()
-    test_loader = unittest.TestLoader()
-    suite = test_loader.loadTestsFromName(module)
-    text_test_runner = unittest.TextTestRunner(stream=err_log)
+    text_test_runner = unittest.TextTestRunner(stream = err_log)
     result = text_test_runner.run(suite)
     return (
         result.testsRun - len(result.failures) - len(result.errors),
         result.testsRun,
         err_log.getvalue()
     )
-
-
-@log_exceptions
-def run_doctests(arguments):
-    """Loads all doctests in file, with root as package location."""
-    root, file_path = arguments
-    import unittest
-    import doctest
-    module = file_name_to_module(root, file_path)
-    err_log = StringIO()
-    try:
-        suite = doctest.DocTestSuite(module, optionflags=doctest.ELLIPSIS)
-    except ValueError:
-        return (
-        0,
-        0,
-        """No doctests found in:%r\n""" % (module)  
-        )
-    text_test_runner = unittest.TextTestRunner(stream=err_log)
-    result = text_test_runner.run(suite)
-    return (
-        result.testsRun - len(result.failures) - len(result.errors),
-        result.testsRun,
-        err_log.getvalue()
-    )
-
-
-####
-## Test Strategies
-####
-
-
-class StaticTestStrategy(StaticFileStartegy):
-    """Runs a Static set of files as if thay where Unitttest suits. They must
-    however be on the python path or be inside a package that are on the path.
-    """
-    def __init__(
-        self,
-        file_paths,
-        test_runner,
-        hasher=DefaultHasher(os)
-    ):
-        self.test_runner = test_runner
-        super(StaticTestStrategy, self).__init__(
-            file_paths=file_paths,
-            hasher=hasher
-        )
-
-    def run_tests(self, _file_paths, logger, pool=True):
-        """Runs all staticly selected files as if they where UnitTests"""
-        from multiprocessing import Pool
-        file_paths_to_run = []
-        for file_path in self.file_paths:
-            file_paths_to_run.append((os.getcwd(), file_path))
-        if pool:
-            pool = Pool()
-            results = pool.map(self.test_runner, file_paths_to_run)
-        else:
-            results = map(self.test_runner, file_paths_to_run)
-        all_green = 0
-        all_total = 0
-        for (green, total, log), (_rt, pth) in zip(results, file_paths_to_run):
-            all_green += green
-            all_total += total
-            if green.imag != 0 or total.imag != 0:
-                level = "error"
-            elif green == total:
-                level = "info"
-            else:
-                level = "warning"
-            logger.log(log, level=level)
-        if type(pool) != bool:
-            pool.terminate()
-        return (all_green, all_total)
-
-
-class RecursiveRegexpTestStartegy(object):
-    """Recursively look for tests in packages with a filename matching the
-    regexpr."""
-    def __init__(self, root, expr, test_runner, walker=os.walk):
-        self.test_runner = test_runner
-        self.root = os.path.abspath(root)
-        self.expr = expr
-        self.walker = walker
-
-    @staticmethod
-    def is_package(path, folder):
-        """Check if folder is a package"""
-        return os.path.isfile(os.path.join(path, folder, "__init__.py"))
-
-    def find_tests(self):
-        """Helper method that finds the tests"""
-        file_paths_to_run = []
-        for path, folders, file_paths in self.walker(self.root):
-            to_remove = []
-            for folder in folders:
-                if not self.is_package(path, folder):
-                    to_remove.append(folder)
-            for folder in to_remove:
-                folders.remove(folder)
-            for file_path in file_paths:
-                if re_complete_match(self.expr, file_path):
-                    file_paths_to_run.append(
-                        (
-                            self.root,
-                            os.path.abspath(
-                                os.path.join(
-                                    path,
-                                    file_path
-                                )
-                            )
-                        )
-                    )
-                else:
-                    pass
-        return file_paths_to_run
-
-    def run_tests(self, _file_paths, logger, pool=True):
-        """finds and run all tests"""
-        from multiprocessing import Pool
-
-        file_paths_to_run = self.find_tests()
-        if pool:
-            pool = Pool()
-            results = pool.map(
-                self.test_runner,
-                file_paths_to_run
-            )
-        else:
-            results = map(
-                self.test_runner,
-                file_paths_to_run
-            )
-        all_green = 0
-        all_total = 0
-        for (green, total, log), (_rt, pth) in zip(results, file_paths_to_run):
-            all_green += green
-            all_total += total
-            if green.imag != 0 or total.imag != 0:
-                level = "error"
-            elif green == total:
-                level = "info"
-            else:
-                level = "warning"
-            logger.log(log, level=level)
-        if type(pool) != bool:
-            pool.terminate()
-        return (all_green, all_total)
 
 
 ####
@@ -496,7 +260,7 @@ class RecursiveRegexpTestStartegy(object):
 
 
 class TkGUI(object):
-    """A cloection class for all that is tkinter"""
+    """Connect pytddmon engine to Tkinter GUI toolkit"""
     def __init__(self, pytddmon):
         self.pytddmon = pytddmon
         self.color_picker = ColorPicker()
@@ -667,12 +431,21 @@ class TkGUI(object):
 ## Un Organized
 ####
 
+def log_exceptions(func):
+    """Decorator that forwards the error message from an exception to the log
+    slot of the return value, and also returns a complexnumber to signal that
+    the result is an error."""
+    from functools import wraps
 
-def re_complete_match(regexp, string_to_match):
-    """Helper function that does a regexp check if the full string_to_match
-    matches the regexp"""
-    return bool(re.match(regexp + "$", string_to_match))
-
+    @wraps(func)
+    def wrapper(*a, **k):
+        "Docstring"
+        try:
+            return func(*a, **k)
+        except:
+            import traceback
+            return (0, 1j, traceback.format_exc())
+    return wrapper
 
 def file_name_to_module(base_path, file_name):
     r"""Converts filenames of files in packages to import friendly dot
@@ -779,60 +552,33 @@ def run():
     """
     The main function: basic initialization and program start
     """
-    sys.path[:0] = [os.getcwd()]
+    cwd = os.getcwd()
+    
+    # Include current work directory in Python path
+    sys.path[:0] = [cwd]
+    
     # Command line argument handling
     (static_file_set, test_mode) = parse_commandline()
-    file_strategies = []
-    if static_file_set:
-        file_strategies.append(
-            StaticFileStartegy(
-                static_file_set
-            )
-        )
+    
+    # What files to monitor?
+    if not static_file_set:
+        import fnmatch
+        regex = fnmatch.translate("*.py")
     else:
-        file_strategies.append(
-            RecursiveGlobFileStartegy(
-                root=os.getcwd(),
-                expr="*.py"
-            )
-        )
-    test_strategies = []
-    if static_file_set:
-        test_strategies.append(
-            StaticTestStrategy(
-                static_file_set,
-                test_runner=run_unittests
-            )
-        )
-        test_strategies.append(
-            StaticTestStrategy(
-                static_file_set,
-                test_runner=run_doctests
-            )
-        )
-    else:
-        test_strategies.append(
-            RecursiveRegexpTestStartegy(
-                root=os.getcwd(),
-                expr="test_.*\\.py",
-                test_runner=run_unittests
-            )
-        )
-        test_strategies.append(
-            RecursiveRegexpTestStartegy(
-                root=os.getcwd(),
-                expr="test_.*\\.py",
-                test_runner=run_doctests
-            )
-        )
-
+        regex = '|'.join(static_file_set)
+    file_finder = FileFinder(cwd, regex)
+    
+    # Python engine ready to be setup
     pytddmon = Pytddmon(
-        project_name=os.path.basename(os.getcwd()),
-        file_strategies=file_strategies,
-        test_strategies=test_strategies,
-        log_level=DefaultLogger.levels["error"] | DefaultLogger.levels["warning"]
+        project_name = os.path.basename(cwd),
+        file_finder,
+        log_level = Logger.levels["error"] | Logger.levels["warning"]
     )
-    if test_mode:
+    
+    # Start the engine!
+    if not test_mode:
+        TkGUI(pytddmon).run()
+    else:
         pytddmon.main()
         with open("pytddmon.log", "w") as log_file:
             log_file.write(
@@ -841,8 +587,6 @@ def run():
                     pytddmon.total_tests_run
                 )
             )
-    else:
-        TkGUI(pytddmon).run()
 
 if __name__ == '__main__':
     run()
