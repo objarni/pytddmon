@@ -1,6 +1,6 @@
 import unittest
 import os
-from pytddmon import RecursiveRegexpFileStartegy
+from pytddmon import FileFinder
 from tests.fakes import FakeHasher
 
 class RecursiveRegexpFileStartegyTest(unittest.TestCase):
