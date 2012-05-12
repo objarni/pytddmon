@@ -49,6 +49,8 @@ import optparse
 import re
 import unittest
 import doctest
+import time
+import multiprocessing
 
 ON_PYTHON3 = sys.version_info[0] == 3
 ON_WINDOWS = platform.system() == "Windows"
@@ -62,22 +64,22 @@ class Pytddmon:
     def __init__(
         self,
         file_finder,
-        project_name = "<pytddmon>",
-        log_level = None
+        project_name = "<pytddmon>"
     ):
         self.file_finder = file_finder
         self.project_name = project_name
-        self.log_level = log_level
         
         self.total_tests_run = 0
         self.total_tests_passed = 0
         self.last_testrun_time = -1
-        self.logger = Logger()
+        self.log = ""
         
         self.setup_monitor()
+        self.change_detected = False
         
+        self.run_tests()
+
     def setup_monitor(self):
-        import os
         os.stat_float_times(False)
         def get_file_size(file_path):
             stat = os.stat(file_path)
@@ -85,30 +87,46 @@ class Pytddmon:
         def get_file_modtime(file_path):
             stat = os.stat(file_path)
             return stat.st_mtime
-        self.monitor = Monitor(file_finder, get_file_size, get_file_modtime)
+        self.monitor = Monitor(self.file_finder, get_file_size, get_file_modtime)
 
-    def run_tests(self, file_paths):
+    def run_tests(self):
         """Runs all tests and updates the time it took and the total test run
         and passed."""
-        import time
+        
+        file_paths = self.file_finder()
+        
+        # We need to run the tests in a separate process, since
+        # Python caches loaded modules, and unittest/doctest
+        # imports modules to run them.
+        # However, we do not want to assume users' unit tests
+        # are thread-safe, so we only run one test module at a
+        # time, using processes = 1.
         start = time.time()
-        self.total_tests_run = 0
-        self.total_tests_passed = 0
-        self.logger = Logger()
-        for test_strategy in self.test_strategies:
-            passed, tests_run = test_strategy.run_tests(file_paths, logger = self.logger)
-            self.total_tests_run += tests_run
-            self.total_tests_passed += passed
+        pool = multiprocessing.Pool(processes = 1)
+        results = pool.map(run_tests_in_file, file_paths)
         self.last_testrun_time = time.time() - start
+        
+        self.total_tests_passed = 0
+        self.total_tests_run = 0
+        self.log = ""
+        self.log += "monitoring: %s\n" % self.project_name
+        self.log += "files found: %i\n" % len(results)
+        self.log += "test run time: %.2f seconds\n" % self.last_testrun_time
+        for packed in results:
+            (module, green, total, logtext) = packed
+            self.total_tests_passed += green
+            self.total_tests_run += total
+            self.log += module + ":\n" + logtext
 
     def main(self):
         """This is the main loop body"""
-        file_paths = self.file_finder()
-        self.run_tests(file_paths)
+        self.change_detected = self.monitor.look_for_changes()
+        if self.change_detected:
+            self.run_tests()
 
-    def get_logs(self):
-        """Creates a text log of all tests run"""
-        return self.logger.getlog(self.log_level)
+    def get_log(self):
+        """Access the log string created during test run"""
+        return self.log
 
 class Monitor:
     'Looks for file changes when prompted to'
@@ -133,54 +151,6 @@ class Monitor:
         self.snapshot = new_snapshot
         return change_detected
 
-####
-## Logging
-####
-
-class Logger:
-    """handles accumulation of logs. It also take care of tagging
-    logs so that you can query for a specific log message."""
-    levels = {
-        None: int("1111", 2),
-        "info": int("1", 2),
-        "warning": int("10", 2),
-        "error": int("100", 2),
-        "debug": int("1000", 2),
-        "all": int("1111", 2)
-    }
-
-    levels_back = dict(
-        (value, key)
-        for key, value in levels.items() if key!=None
-    )
-
-    def __init__(self):
-        # logs is a list with int keys and list of strings as values
-        self.logs = []
-
-    def getlog(self, level = None):
-        level = self.level_2_int(level)
-        return "\n".join(
-            "[%s]%s" % (
-                self.int_2_level(level_),
-                log
-            )
-            for level_, log in self.logs if level_ & level
-        )
-
-    @classmethod
-    def level_2_int(cls, level = None):
-        return cls.levels.get(level, level)
-
-    @classmethod
-    def int_2_level(cls, level):
-        return cls.levels_back.get(level, "Unknown")
-
-    def log(self, log, level = None):
-        level = self.level_2_int(level)
-        self.loggs.append(
-            (level, log)
-        )
 
 ####
 ## Finding files
@@ -188,12 +158,13 @@ class Logger:
 
 class FileFinder:
     "Returns all files matching given regular expression from root downwards"
-    import os
-    import re
     
     def __init__(self, root, regexp):
         self.root = os.path.abspath(root)
         self.regexp = regexp
+        
+    def __call__(self):
+        return self.find_files()
 
     def find_files(self):
         "recursively finds files matching regexp"
@@ -214,11 +185,63 @@ class FileFinder:
 ## Finding & running tests
 ####
 
+def log_exceptions(func):
+    """Decorator that forwards the error message from an exception to the log
+    slot of the return value, and also returns a complexnumber to signal that
+    the result is an error."""
+    from functools import wraps
+
+    @wraps(func)
+    def wrapper(*a, **k):
+        "Docstring"
+        try:
+            return func(*a, **k)
+        except:
+            import traceback
+            return ('', 0, 1j, traceback.format_exc())
+    return wrapper
+
 @log_exceptions
-def run_tests(root, file_path):
-    module = file_name_to_module(root, file_path)
+def run_tests_in_file(file_path):
+    module = file_name_to_module("", file_path)
+    return run_module(module)
+
+def run_module(module):
     suite = find_tests_in_module(module)
-    return run_suite(suite)
+    (green, total, log) = run_suite(suite)
+    return (module, green, total, log)
+
+def file_name_to_module(base_path, file_name):
+    r"""Converts filenames of files in packages to import friendly dot
+    separated paths.
+
+    Examples:
+    >>> print(file_name_to_module("","pytddmon.pyw"))
+    pytddmon
+    >>> print(file_name_to_module("","pytddmon.py"))
+    pytddmon
+    >>> print(file_name_to_module("","tests/pytddmon.py"))
+    tests.pytddmon
+    >>> print(file_name_to_module("","./tests/pytddmon.py"))
+    tests.pytddmon
+    >>> print(file_name_to_module("",".\\tests\\pytddmon.py"))
+    tests.pytddmon
+    >>> print(
+    ...     file_name_to_module(
+    ...         "/User/pytddmon\\ geek/pytddmon/",
+    ...         "/User/pytddmon\\ geek/pytddmon/tests/pytddmon.py"
+    ...     )
+    ... )
+    tests.pytddmon
+    """
+    symbol_stripped = os.path.relpath(file_name, base_path)
+    for symbol in r"/\.":
+        symbol_stripped = symbol_stripped.replace(symbol, " ")
+    words = symbol_stripped.split()
+    # remove .py/.pyw
+    module_words = words[:-1]
+    module_name = '.'.join(module_words)
+    return module_name
 
 def find_tests_in_module(module):
     suite = unittest.TestSuite()
@@ -236,14 +259,13 @@ def find_doctests_in_module(module):
     except ValueError:
         return unittest.TestSuite()
 
-def StringIO():
-    if ON_PYTHON3:
-        import io as StringIO
-    else:
-        import StringIO 
-    return StringIO.StringIO()
-
 def run_suite(suite):
+    def StringIO():
+        if ON_PYTHON3:
+            import io as StringIO
+        else:
+            import StringIO 
+        return StringIO.StringIO()
     err_log = StringIO()
     text_test_runner = unittest.TextTestRunner(stream = err_log)
     result = text_test_runner.run(suite)
@@ -376,16 +398,12 @@ class TkGUI(object):
             bg=rgb,
         )
         
-        if self.pytddmon.files_are_changed and self.window_is_open():
+        if self.pytddmon.change_detected and self.window_is_open():
             self.update_text_window()
 
     def get_text_message(self):
         """returns the logmessage from pytddmon"""
-        message = "monitoring: %s\ntime: %.2f seconds\n%s" % (
-                self.pytddmon.project_name,
-                self.pytddmon.last_testrun_time,
-                self.pytddmon.get_logs()
-            )
+        message = self.pytddmon.get_log()
         return message
 
     def open_text_window(self):
@@ -425,60 +443,6 @@ class TkGUI(object):
         """starts the main loop and goes into sleep"""
         self.loop()
         self.root.mainloop()
-
-
-####
-## Un Organized
-####
-
-def log_exceptions(func):
-    """Decorator that forwards the error message from an exception to the log
-    slot of the return value, and also returns a complexnumber to signal that
-    the result is an error."""
-    from functools import wraps
-
-    @wraps(func)
-    def wrapper(*a, **k):
-        "Docstring"
-        try:
-            return func(*a, **k)
-        except:
-            import traceback
-            return (0, 1j, traceback.format_exc())
-    return wrapper
-
-def file_name_to_module(base_path, file_name):
-    r"""Converts filenames of files in packages to import friendly dot
-    separated paths.
-
-    Examples:
-    >>> print(file_name_to_module("","pytddmon.pyw"))
-    pytddmon
-    >>> print(file_name_to_module("","pytddmon.py"))
-    pytddmon
-    >>> print(file_name_to_module("","tests/pytddmon.py"))
-    tests.pytddmon
-    >>> print(file_name_to_module("","./tests/pytddmon.py"))
-    tests.pytddmon
-    >>> print(file_name_to_module("",".\\tests\\pytddmon.py"))
-    tests.pytddmon
-    >>> print(
-    ...     file_name_to_module(
-    ...         "/User/pytddmon\\ geek/pytddmon/",
-    ...         "/User/pytddmon\\ geek/pytddmon/tests/pytddmon.py"
-    ...     )
-    ... )
-    tests.pytddmon
-    """
-    symbol_stripped = os.path.relpath(file_name, base_path)
-    for symbol in r"/\.":
-        symbol_stripped = symbol_stripped.replace(symbol, " ")
-    words = symbol_stripped.split()
-    # remove .py/.pyw
-    module_words = words[:-1]
-    module_name = '.'.join(module_words)
-    return module_name
-
 
 class ColorPicker:
     """
@@ -570,9 +534,8 @@ def run():
     
     # Python engine ready to be setup
     pytddmon = Pytddmon(
-        project_name = os.path.basename(cwd),
         file_finder,
-        log_level = Logger.levels["error"] | Logger.levels["warning"]
+        project_name = os.path.basename(cwd)
     )
     
     # Start the engine!
