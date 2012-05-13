@@ -104,19 +104,24 @@ class Pytddmon:
         start = time.time()
         pool = multiprocessing.Pool(processes = 1)
         results = pool.map(run_tests_in_file, file_paths)
+        pool.close()
+        pool.join()
         self.last_testrun_time = time.time() - start
         
+        now = time.strftime("%H:%M:%S", time.localtime())
+        self.log = ""
+        self.log += "Monitoring folder %s.\n" % self.project_name
+        self.log += "Found %i files.\n" % len(results)
+        self.log += "Last change detected at %s.\n" % now
+        self.log += "Test run took %.2f seconds.\n" % self.last_testrun_time
+        self.log += "\n"
         self.total_tests_passed = 0
         self.total_tests_run = 0
-        self.log = ""
-        self.log += "monitoring: %s\n" % self.project_name
-        self.log += "files found: %i\n" % len(results)
-        self.log += "test run time: %.2f seconds\n" % self.last_testrun_time
         for packed in results:
             (module, green, total, logtext) = packed
             self.total_tests_passed += green
             self.total_tests_run += total
-            self.log += module + ":\n" + logtext
+            self.log += "\nLog from " + module + ":\n" + logtext
 
     def main(self):
         """This is the main loop body"""
@@ -267,7 +272,7 @@ def run_suite(suite):
             import StringIO 
         return StringIO.StringIO()
     err_log = StringIO()
-    text_test_runner = unittest.TextTestRunner(stream = err_log)
+    text_test_runner = unittest.TextTestRunner(stream = err_log, verbosity = 1)
     result = text_test_runner.run(suite)
     return (
         result.testsRun - len(result.failures) - len(result.errors),
@@ -422,7 +427,6 @@ class TkGUI(object):
         text['state'] = self.tkinter.NORMAL
         text.delete(1.0, self.tkinter.END)
         text.insert(self.tkinter.INSERT, self.get_text_message())
-        text.see(self.tkinter.END)
         text['state'] = self.tkinter.DISABLED
         text.pack(expand=1, fill='both')
         text.focus_set()
