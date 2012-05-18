@@ -102,10 +102,13 @@ class Pytddmon:
         # are thread-safe, so we only run one test module at a
         # time, using processes = 1.
         start = time.time()
-        pool = multiprocessing.Pool(processes = 1)
-        results = pool.map(run_tests_in_file, file_paths)
-        pool.close()
-        pool.join()
+        if file_paths:
+            pool = multiprocessing.Pool(processes = 1)
+            results = pool.map(run_tests_in_file, file_paths)
+            pool.close()
+            pool.join()
+        else:
+            results = []
         self.last_testrun_time = time.time() - start
         
         now = time.strftime("%H:%M:%S", time.localtime())
