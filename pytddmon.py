@@ -51,6 +51,8 @@ import unittest
 import doctest
 import time
 import multiprocessing
+import fnmatch
+import functools
 
 ON_PYTHON3 = sys.version_info[0] == 3
 ON_WINDOWS = platform.system() == "Windows"
@@ -93,6 +95,10 @@ class Pytddmon:
         """Runs all tests and updates the time it took and the total test run
         and passed."""
         
+        pycfiles = FileFinder('.', wildcard_to_regex("*.pyc"))()
+        #print(pycfiles)
+        map(os.unlink, pycfiles)
+        
         file_paths = self.file_finder()
         
         # We need to run the tests in a separate process, since
@@ -114,7 +120,7 @@ class Pytddmon:
         now = time.strftime("%H:%M:%S", time.localtime())
         self.log = ""
         self.log += "Monitoring folder %s.\n" % self.project_name
-        self.log += "Found %i files.\n" % len(results)
+        self.log += "Found <TOTALTESTS> tests in %i files.\n" % len(results)
         self.log += "Last change detected at %s.\n" % now
         self.log += "Test run took %.2f seconds.\n" % self.last_testrun_time
         self.log += "\n"
@@ -125,6 +131,7 @@ class Pytddmon:
             self.total_tests_passed += green
             self.total_tests_run += total
             self.log += "\nLog from " + module + ":\n" + logtext
+        self.log = self.log.replace('<TOTALTESTS>', str(int(self.total_tests_run.real)))
 
     def main(self):
         """This is the main loop body"""
@@ -189,6 +196,8 @@ class FileFinder:
         "full string regexp check"
         return bool(re.match(self.regexp + "$", string_to_match))
 
+wildcard_to_regex = fnmatch.translate
+
 ####
 ## Finding & running tests
 ####
@@ -197,7 +206,7 @@ def log_exceptions(func):
     """Decorator that forwards the error message from an exception to the log
     slot of the return value, and also returns a complexnumber to signal that
     the result is an error."""
-    from functools import wraps
+    wraps = functools.wraps
 
     @wraps(func)
     def wrapper(*a, **k):
@@ -277,11 +286,10 @@ def run_suite(suite):
     err_log = StringIO()
     text_test_runner = unittest.TextTestRunner(stream = err_log, verbosity = 1)
     result = text_test_runner.run(suite)
-    return (
-        result.testsRun - len(result.failures) - len(result.errors),
-        result.testsRun,
-        err_log.getvalue()
-    )
+    green = result.testsRun - len(result.failures) - len(result.errors)
+    total = result.testsRun
+    log = err_log.getvalue() if green<total else "All %i tests passed\n" % green
+    return (green, total, log)
 
 
 ####
@@ -390,7 +398,7 @@ class TkGUI(object):
         rgb = self.color_picker.translate_color(light, color)
         self.color_picker.pulse()
         if self.pytddmon.total_tests_run.imag!=0:
-            text = "*%i*" % self.pytddmon.total_tests_run.imag
+            text = "?ERROR"
         else:
             text = "%r/%r" % (
                 self.pytddmon.total_tests_passed,
@@ -533,8 +541,7 @@ def run():
     
     # What files to monitor?
     if not static_file_set:
-        import fnmatch
-        regex = fnmatch.translate("*.py")
+        regex = wildcard_to_regex("*.py")
     else:
         regex = '|'.join(static_file_set)
     file_finder = FileFinder(cwd, regex)
