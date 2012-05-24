@@ -2,15 +2,15 @@
 #coding: utf-8
 
 '''
-COPYRIGHT (c) 2009, 2010, 2011
+COPYRIGHT (c) 2009, 2010, 2011, 2012
 .. in order of first contribution
 Olof Bjarnason
     Initial proof-of-concept pygame implementation.
-Fredrik Wendt:
+Fredrik Wendt
     Help with Tkinter implementation (replacing the pygame dependency)
-KrunoSaho
+Krunoslav Saho
     Added always-on-top to the pytddmon window
-Neppord(Samuel Ytterbrink)
+Samuel Ytterbrink
     Print(".") will not screw up test-counting (it did before)
     Docstring support
     Recursive discovery of tests
