@@ -29,6 +29,6 @@ Folder structure
 ----------------
 src/       contains pytddmon.py
 src/tests  unit tests for pytddmon.py
-svg/       pytddmon logo
+logo/      pytddmon logo
 systest/   contains systest.py, lots of folders and a Readme.txt
            (used for end-to-end regression testing pytddmon.py)
