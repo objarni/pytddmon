@@ -66,34 +66,23 @@ class Pytddmon:
     def __init__(
         self,
         file_finder,
+        monitor,
         project_name = "<pytddmon>"
     ):
         self.file_finder = file_finder
         self.project_name = project_name
+        self.monitor = monitor
+        self.change_detected = False
 
         self.total_tests_run = 0
         self.total_tests_passed = 0
         self.last_testrun_time = -1
         self.log = ""
-        
-        self.setup_monitor()
-        self.change_detected = False
-        
+
         self.run_tests()
 
-    def setup_monitor(self):
-        os.stat_float_times(False)
-        def get_file_size(file_path):
-            stat = os.stat(file_path)
-            return stat.st_size
-        def get_file_modtime(file_path):
-            stat = os.stat(file_path)
-            return stat.st_mtime
-        self.monitor = Monitor(self.file_finder, get_file_size, get_file_modtime)
-
     def run_tests(self):
-        """Runs all tests and updates the time it took and the total test run
-        and passed."""
+        """Runs all tests and updates state variables with results."""
         
         file_paths = self.file_finder()
         
@@ -522,6 +511,15 @@ def parse_commandline():
     (options, args) = parser.parse_args()
     return (args, options.log_and_exit)
 
+def build_monitor(file_finder):
+    os.stat_float_times(False)
+    def get_file_size(file_path):
+        stat = os.stat(file_path)
+        return stat.st_size
+    def get_file_modtime(file_path):
+        stat = os.stat(file_path)
+        return stat.st_mtime
+    return Monitor(file_finder, get_file_size, get_file_modtime)
 
 def run():
     """
@@ -542,9 +540,13 @@ def run():
         regex = '|'.join(static_file_set)
     file_finder = FileFinder(cwd, regex)
     
+    # The change detector: Monitor
+    monitor = build_monitor(file_finder)
+    
     # Python engine ready to be setup
     pytddmon = Pytddmon(
         file_finder,
+        monitor,
         project_name = os.path.basename(cwd)
     )
     

@@ -11,19 +11,22 @@ from pytddmon import Pytddmon
 '''
 
 class test_Pytddmon(unittest.TestCase):
-    def test_number_of_tests_variable(self):
-        return
-        pytddmon.main()
-        number_of_tests = pytddmon.total_tests
-        assert number_of_tests == 3
-        
+
     def test_runs_tests_at_boot(self):
-        return
-        tests_run
-        def fake_detector(): pass
-        pytddmon = Pytddmon(fake_detector, fake_file_finder)
+        calls = []
+        def fake_filefinder():
+            calls.append(1)
+            return []
+        class FakeMonitor:
+            def __init__(self, filefinder):
+                pass
+            def look_for_changes(self):
+                return False
+        fake_monitor = FakeMonitor(fake_filefinder)
+        pytddmon = Pytddmon(fake_filefinder, fake_monitor)
         pytddmon.main()
-        assert tests_run
+        test_runs = len(calls)
+        self.assertEqual(1, test_runs)
 
 if __name__ == '__main__':
     unittest.main()
