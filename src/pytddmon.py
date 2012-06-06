@@ -70,7 +70,7 @@ class Pytddmon:
     ):
         self.file_finder = file_finder
         self.project_name = project_name
-        
+
         self.total_tests_run = 0
         self.total_tests_passed = 0
         self.last_testrun_time = -1
@@ -94,10 +94,6 @@ class Pytddmon:
     def run_tests(self):
         """Runs all tests and updates the time it took and the total test run
         and passed."""
-        
-        pycfiles = FileFinder('.', wildcard_to_regex("*.pyc"))()
-        #print(pycfiles)
-        map(os.unlink, pycfiles)
         
         file_paths = self.file_finder()
         
