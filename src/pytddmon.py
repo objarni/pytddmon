@@ -121,6 +121,9 @@ class Pytddmon:
                 str(int(self.total_tests_run.real)))
         self.status_message = now
 
+    def get_and_set_change_detected(self):
+        self.change_detected = self.monitor.look_for_changes()
+        return self.change_detected
 
     def main(self):
         """This is the main loop body"""
@@ -255,8 +258,11 @@ def file_name_to_module(base_path, file_name):
 
 def find_tests_in_module(module):
     suite = unittest.TestSuite()
-    suite.addTests(find_unittests_in_module(module))
-    suite.addTests(find_doctests_in_module(module))
+    try:
+        suite.addTests(find_unittests_in_module(module))
+        suite.addTests(find_doctests_in_module(module))
+    except:
+        pass
     return suite
 
 def find_unittests_in_module(module):
@@ -416,12 +422,16 @@ class TkGUI(object):
         self.root.configure(
             bg=rgb,
         )
-        self.status_bar.configure(
-            text=self.pytddmon.get_status_message()
-        )
+        self.update_status(self.pytddmon.get_status_message())
 
         if self.pytddmon.change_detected and self.window_is_open():
             self.update_text_window()
+
+    def update_status(self, message):
+        self.status_bar.configure(
+            text=message
+        )
+        self.status_bar.update_idletasks()
 
     def get_text_message(self):
         """returns the logmessage from pytddmon"""
@@ -456,7 +466,9 @@ class TkGUI(object):
 
     def loop(self):
         """the main loop"""
-        self.pytddmon.main()
+        if self.pytddmon.get_and_set_change_detected():
+            self.update_status('Testing...')
+            self.pytddmon.run_tests()
         self.update()
         self.frame.after(750, self.loop)
 
