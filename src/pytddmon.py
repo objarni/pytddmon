@@ -21,6 +21,10 @@ Rafael Capucho
 Ilian Iliev
     Use integers instead of floats in file modified time (checksum calc)
     Auto-update of text in Details window when the log changes
+Henrik Bohre
+    Status bar in pytddmon window, showing either last time tests were
+    run, or "Testing..." during a test run
+    
 
 LICENSE
 Permission is hereby granted, free of charge, to any person obtaining a copy

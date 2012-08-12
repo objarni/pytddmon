@@ -1,4 +1,7 @@
 ﻿# coding: utf-8
+import sys
+sys.path.append('..')
+
 import unittest
 from pytddmon import Pytddmon
 
@@ -17,7 +20,7 @@ class test_Pytddmon_monitor_communication(unittest.TestCase):
             self.returns.reverse()
         def look_for_changes(self):
             return self.returns.pop()
-
+            
     def setUp(self):
         self.number_of_test_runs = 0
 
@@ -51,6 +54,18 @@ class test_Pytddmon_monitor_communication(unittest.TestCase):
         for _ in range(runs):
             pytddmon.main()
         self.assertEqual(runs + 1, self.number_of_test_runs)
+
+    def test_total_tests_is_zero_if_no_tests_are_run(self):
+        fake_monitor = self.FakeMonitor(look_for_changes_returns = [False])
+        pytddmon = Pytddmon(self.fake_filefinder, fake_monitor)
+        pytddmon.main()
+        self.assertEqual(0, pytddmon.total_tests_run)
+        
+    def test_total_tests_is_zero_if_no_tests_are_run(self):
+        fake_monitor = self.FakeMonitor(look_for_changes_returns = [False])
+        pytddmon = Pytddmon(self.fake_filefinder, fake_monitor)
+        pytddmon.main()
+        self.assertEqual(0, pytddmon.total_tests_run)
 
 if __name__ == '__main__':
     unittest.main()
