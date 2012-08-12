@@ -78,6 +78,7 @@ class Pytddmon:
         self.total_tests_passed = 0
         self.last_testrun_time = -1
         self.log = ""
+        self.status_message = 'n/a'
 
         self.run_tests()
 
@@ -116,7 +117,10 @@ class Pytddmon:
             self.total_tests_passed += green
             self.total_tests_run += total
             self.log += "\nLog from " + module + ":\n" + logtext
-        self.log = self.log.replace('<TOTALTESTS>', str(int(self.total_tests_run.real)))
+        self.log = self.log.replace('<TOTALTESTS>', 
+                str(int(self.total_tests_run.real)))
+        self.status_message = now
+
 
     def main(self):
         """This is the main loop body"""
@@ -127,6 +131,10 @@ class Pytddmon:
     def get_log(self):
         """Access the log string created during test run"""
         return self.log
+
+    def get_status_message(self):
+        """Return message in status bar"""
+        return self.status_message
 
 class Monitor:
     'Looks for file changes when prompted to'
@@ -298,6 +306,8 @@ class TkGUI(object):
         self.building_frame()
         self.button = None
         self.building_button()
+        self.status_bar = None
+        self.building_status_bar()
         self.frame.grid()
         self.message_window = None
         self.text = None
@@ -367,6 +377,14 @@ class TkGUI(object):
         )
         self.button.pack(expand=1, fill="both")
 
+    def building_status_bar(self):
+        """Add status bar and assign it to self.status_bar"""
+        self.status_bar = self.tkinter.Label(
+            self.frame,
+            text="n/a"
+        )
+        self.status_bar.pack(expand=1, fill="both")
+
     def window_is_open(self):
         """checks whether the textwdiget windows is open"""
         if not self.message_window or not self.message_window.winfo_exists():
@@ -398,7 +416,10 @@ class TkGUI(object):
         self.root.configure(
             bg=rgb,
         )
-        
+        self.status_bar.configure(
+            text=self.pytddmon.get_status_message()
+        )
+
         if self.pytddmon.change_detected and self.window_is_open():
             self.update_text_window()
 
