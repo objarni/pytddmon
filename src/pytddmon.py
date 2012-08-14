@@ -112,11 +112,17 @@ class Pytddmon:
         self.log += "\n"
         self.total_tests_passed = 0
         self.total_tests_run = 0
+        module_logs = []  # Summary for each module with errors first
         for packed in results:
             (module, green, total, logtext) = packed
             self.total_tests_passed += green
             self.total_tests_run += total
-            self.log += "\nLog from " + module + ":\n" + logtext
+            module_log = "\nLog from " + module + ":\n" + logtext
+            if total - green > 0:  # Errors are inserted first
+                module_logs.insert(0, module_log)
+            else:
+                module_logs.append(module_log)
+        self.log += ''.join(module_logs)
         self.log = self.log.replace('<TOTALTESTS>', 
                 str(int(self.total_tests_run.real)))
         self.status_message = now
