@@ -116,11 +116,17 @@ class Pytddmon:
         self.log += "\n"
         self.total_tests_passed = 0
         self.total_tests_run = 0
+        module_logs = []  # Summary for each module with errors first
         for packed in results:
             (module, green, total, logtext) = packed
             self.total_tests_passed += green
             self.total_tests_run += total
-            self.log += "\nLog from " + module + ":\n" + logtext
+            module_log = "\nLog from " + module + ":\n" + logtext
+            if not isinstance(total, int) or total - green > 0:
+                module_logs.insert(0, module_log)
+            else:
+                module_logs.append(module_log)
+        self.log += ''.join(module_logs)
         self.log = self.log.replace('<TOTALTESTS>', 
                 str(int(self.total_tests_run.real)))
         self.status_message = now
@@ -262,11 +268,8 @@ def file_name_to_module(base_path, file_name):
 
 def find_tests_in_module(module):
     suite = unittest.TestSuite()
-    try:
-        suite.addTests(find_unittests_in_module(module))
-        suite.addTests(find_doctests_in_module(module))
-    except:
-        pass
+    suite.addTests(find_unittests_in_module(module))
+    suite.addTests(find_doctests_in_module(module))
     return suite
 
 def find_unittests_in_module(module):
@@ -333,6 +336,8 @@ class TkGUI(object):
             height=0
         )
         self.frame.pack(expand=1, fill="both")
+        self.create_text_window()
+        self.update_text_window()
 
     def building_tkinter(self):
         """imports the tkinter module as self.tkinter"""
@@ -395,12 +400,6 @@ class TkGUI(object):
         )
         self.status_bar.pack(expand=1, fill="both")
 
-    def window_is_open(self):
-        """checks whether the textwdiget windows is open"""
-        if not self.message_window or not self.message_window.winfo_exists():
-            return False
-        return True
-
     def update(self):
         """updates the tk gui"""
         self.color_picker.set_result(
@@ -428,7 +427,7 @@ class TkGUI(object):
         )
         self.update_status(self.pytddmon.get_status_message())
 
-        if self.pytddmon.change_detected and self.window_is_open():
+        if self.pytddmon.change_detected:
             self.update_text_window()
 
     def update_status(self, message):
@@ -442,15 +441,15 @@ class TkGUI(object):
         message = self.pytddmon.get_log()
         return message
 
-    def open_text_window(self):
+    def create_text_window(self):
         """creates new window and text widget""" 
         win = self.tkinter.Toplevel()
-        win.wm_attributes("-topmost", 1)
         if ON_WINDOWS:
             win.attributes("-toolwindow", 1)
         win.title('Details')
         self.message_window = win
         self.text = self.tkinter.Text(win)
+        self.message_window.withdraw()
 
     def update_text_window(self):
         """inserts/replaces the log message in the text widget"""
@@ -463,10 +462,11 @@ class TkGUI(object):
         text.focus_set()
 
     def display_log_message(self, _arg):
-        """displays the logmessage from pytddmon in a window"""
-        if not self.window_is_open():
-            self.open_text_window()
-            self.update_text_window()
+        """displays/close the logmessage from pytddmon in a window"""
+        if self.message_window.state() == 'normal':
+            self.message_window.state('iconic')
+        else:
+            self.message_window.state('normal')
 
     def loop(self):
         """the main loop"""
