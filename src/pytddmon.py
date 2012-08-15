@@ -118,7 +118,7 @@ class Pytddmon:
             self.total_tests_passed += green
             self.total_tests_run += total
             module_log = "\nLog from " + module + ":\n" + logtext
-            if total - green > 0:  # Errors are inserted first
+            if not isinstance(total, int) or total - green > 0:
                 module_logs.insert(0, module_log)
             else:
                 module_logs.append(module_log)
@@ -264,11 +264,8 @@ def file_name_to_module(base_path, file_name):
 
 def find_tests_in_module(module):
     suite = unittest.TestSuite()
-    try:
-        suite.addTests(find_unittests_in_module(module))
-        suite.addTests(find_doctests_in_module(module))
-    except:
-        pass
+    suite.addTests(find_unittests_in_module(module))
+    suite.addTests(find_doctests_in_module(module))
     return suite
 
 def find_unittests_in_module(module):
