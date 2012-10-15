@@ -302,14 +302,30 @@ def run_suite(suite):
 ## GUI
 ####
 
+def import_tkinter():
+    "imports tkinter from python 3.x or python 2.x"
+    if not ON_PYTHON3:
+        import Tkinter as tkinter
+    else:
+        import tkinter
+    return tkinter
+
+def import_tkFont():
+    "imports tkFont from python 3.x or python 2.x"
+    if not ON_PYTHON3:
+        import tkFont
+    else:
+        from tkinter import font as tkFont 
+    return tkFont
+    
 
 class TkGUI(object):
     """Connect pytddmon engine to Tkinter GUI toolkit"""
-    def __init__(self, pytddmon):
+    def __init__(self, pytddmon, tkinter, tkFont):
         self.pytddmon = pytddmon
+        self.tkinter = tkinter
+        self.tkFont = tkFont
         self.color_picker = ColorPicker()
-        self.tkinter = None
-        self.building_tkinter()
         self.root = None
         self.building_root()
         self.title_font = None
@@ -339,14 +355,6 @@ class TkGUI(object):
         self.create_text_window()
         self.update_text_window()
 
-    def building_tkinter(self):
-        """imports the tkinter module as self.tkinter"""
-        if not ON_PYTHON3:
-            import Tkinter as tkinter
-        else:
-            import tkinter
-        self.tkinter = tkinter
-
     def building_root(self):
         """take hold of the tk root object as self.root"""
         self.root = self.tkinter.Tk()
@@ -357,12 +365,8 @@ class TkGUI(object):
 
     def building_fonts(self):
         "building fonts"
-        if not ON_PYTHON3:
-            import tkFont
-        else:
-            from tkinter import font as tkFont 
-        self.title_font = tkFont.nametofont("TkCaptionFont")
-        self.button_font = tkFont.Font(name="Helvetica", size=28)
+        self.title_font = self.tkFont.nametofont("TkCaptionFont")
+        self.button_font = self.tkFont.Font(name="Helvetica", size=28)
 
     def building_frame(self):
         """Creates a frame and assigns it to self.frame"""
@@ -589,7 +593,7 @@ def run():
     
     # Start the engine!
     if not test_mode:
-        TkGUI(pytddmon).run()
+        TkGUI(pytddmon, import_tkinter(), import_tkFont()).run()
     else:
         pytddmon.main()
         with open("pytddmon.log", "w") as log_file:
