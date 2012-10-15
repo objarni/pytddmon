@@ -221,7 +221,7 @@ def log_exceptions(func):
             return func(*a, **k)
         except:
             import traceback
-            return ('', 0, 1j, traceback.format_exc())
+            return ('Exception(%s)' % a[0] , 0, 1j, traceback.format_exc())
     return wrapper
 
 @log_exceptions
