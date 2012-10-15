@@ -318,6 +318,43 @@ def import_tkFont():
         from tkinter import font as tkFont 
     return tkFont
     
+class TKGUIButton(object):
+    """Encapsulate the button(label)"""
+    def __init__(self, tkinter, tkFont, toplevel, display_log_callback):
+        self.font = tkFont.Font(name="Helvetica", size=28)
+        self.label = tkinter.Label(
+            toplevel,
+            text="loading...",
+            relief='raised',
+            font=self.font,
+            justify=tkinter.CENTER,
+            anchor=tkinter.CENTER
+        )
+        self.bind_click(display_log_callback)
+        self.pack()
+
+    def bind_click(self, display_log_callback):
+        """Binds the left mous button click event to trigger the logg_windows\
+        diplay method"""
+        self.label.bind(
+            '<Button-1>',
+            display_log_callback
+        )
+
+    def pack(self):
+        "packs the lable"
+        self.label.pack(
+            expand=1,
+            fill='both'
+        )
+
+    def update(self, text, color):
+        "updates the collor and displayed text."
+        self.label.configure(
+            bg=color,
+            activebackground=color,
+            text=text
+        )
 
 class TkGUI(object):
     """Connect pytddmon engine to Tkinter GUI toolkit"""
@@ -329,12 +366,15 @@ class TkGUI(object):
         self.root = None
         self.building_root()
         self.title_font = None
-        self.button_font = None
         self.building_fonts()
         self.frame = None
         self.building_frame()
-        self.button = None
-        self.building_button()
+        self.button = TKGUIButton(
+            tkinter,
+            tkFont,
+            self.frame,
+            self.display_log_message
+        )
         self.status_bar = None
         self.building_status_bar()
         self.frame.grid()
@@ -366,7 +406,6 @@ class TkGUI(object):
     def building_fonts(self):
         "building fonts"
         self.title_font = self.tkFont.nametofont("TkCaptionFont")
-        self.button_font = self.tkFont.Font(name="Helvetica", size=28)
 
     def building_frame(self):
         """Creates a frame and assigns it to self.frame"""
@@ -379,22 +418,6 @@ class TkGUI(object):
         # Forces the window to not be resizeable
         self.frame.master.resizable(False, False)
         self.frame.pack(expand=1, fill="both")
-
-    def building_button(self):
-        """Builds  abutton and assign it to self.button"""
-        self.button = self.tkinter.Label(
-            self.frame,
-            text="loading...",
-            relief='raised',
-            font=self.button_font,
-            justify=self.tkinter.CENTER,
-            anchor=self.tkinter.CENTER
-        )
-        self.button.bind(
-            "<Button-1>",
-            self.display_log_message
-        )
-        self.button.pack(expand=1, fill="both")
 
     def building_status_bar(self):
         """Add status bar and assign it to self.status_bar"""
@@ -421,11 +444,7 @@ class TkGUI(object):
                 self.pytddmon.total_tests_run
             )
 
-        self.button.configure(
-            bg=rgb,
-            activebackground=rgb,
-            text=text
-        )
+        self.button.update(text, rgb)
         self.root.configure(
             bg=rgb,
         )
