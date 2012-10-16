@@ -427,8 +427,8 @@ class TkGUI(object):
         )
         self.status_bar.pack(expand=1, fill="both")
 
-    def update(self):
-        """updates the tk gui"""
+    def _update_and_get_color(self):
+        "Calculate the current color and trigger pulse"
         self.color_picker.set_result(
             self.pytddmon.total_tests_passed,
             self.pytddmon.total_tests_run,
@@ -436,6 +436,10 @@ class TkGUI(object):
         light, color = self.color_picker.pick()
         rgb = self.color_picker.translate_color(light, color)
         self.color_picker.pulse()
+        return rgb
+
+    def _get_text(self):
+        "Calculates the text to show the user(passed/total or Error!)"
         if self.pytddmon.total_tests_run.imag!=0:
             text = "?ERROR"
         else:
@@ -443,13 +447,16 @@ class TkGUI(object):
                 self.pytddmon.total_tests_passed,
                 self.pytddmon.total_tests_run
             )
+        return text
 
+    def update(self):
+        """updates the tk gui"""
+        rgb = self._update_and_get_color()
+        text = self._get_text()
         self.button.update(text, rgb)
-        self.root.configure(
-            bg=rgb,
-        )
+        self.root.configure(bg=rgb)
         self.update_status(self.pytddmon.get_status_message())
-
+    
         if self.pytddmon.change_detected:
             self.update_text_window()
 
