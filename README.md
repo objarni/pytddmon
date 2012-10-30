@@ -1,5 +1,5 @@
-pytddmon - continous unit testing in Python
-===========================================
+pytddmon - continuous unit testing in Python
+============================================
 
 Latest news
 -----------
