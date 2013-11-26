@@ -11,5 +11,4 @@ before_install:
 
 script:
   - nosetests
-  - touch /tmp/tmpstuff.txt
-  - ( cd systest && python ./systest.py )
+  - ( cd systest && python ./systest.py -t /tmp -c )
