@@ -82,7 +82,7 @@ def run_all():
     os.chdir(cwd)
 
 def touch(fname, times=None):
-    with file(fname, 'a'):
+    with open(fname, 'a'):
         os.utime(fname, times)
 
 def parse_commandline():
