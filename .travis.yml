@@ -6,6 +6,9 @@ python:
   - '3.2'
   - '3.3'
 
+install:
+  - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
+
 script:
   - nosetests
   - ( cd systest && python ./systest.py -t /tmp -c )
