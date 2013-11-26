@@ -67,7 +67,7 @@ def run_all():
                 log_name = os.path.join(log_path, 'pytddmon.log')
                 if not os.path.exists(log_path):
                     os.mkdir(log_path)
-                    touch(log_path)
+                    touch(log_name)
                 cmdline.extend(['--log-path', log_name])
             args = get_args(path)
             cmdline.extend(args)
