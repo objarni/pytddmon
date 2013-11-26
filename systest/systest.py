@@ -67,6 +67,7 @@ def run_all():
                 log_name = os.path.join(log_path, 'pytddmon.log')
                 if not os.path.exists(log_path):
                     os.mkdir(log_path)
+                    touch(log_path)
                 cmdline.extend(['--log-path', log_name])
             args = get_args(path)
             cmdline.extend(args)
@@ -80,6 +81,9 @@ def run_all():
 
     os.chdir(cwd)
 
+def touch(fname, times=None):
+    with file(fname, 'a'):
+        os.utime(fname, times)
 
 def parse_commandline():
     parser = OptionParser()
