@@ -1,0 +1,4 @@
+*.pyc
+*.pyo
+systest/*/pytddmon.log
+pytddmon.log

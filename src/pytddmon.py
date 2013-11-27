@@ -574,8 +574,11 @@ def parse_commandline():
         action="store_true",
         default=False,
         help='Run all tests, write the results to "pytddmon.log" and exit.')
+    parser.add_option(
+        "--log-path",
+        help='Instead of writing to "pytddmon.log" in --log-and-exit, write to LOG_PATH instead.')
     (options, args) = parser.parse_args()
-    return args, options.log_and_exit
+    return args, options.log_and_exit, options.log_path
 
 
 def build_monitor(file_finder):
@@ -602,7 +605,7 @@ def run():
     sys.path[:0] = [cwd]
 
     # Command line argument handling
-    (static_file_set, test_mode) = parse_commandline()
+    (static_file_set, test_mode, test_output) = parse_commandline()
 
     # What files to monitor?
     if not static_file_set:
@@ -626,7 +629,9 @@ def run():
         TkGUI(pytddmon, import_tkinter(), import_tkFont()).run()
     else:
         pytddmon.main()
-        with open("pytddmon.log", "w") as log_file:
+
+        outputfile = test_output or 'pytddmon.log'
+        with open(outputfile, 'w') as log_file:
             log_file.write(
                 "green=%r\ntotal=%r\n" % (
                     pytddmon.total_tests_passed,
