@@ -1,5 +1,6 @@
 pytddmon - continuous unit testing in Python
 ============================================
+![Travis CI status](https://api.travis-ci.org/objarni/pytddmon.png)
 
 Latest news
 -----------
