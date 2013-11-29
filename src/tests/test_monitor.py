@@ -4,7 +4,7 @@ from pytddmon import Monitor
 
 class test_change_detection(unittest.TestCase):
 
-    def dtest_modification_time_changed(self):
+    def test_modification_time_changed(self):
         def file_finder():
             return ['file']
         def get_file_size(file):
