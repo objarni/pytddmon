@@ -2,3 +2,8 @@
 *.pyo
 systest/*/pytddmon.log
 pytddmon.log
+
+# setuptools artifacts
+build
+*.egg-info
+dist
