@@ -3,6 +3,9 @@
 systest/*/pytddmon.log
 pytddmon.log
 
+# common virtualenv names
+ve*
+
 # setuptools artifacts
 build
 *.egg-info
