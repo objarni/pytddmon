@@ -29,3 +29,7 @@ Henrik Bohre
 
 Wari Wahab
 * PEP 8 fixes and spelling changes
+* Travis CI support
+
+Maximilien Riehl
+* pytddmon on PyPI
