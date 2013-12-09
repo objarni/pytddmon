@@ -302,7 +302,7 @@ def import_tkinter():
             import Tkinter as tkinter
         else:
             import tkinter
-    except ImportError, e:
+    except ImportError as e:
         sys.stderr.write('Cannot import tkinter. Please install it using your system ' +
                          'package manager, since tkinter is not available on PyPI. On Ubuntu : ' +
                          '`sudo apt-get install python-tk`.\n' +
