@@ -297,10 +297,17 @@ def run_suite(suite):
 
 def import_tkinter():
     """imports tkinter from python 3.x or python 2.x"""
-    if not ON_PYTHON3:
-        import Tkinter as tkinter
-    else:
-        import tkinter
+    try:
+        if not ON_PYTHON3:
+            import Tkinter as tkinter
+        else:
+            import tkinter
+    except ImportError as e:
+        sys.stderr.write('Cannot import tkinter. Please install it using your system ' +
+                         'package manager, since tkinter is not available on PyPI. On Ubuntu : ' +
+                         '`sudo apt-get install python-tk`.\n' +
+                         'The actual error was "{0}"\n'.format(e))
+        raise SystemExit(1)
     return tkinter
 
 

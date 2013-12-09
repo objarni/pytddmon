@@ -10,7 +10,19 @@ http://pytddmon.org
 
 
 How to use
-----------
+---------------
+
+### From the cheeseshop
+
+Install `pytddmon` from PyPI:
+```bash
+pip install pytddmon
+```
+
+You can now run `pytddmon.py` from anywhere.
+
+### Run from sources
+
 Copy `src/pytddmon.py` to your projects' root folder. From there, type:
 
            python pytddmon.py
