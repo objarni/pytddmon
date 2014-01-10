@@ -11,7 +11,7 @@ class TestPulse(unittest.TestCase):
         self.assertTrue(light)
 
     def test_pulses_by_default(self):
-        self.assertTrue(self.color_picker.pulsing)
+        self.assertFalse(self.color_picker.pulse_disabled)
 
     def test_dark_after_pulse(self):
         self.color_picker.pulse()
@@ -19,7 +19,7 @@ class TestPulse(unittest.TestCase):
         self.assertFalse(light)
 
     def test_no_light_change_after_disabled_pulse(self):
-        color_picker = ColorPicker(pulsing=False)
+        color_picker = ColorPicker(pulse_disabled=True)
         original_light, _ = color_picker.pick()
         color_picker.pulse()
         new_light, _ = color_picker.pick()
