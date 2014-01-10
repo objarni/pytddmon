@@ -51,11 +51,13 @@ class Pytddmon:
             self,
             file_finder,
             monitor,
-            project_name="<pytddmon>"
+            project_name="<pytddmon>",
+            allowed_to_pulse=True
     ):
         self.file_finder = file_finder
         self.project_name = project_name
         self.monitor = monitor
+        self.allowed_to_pulse = allowed_to_pulse
         self.change_detected = False
 
         self.total_tests_run = 0
@@ -367,7 +369,7 @@ class TkGUI(object):
         self.pytddmon = pytddmon
         self.tkinter = tkinter
         self.tkFont = tkFont
-        self.color_picker = ColorPicker()
+        self.color_picker = ColorPicker(pulsing=pytddmon.allowed_to_pulse)
         self.root = None
         self.building_root()
         self.title_font = None
@@ -535,9 +537,10 @@ class ColorPicker:
         (False, 'gray'): '555'
     }
 
-    def __init__(self):
+    def __init__(self, pulsing=True):
         self.color = 'green'
         self.light = True
+        self.pulsing = pulsing
 
     def pick(self):
         """returns the tuple (light, color) with the types(bool ,str)"""
@@ -545,7 +548,8 @@ class ColorPicker:
 
     def pulse(self):
         """updates the light state"""
-        self.light = not self.light
+        if self.pulsing:
+            self.light = not self.light
 
     def reset_pulse(self):
         """resets the light state"""
@@ -584,8 +588,13 @@ def parse_commandline():
     parser.add_option(
         "--log-path",
         help='Instead of writing to "pytddmon.log" in --log-and-exit, write to LOG_PATH instead.')
+    parser.add_option(
+        "--no-pulse",
+        action="store_true",
+        default="False",
+        help='Disable the "heartbeating colorshift" of pytddmon.')
     (options, args) = parser.parse_args()
-    return args, options.log_and_exit, options.log_path
+    return args, options.log_and_exit, options.log_path, options.no_pulse
 
 
 def build_monitor(file_finder):
@@ -612,7 +621,8 @@ def run():
     sys.path[:0] = [cwd]
 
     # Command line argument handling
-    (static_file_set, test_mode, test_output) = parse_commandline()
+    (static_file_set, test_mode, test_output, pulse_disabled) = parse_commandline()
+    allowed_to_pulse = pulse_disabled is not True
 
     # What files to monitor?
     if not static_file_set:
@@ -628,7 +638,8 @@ def run():
     pytddmon = Pytddmon(
         file_finder,
         monitor,
-        project_name=os.path.basename(cwd)
+        project_name=os.path.basename(cwd),
+        allowed_to_pulse=allowed_to_pulse
     )
 
     # Start the engine!
