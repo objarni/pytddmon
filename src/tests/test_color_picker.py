@@ -7,13 +7,23 @@ class TestPulse(unittest.TestCase):
         self.color_picker = ColorPicker()
 
     def test_starts_with_light_color(self):
-        (light, color) = self.color_picker.pick()
+        light, _ = self.color_picker.pick()
         self.assertTrue(light)
+
+    def test_pulses_by_default(self):
+        self.assertFalse(self.color_picker.pulse_disabled)
 
     def test_dark_after_pulse(self):
         self.color_picker.pulse()
-        (light, color) = self.color_picker.pick()
+        light, _ = self.color_picker.pick()
         self.assertFalse(light)
+
+    def test_no_light_change_after_disabled_pulse(self):
+        color_picker = ColorPicker(pulse_disabled=True)
+        original_light, _ = color_picker.pick()
+        color_picker.pulse()
+        new_light, _ = color_picker.pick()
+        self.assertEqual(original_light, new_light)
 
     def test_no_failing_test_picks_green(self):
         self.color_picker.set_result(1, 1)
