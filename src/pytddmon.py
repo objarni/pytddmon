@@ -2,7 +2,7 @@
 #coding: utf-8
 
 """
-COPYRIGHT (c) 2009-2013
+COPYRIGHT (c) 2009-2014
 
 LICENSE
 Permission is hereby granted, free of charge, to any person obtaining a copy
