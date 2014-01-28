@@ -1,6 +1,7 @@
 pytddmon - change log
 =====================
 
+* v1.0.3 - Broken message window bug fixed (issue #12)
 * v1.0.2 - Support for disabling color pulse
 * v1.0.1 - Available on PyPI "cheeseshop"
 * v1.0.0 - Travis CI
