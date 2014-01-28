@@ -484,8 +484,12 @@ class TkGUI(object):
         if ON_WINDOWS:
             win.attributes("-toolwindow", 1)
         win.title('Details')
+        win.protocol('WM_DELETE_WINDOW', self.when_message_window_x)
         self.message_window = win
         self.text = self.tkinter.Text(win)
+        self.message_window.withdraw()
+
+    def when_message_window_x(self):
         self.message_window.withdraw()
 
     def update_text_window(self):
@@ -501,7 +505,7 @@ class TkGUI(object):
     def display_log_message(self, _arg):
         """displays/close the log message from pytddmon in a window"""
         if self.message_window.state() == 'normal':
-            self.message_window.state('iconic')
+            self.message_window.withdraw()
         else:
             self.message_window.state('normal')
 
