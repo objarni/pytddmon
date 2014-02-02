@@ -161,9 +161,9 @@ class Kata:
         classname = kata_name.title().replace(' ', '') + 'Tests'
         self.content = '''\
 import unittest
-# Unit tests for kata '{}'.
+# Unit tests for kata '{0}'.
 
-class {}(unittest.TestCase):
+class {1}(unittest.TestCase):
 
     def test_something(self):
         self.assertTrue(True)
