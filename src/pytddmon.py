@@ -45,7 +45,7 @@ ON_WINDOWS = platform.system() == "Windows"
 ####
 
 class Pytddmon:
-    """The core class, all functionality is combined into this class"""
+    """The core class, all functionality (except UI) is combined into this class"""
 
     def __init__(
             self,
@@ -155,6 +155,24 @@ class Monitor:
         self.snapshot = new_snapshot
         return change_detected
 
+class Kata:
+    ''' Generates a logical unit test template file '''
+    def __init__(self, kata_name):
+        classname = kata_name.title().replace(' ', '') + 'Tests'
+        self.content = '''\
+import unittest
+# Unit tests for kata '{}'.
+
+class {}(unittest.TestCase):
+
+    def test_something(self):
+        self.assertTrue(True)
+
+    def test_another_thing(self):
+        self.assertEqual([1, 2], range(1, 3))
+
+'''.format(kata_name, classname)
+        self.filename = 'test_' + kata_name.lower().replace(' ', '_') + '.py'
 
 ####
 ## Finding files
@@ -522,7 +540,6 @@ class TkGUI(object):
         self.loop()
         self.root.mainloop()
 
-
 class ColorPicker:
     """
     ColorPicker decides the background color the pytddmon window,
@@ -592,7 +609,10 @@ def parse_commandline():
         help='Run all tests, write the results to "pytddmon.log" and exit.')
     parser.add_option(
         "--log-path",
-        help='Instead of writing to "pytddmon.log" in --log-and-exit, write to LOG_PATH instead.')
+        help='Instead of writing to "pytddmon.log" in --log-and-exit, write to LOG_PATH.')
+    parser.add_option(
+        "--gen-kata",
+        help='Generate a stub unit test file appropriate for jump starting a kata')
     parser.add_option(
         "--no-pulse",
         dest="pulse_disabled",
@@ -600,7 +620,12 @@ def parse_commandline():
         default=False,
         help='Disable the "heartbeating colorshift" of pytddmon.')
     (options, args) = parser.parse_args()
-    return args, options.log_and_exit, options.log_path, options.pulse_disabled
+    return (
+        args,
+        options.log_and_exit,
+        options.log_path,
+        options.pulse_disabled,
+        options.gen_kata)
 
 
 def build_monitor(file_finder):
@@ -627,7 +652,15 @@ def run():
     sys.path[:0] = [cwd]
 
     # Command line argument handling
-    (static_file_set, test_mode, test_output, pulse_disabled) = parse_commandline()
+    (static_file_set, test_mode, test_output, pulse_disabled, kata_name) = parse_commandline()
+
+    # Generating a kata unit test file? Do it and exit ...
+    if kata_name:
+        kata = Kata(kata_name)
+        print('Writing kata unit test template to ' + kata.filename + '.')
+        with open(kata.filename, 'w') as f:
+            f.write(kata.content)
+        return
 
     # What files to monitor?
     if not static_file_set:
@@ -647,7 +680,7 @@ def run():
         pulse_disabled=pulse_disabled
     )
 
-    # Start the engine!
+    # Start the engine
     if not test_mode:
         TkGUI(pytddmon, import_tkinter(), import_tkFont()).run()
     else:
