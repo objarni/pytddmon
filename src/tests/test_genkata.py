@@ -24,7 +24,7 @@ class KataGeneratorTests(unittest.TestCase):
 		self.assertTrue('self.assertTrue(True)' in self.result)
 
 	def test_contains_an_list_equality_assertion(self):
-		self.assertTrue('self.assertEqual([1, 2], range(1, 3))' in self.result)
+		self.assertTrue('self.assertEqual([1, 2], [x for x in range(1, 3)])' in self.result)
 
 	def test_removes_spaces_in_name(self):
 		result = Kata('a name with spaces').content

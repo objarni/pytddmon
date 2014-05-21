@@ -169,7 +169,7 @@ class {1}(unittest.TestCase):
         self.assertTrue(True)
 
     def test_another_thing(self):
-        self.assertEqual([1, 2], range(1, 3))
+        self.assertEqual([1, 2], [x for x in range(1, 3)])
 
 '''.format(kata_name, classname)
         self.filename = 'test_' + kata_name.lower().replace(' ', '_') + '.py'
