@@ -49,12 +49,12 @@ However, you may want to run the automatic tests locally before requesting a pul
 
 ### Running the unit tests
 
-```cd pytddmon/src
-python pytddmon.py   # this runs the unit tests in pytddmon/src/tests
-```
+           cd pytddmon/src
+           python pytddmon.py
+
 
 ### Running the integration tests
 
-```cd pytddmon/systest
-python systest.py
-```
+           cd pytddmon/systest
+           python systest.py
+
