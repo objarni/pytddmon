@@ -41,3 +41,20 @@ Folder structure
            systest/   contains systest.py, lots of folders and a Readme.txt
                       (used for end-to-end regression testing pytddmon.py)
 
+Submitting a patch
+==================
+We use TravisCI for automatic unit and integration testing when a pull request arrives at Github.
+
+If may want to run the automatic tests locally before requesting a pull.
+
+Running the unit tests
+----------------------
+
+> cd pytddmon/src
+> python pytddmon.py   # this runs the unit tests in pytddmon/src/tests
+
+Running the integration tests
+-----------------------------
+
+> cd pytddmon/systest
+> python systest.py
