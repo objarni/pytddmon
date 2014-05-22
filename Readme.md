@@ -42,17 +42,19 @@ Folder structure
                       (used for end-to-end regression testing pytddmon.py)
 
 Submitting a patch
-==================
+------------------
 TravisCI is used for automatic unit and integration testing when a pull request arrives at Github.
 
 However, you may want to run the automatic tests locally before requesting a pull.
 
-*Running the unit tests*
+### Running the unit tests
 
-> cd pytddmon/src
-> python pytddmon.py   # this runs the unit tests in pytddmon/src/tests
+```cd pytddmon/src
+python pytddmon.py   # this runs the unit tests in pytddmon/src/tests
+```
 
-*Running the integration tests*
+### Running the integration tests
 
-> cd pytddmon/systest
-> python systest.py
+```cd pytddmon/systest
+python systest.py
+```
