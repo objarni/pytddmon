@@ -160,6 +160,7 @@ class Kata:
     def __init__(self, kata_name):
         classname = kata_name.title().replace(' ', '') + 'Tests'
         self.content = '''\
+# coding: utf-8
 import unittest
 # Unit tests for kata '{0}'.
 

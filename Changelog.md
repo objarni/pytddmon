@@ -1,6 +1,8 @@
 pytddmon - change log
 =====================
 
+* v1.0.5 - Kata generator bug fix (issue #19)
+         - Kata generator unicode shebang (issue #17)
 * v1.0.4 - Kata Unit Test generation
 * v1.0.3 - Broken message window bug fixed (issue #12)
 * v1.0.2 - Support for disabling color pulse

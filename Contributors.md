@@ -33,3 +33,6 @@ Wari Wahab
 
 Maximilien Riehl
 * pytddmon on PyPI
+
+Javier J. Gutiérrez
+* Fixed bug in kata generator for Python3, issue #19

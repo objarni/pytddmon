@@ -36,3 +36,7 @@ class KataGeneratorTests(unittest.TestCase):
 	def test_filename_is_stripped_from_spaces(self):
 		filename = Kata('Blair witch project').filename
 		self.assertEqual('test_blair_witch_project.py', filename)
+
+	def test_unicode_shebang_included(self):
+		result = Kata('some nice kata').content
+		self.assertTrue('# coding: utf-8' in result, result)
