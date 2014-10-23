@@ -33,7 +33,6 @@ import unittest
 import doctest
 import time
 import multiprocessing
-import fnmatch
 import functools
 
 ON_PYTHON3 = sys.version_info[0] == 3
@@ -204,8 +203,6 @@ class FileFinder:
         """full string regexp check"""
         return bool(re.match(self.regexp + "$", string_to_match))
 
-
-wildcard_to_regex = fnmatch.translate
 
 
 ####
@@ -665,7 +662,7 @@ def run():
 
     # What files to monitor?
     if not static_file_set:
-        regex = wildcard_to_regex("*.py")
+        regex = ("^[^\\.].*.py")
     else:
         regex = '|'.join(static_file_set)
     file_finder = FileFinder(cwd, regex)

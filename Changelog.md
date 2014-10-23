@@ -1,6 +1,7 @@
 pytddmon - change log
 =====================
 
+* v1.0.6 - Ignoring dotfiles (issue #25)
 * v1.0.5 - Kata generator bug fix (issue #19)
          - Kata generator unicode shebang (issue #17)
 * v1.0.4 - Kata Unit Test generation

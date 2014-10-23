@@ -12,7 +12,7 @@ Javier J. Gutiérrez'''
 if __name__ == '__main__':
     setup(
         name='pytddmon',
-        version='1.0.5',
+        version='1.0.6',
         description='continuous unit testing in Python',
         long_description='Read the pytddmon blog and more documentation at http://pytddmon.org',
         author=authors,
