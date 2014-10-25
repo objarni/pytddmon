@@ -36,13 +36,6 @@ import multiprocessing
 import functools
 
 
-VERSION = "1.0.7"
-AUTHORS = '''\
-Olof Bjarnason, Fredrik Wendt, Krunoslav Saho,
-Samuel Ytterbrink, Rafael Capucho, Ilian Iliev,
-Henrik Bohre, Wari Wahab, Maximilien Riehl,
-Javier J. Gutiérrez'''
-HOMEPAGE = "http://pytddmon.org"
 ON_PYTHON3 = sys.version_info[0] == 3
 ON_WINDOWS = platform.system() == "Windows"
 
@@ -616,7 +609,7 @@ def parse_commandline():
     passed to pytddmon.
     """
     usage = "usage: %prog [options] [static file list]"
-    version = "%prog " + VERSION
+    version = "%prog " + '1.0.7'
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option(
         "--log-and-exit",
