@@ -609,7 +609,7 @@ def parse_commandline():
     passed to pytddmon.
     """
     usage = "usage: %prog [options] [static file list]"
-    version = "%prog " + '1.0.7'
+    version = "%prog " + '1.0.8'
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option(
         "--log-and-exit",

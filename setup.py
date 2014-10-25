@@ -3,7 +3,7 @@
 
 from setuptools import setup
 
-VERSION = "1.0.7"
+VERSION = "1.0.8"
 AUTHORS = '''\
 Olof Bjarnason, Fredrik Wendt, Krunoslav Saho,
 Samuel Ytterbrink, Rafael Capucho, Ilian Iliev,
