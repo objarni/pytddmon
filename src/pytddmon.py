@@ -272,8 +272,7 @@ def file_name_to_module(base_path, file_name):
     words = symbol_stripped.split()
     # remove .py/.pyw
     module_words = words[:-1]
-    module_name = '.'.join(module_words)
-    return module_name
+    return '.'.join(module_words)
 
 
 def find_tests_in_module(module):
@@ -412,10 +411,7 @@ class TkGUI(object):
         self.message_window = None
         self.text = None
 
-        if ON_WINDOWS:
-            buttons_width = 25
-        else:
-            buttons_width = 75
+        buttons_width = 25 if ON_WINDOWS else 75
         self.root.minsize(
             width=self.title_font.measure(
                 self.pytddmon.project_name
@@ -499,8 +495,7 @@ class TkGUI(object):
 
     def get_text_message(self):
         """returns the log message from pytddmon"""
-        message = self.pytddmon.get_log()
-        return message
+        return self.pytddmon.get_log()
 
     def create_text_window(self):
         """creates new window and text widget"""
@@ -675,10 +670,7 @@ def run():
         return
 
     # What files to monitor?
-    if not static_file_set:
-        regex = ("^[^\\.].*.py")
-    else:
-        regex = '|'.join(static_file_set)
+    regex = "^[^\\.].*.py" if not static_file_set else '|'.join(static_file_set)
     file_finder = FileFinder(cwd, regex)
 
     # The change detector: Monitor
