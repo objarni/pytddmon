@@ -640,7 +640,10 @@ def parse_commandline():
 
 
 def build_monitor(file_finder):
-    os.stat_float_times(False)
+    try:
+        os.stat_float_times(False)
+    except AttributeError:
+        pass #AttributeError: module 'os' has no attribute 'stat_float_times'
 
     def get_file_size(file_path):
         stat = os.stat(file_path)
