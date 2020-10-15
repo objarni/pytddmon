@@ -2,7 +2,10 @@ pytddmon - continuous unit testing in Python
 ============================================
 [![Travis CI status](https://api.travis-ci.org/objarni/pytddmon.png)](https://travis-ci.org/objarni/pytddmon)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
-[![PyPI pyversions](https://img.shields.io/pypi/pyversions/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
+
+[![Travis CI](https://img.shields.io/travis/objarni/pytddmon/master.svg?style=flat-square)](https://travis-ci.org/objarni/pytddmon)
+[![Latest PyPI version](https://img.shields.io/pypi/v/pytddmon.svg?style=flat-square)](https://pypi.org/project/pytddmon)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/hatch.svg?style=flat-square)](https://pypi.org/project/pytddmon)
 
 
 Latest news
