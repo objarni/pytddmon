@@ -1,6 +1,9 @@
 pytddmon - continuous unit testing in Python
 ============================================
 [![Travis CI status](https://api.travis-ci.org/objarni/pytddmon.png)](https://travis-ci.org/objarni/pytddmon)
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
+
 
 Latest news
 -----------
