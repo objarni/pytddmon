@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-#coding: utf-8
+# coding: utf-8
 
 """
 COPYRIGHT (c) 2009-2014
@@ -44,16 +44,13 @@ ON_WINDOWS = platform.system() == "Windows"
 ## Core
 ####
 
+
 class Pytddmon:
     """The core class, all functionality (except UI) is
     combined into this class"""
 
     def __init__(
-            self,
-            file_finder,
-            monitor,
-            project_name="<pytddmon>",
-            pulse_disabled=False
+        self, file_finder, monitor, project_name="<pytddmon>", pulse_disabled=False
     ):
         self.file_finder = file_finder
         self.project_name = project_name
@@ -65,7 +62,7 @@ class Pytddmon:
         self.total_tests_passed = 0
         self.last_test_run_time = -1
         self.log = ""
-        self.status_message = 'n/a'
+        self.status_message = "n/a"
 
         self.run_tests()
 
@@ -109,9 +106,8 @@ class Pytddmon:
                 module_logs.insert(0, module_log)
             else:
                 module_logs.append(module_log)
-        self.log += ''.join(module_logs)
-        self.log = self.log.replace('<TOTALTESTS>',
-                                    str(int(self.total_tests_run.real)))
+        self.log += "".join(module_logs)
+        self.log = self.log.replace("<TOTALTESTS>", str(int(self.total_tests_run.real)))
         self.status_message = now
 
     def get_and_set_change_detected(self):
@@ -158,10 +154,11 @@ class Monitor:
 
 
 class Kata:
-    ''' Generates a logical unit test template file '''
+    """ Generates a logical unit test template file """
+
     def __init__(self, kata_name):
-        classname = kata_name.title().replace(' ', '') + 'Tests'
-        self.content = '''\
+        classname = kata_name.title().replace(" ", "") + "Tests"
+        self.content = """\
 # coding: utf-8
 import unittest
 # Unit tests for kata '{0}'.
@@ -174,8 +171,10 @@ class {1}(unittest.TestCase):
     def test_another_thing(self):
         self.assertEqual([1, 2], [x for x in range(1, 3)])
 
-'''.format(kata_name, classname)
-        self.filename = 'test_' + kata_name.lower().replace(' ', '_') + '.py'
+""".format(
+            kata_name, classname
+        )
+        self.filename = "test_" + kata_name.lower().replace(" ", "_") + ".py"
 
 
 ####
@@ -198,9 +197,7 @@ class FileFinder:
         for path, _folder, filenames in os.walk(self.root):
             for filename in filenames:
                 if self.re_complete_match(filename):
-                    file_paths.add(
-                        os.path.abspath(os.path.join(path, filename))
-                    )
+                    file_paths.add(os.path.abspath(os.path.join(path, filename)))
         return file_paths
 
     def re_complete_match(self, string_to_match):
@@ -211,6 +208,7 @@ class FileFinder:
 ####
 ## Finding & running tests
 ####
+
 
 def log_exceptions(func):
     """Decorator that forwards the error message from an exception to the log
@@ -226,7 +224,7 @@ def log_exceptions(func):
         except:
             import traceback
 
-            return 'Exception(%s)' % a[0], 0, 1j, traceback.format_exc()
+            return "Exception(%s)" % a[0], 0, 1j, traceback.format_exc()
 
     return wrapper
 
@@ -272,7 +270,7 @@ def file_name_to_module(base_path, file_name):
     words = symbol_stripped.split()
     # remove .py/.pyw
     module_words = words[:-1]
-    return '.'.join(module_words)
+    return ".".join(module_words)
 
 
 def find_tests_in_module(module):
@@ -318,6 +316,7 @@ def run_suite(suite):
 ## GUI
 ####
 
+
 def import_tkinter():
     """imports tkinter from python 3.x or python 2.x"""
     try:
@@ -327,11 +326,12 @@ def import_tkinter():
             import tkinter
     except ImportError as e:
         sys.stderr.write(
-            'Cannot import tkinter. Please install it using your system ' +
-            'package manager, since tkinter is not available on PyPI. ' +
-            ' In Ubuntu: \n' +
-            '    sudo apt-get install python-tk\n' +
-            'The actual error was "{0}"\n'.format(e))
+            "Cannot import tkinter. Please install it using your system "
+            + "package manager, since tkinter is not available on PyPI. "
+            + " In Ubuntu: \n"
+            + "    sudo apt-get install python-tk\n"
+            + 'The actual error was "{0}"\n'.format(e)
+        )
         raise SystemExit(1)
     return tkinter
 
@@ -353,10 +353,10 @@ class TKGUIButton(object):
         self.label = tkinter.Label(
             toplevel,
             text="loading...",
-            relief='raised',
+            relief="raised",
             font=self.font,
             justify=tkinter.CENTER,
-            anchor=tkinter.CENTER
+            anchor=tkinter.CENTER,
         )
         self.bind_click(display_log_callback)
         self.pack()
@@ -364,25 +364,15 @@ class TKGUIButton(object):
     def bind_click(self, display_log_callback):
         """Binds the left mouse button click event to trigger the log_windows
         display method"""
-        self.label.bind(
-            '<Button-1>',
-            display_log_callback
-        )
+        self.label.bind("<Button-1>", display_log_callback)
 
     def pack(self):
         """packs the label"""
-        self.label.pack(
-            expand=1,
-            fill='both'
-        )
+        self.label.pack(expand=1, fill="both")
 
     def update(self, text, color):
         """updates the color and displayed text."""
-        self.label.configure(
-            bg=color,
-            activebackground=color,
-            text=text
-        )
+        self.label.configure(bg=color, activebackground=color, text=text)
 
 
 class TkGUI(object):
@@ -399,12 +389,7 @@ class TkGUI(object):
         self.building_fonts()
         self.frame = None
         self.building_frame()
-        self.button = TKGUIButton(
-            tkinter,
-            tkFont,
-            self.frame,
-            self.display_log_message
-        )
+        self.button = TKGUIButton(tkinter, tkFont, self.frame, self.display_log_message)
         self.status_bar = None
         self.building_status_bar()
         self.frame.grid()
@@ -413,10 +398,8 @@ class TkGUI(object):
 
         buttons_width = 25 if ON_WINDOWS else 75
         self.root.minsize(
-            width=self.title_font.measure(
-                self.pytddmon.project_name
-            ) + buttons_width,
-            height=0
+            width=self.title_font.measure(self.pytddmon.project_name) + buttons_width,
+            height=0,
         )
         self.frame.pack(expand=1, fill="both")
         self.create_text_window()
@@ -437,9 +420,7 @@ class TkGUI(object):
     def building_frame(self):
         """Creates a frame and assigns it to self.frame"""
         # Calculate the width of the tilte + buttons
-        self.frame = self.tkinter.Frame(
-            self.root
-        )
+        self.frame = self.tkinter.Frame(self.root)
         # Sets the title of the gui
         self.frame.master.title(self.pytddmon.project_name)
         # Forces the window to not be resizeable
@@ -448,17 +429,13 @@ class TkGUI(object):
 
     def building_status_bar(self):
         """Add status bar and assign it to self.status_bar"""
-        self.status_bar = self.tkinter.Label(
-            self.frame,
-            text="n/a"
-        )
+        self.status_bar = self.tkinter.Label(self.frame, text="n/a")
         self.status_bar.pack(expand=1, fill="both")
 
     def _update_and_get_color(self):
         """Calculate the current color and trigger pulse"""
         self.color_picker.set_result(
-            self.pytddmon.total_tests_passed,
-            self.pytddmon.total_tests_run,
+            self.pytddmon.total_tests_passed, self.pytddmon.total_tests_run,
         )
         light, color = self.color_picker.pick()
         rgb = self.color_picker.translate_color(light, color)
@@ -472,7 +449,7 @@ class TkGUI(object):
         else:
             text = "%r/%r" % (
                 self.pytddmon.total_tests_passed,
-                self.pytddmon.total_tests_run
+                self.pytddmon.total_tests_run,
             )
         return text
 
@@ -488,9 +465,7 @@ class TkGUI(object):
             self.update_text_window()
 
     def update_status(self, message):
-        self.status_bar.configure(
-            text=message
-        )
+        self.status_bar.configure(text=message)
         self.status_bar.update_idletasks()
 
     def get_text_message(self):
@@ -502,8 +477,8 @@ class TkGUI(object):
         win = self.tkinter.Toplevel()
         if ON_WINDOWS:
             win.attributes("-toolwindow", 1)
-        win.title('Details')
-        win.protocol('WM_DELETE_WINDOW', self.when_message_window_x)
+        win.title("Details")
+        win.protocol("WM_DELETE_WINDOW", self.when_message_window_x)
         self.message_window = win
         self.text = self.tkinter.Text(win)
         self.message_window.withdraw()
@@ -514,24 +489,24 @@ class TkGUI(object):
     def update_text_window(self):
         """inserts/replaces the log message in the text widget"""
         text = self.text
-        text['state'] = self.tkinter.NORMAL
+        text["state"] = self.tkinter.NORMAL
         text.delete(1.0, self.tkinter.END)
         text.insert(self.tkinter.INSERT, self.get_text_message())
-        text['state'] = self.tkinter.DISABLED
-        text.pack(expand=1, fill='both')
+        text["state"] = self.tkinter.DISABLED
+        text.pack(expand=1, fill="both")
         text.focus_set()
 
     def display_log_message(self, _arg):
         """displays/close the log message from pytddmon in a window"""
-        if self.message_window.state() == 'normal':
+        if self.message_window.state() == "normal":
             self.message_window.withdraw()
         else:
-            self.message_window.state('normal')
+            self.message_window.state("normal")
 
     def loop(self):
         """the main loop"""
         if self.pytddmon.get_and_set_change_detected():
-            self.update_status('Testing...')
+            self.update_status("Testing...")
             self.pytddmon.run_tests()
         self.update()
         self.frame.after(750, self.loop)
@@ -549,19 +524,20 @@ class ColorPicker:
     tests. Also, there is a "pulse" (light color, dark color),
     to increase the feeling of continuous testing.
     """
+
     color_table = {
-        (True, 'green'): '0f0',
-        (False, 'green'): '0c0',
-        (True, 'red'): 'f00',
-        (False, 'red'): 'c00',
-        (True, 'orange'): 'fc0',
-        (False, 'orange'): 'ca0',
-        (True, 'gray'): '999',
-        (False, 'gray'): '555'
+        (True, "green"): "0f0",
+        (False, "green"): "0c0",
+        (True, "red"): "f00",
+        (False, "red"): "c00",
+        (True, "orange"): "fc0",
+        (False, "orange"): "ca0",
+        (True, "gray"): "999",
+        (False, "gray"): "555",
     }
 
     def __init__(self, pulse_disabled=False):
-        self.color = 'green'
+        self.color = "green"
         self.light = True
         self.pulse_disabled = pulse_disabled
 
@@ -582,13 +558,13 @@ class ColorPicker:
     def set_result(self, green, total):
         """calculates what color should be used and may reset the lightness"""
         old_color = self.color
-        self.color = 'green'
+        self.color = "green"
         if green.imag or total.imag:
             self.color = "orange"
         elif green == total - 1:
-            self.color = 'red'
+            self.color = "red"
         elif green < total - 1:
-            self.color = 'gray'
+            self.color = "gray"
         if self.color != old_color:
             self.reset_pulse()
 
@@ -604,38 +580,45 @@ def parse_commandline():
     passed to pytddmon.
     """
     usage = "usage: %prog [options] [static file list]"
-    version = "%prog " + '1.0.8'
+    version = "%prog " + "1.0.8"
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option(
         "--log-and-exit",
         action="store_true",
         default=False,
-        help='Run all tests, write the results to "pytddmon.log" and exit.')
+        help='Run all tests, write the results to "pytddmon.log" and exit.',
+    )
     parser.add_option(
         "--log-path",
-        help='Instead of writing to "pytddmon.log" in --log-and-exit, ' +
-             'write to LOG_PATH.')
+        help='Instead of writing to "pytddmon.log" in --log-and-exit, '
+        + "write to LOG_PATH.",
+    )
     parser.add_option(
         "--gen-kata",
-        help='Generate a stub unit test file appropriate for jump ' +
-             'starting a kata')
+        help="Generate a stub unit test file appropriate for jump " + "starting a kata",
+    )
     parser.add_option(
         "--no-pulse",
         dest="pulse_disabled",
         action="store_true",
         default=False,
-        help='Disable the "heartbeating colorshift" of pytddmon.')
+        help='Disable the "heartbeating colorshift" of pytddmon.',
+    )
     (options, args) = parser.parse_args()
     return (
         args,
         options.log_and_exit,
         options.log_path,
         options.pulse_disabled,
-        options.gen_kata)
+        options.gen_kata,
+    )
 
 
 def build_monitor(file_finder):
-    os.stat_float_times(False)
+    try:
+        os.stat_float_times(False)
+    except AttributeError:
+        pass
 
     def get_file_size(file_path):
         stat = os.stat(file_path)
@@ -658,19 +641,24 @@ def run():
     sys.path[:0] = [cwd]
 
     # Command line argument handling
-    (static_file_set, test_mode, test_output,
-     pulse_disabled, kata_name) = parse_commandline()
+    (
+        static_file_set,
+        test_mode,
+        test_output,
+        pulse_disabled,
+        kata_name,
+    ) = parse_commandline()
 
     # Generating a kata unit test file? Do it and exit ...
     if kata_name:
         kata = Kata(kata_name)
-        print('Writing kata unit test template to ' + kata.filename + '.')
-        with open(kata.filename, 'w') as f:
+        print("Writing kata unit test template to " + kata.filename + ".")
+        with open(kata.filename, "w") as f:
             f.write(kata.content)
         return
 
     # What files to monitor?
-    regex = "^[^\\.].*.py" if not static_file_set else '|'.join(static_file_set)
+    regex = "^[^\\.].*.py" if not static_file_set else "|".join(static_file_set)
     file_finder = FileFinder(cwd, regex)
 
     # The change detector: Monitor
@@ -681,7 +669,7 @@ def run():
         file_finder,
         monitor,
         project_name=os.path.basename(cwd),
-        pulse_disabled=pulse_disabled
+        pulse_disabled=pulse_disabled,
     )
 
     # Start the engine
@@ -690,15 +678,13 @@ def run():
     else:
         pytddmon.main()
 
-        outputfile = test_output or 'pytddmon.log'
-        with open(outputfile, 'w') as log_file:
+        outputfile = test_output or "pytddmon.log"
+        with open(outputfile, "w") as log_file:
             log_file.write(
-                "green=%r\ntotal=%r\n" % (
-                    pytddmon.total_tests_passed,
-                    pytddmon.total_tests_run
-                )
+                "green=%r\ntotal=%r\n"
+                % (pytddmon.total_tests_passed, pytddmon.total_tests_run)
             )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()
